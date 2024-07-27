@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- network_policy.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/startup-probe.sh
+  - files/readiness-probe.sh
+  - files/liveness-probe.sh
+  - files/redis.conf
+  - files/sentinel.conf
+  - files/redis-server.sh
+  - files/redis-sentinel.sh
+  name: redis
+  options:
+    immutable: true
+- files:
+  - files/haproxy.cfg
+  - files/init-haproxy.sh
+  name: redis-haproxy
+  options:
+    immutable: true
+images:
+- digest: sha256:2f93168274fa54fa0dc26cec3da8645cd8c5aa14ea05982b84638824ba42b5b1
+  name: haproxy
+  newName: ghcr.io/kaidotio/hippocampus/mirror/haproxy
+- digest: sha256:5f8cb949f8783074346fb5d24dc74739ac6d67b86277052986afd5f1cc5d2803
+  name: oliver006/redis_exporter
+  newName: ghcr.io/kaidotio/hippocampus/mirror/oliver006/redis_exporter
+- digest: sha256:4713bf43866d42d128482e63f617bcfe39b3c32defb0d0170af06508e67d7c06
+  name: quay.io/prometheus/haproxy-exporter
+  newName: ghcr.io/kaidotio/hippocampus/mirror/quay.io/prometheus/haproxy-exporter
+- digest: sha256:f0e70c8cf92c2f2dc9f8d6fa45dcb29ce51188dc4058a96d54e587550031ce85
+  name: redis/redis-stack
+  newName: ghcr.io/kaidotio/hippocampus/mirror/redis/redis-stack

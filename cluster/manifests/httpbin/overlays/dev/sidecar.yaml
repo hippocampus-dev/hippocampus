@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: httpbin-istio
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: httpbin-istio
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - assets/assets-minio.assets.svc.cluster.local
+        - proxy-wasm/proxy-wasm.proxy-wasm.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

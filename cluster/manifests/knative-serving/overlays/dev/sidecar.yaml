@@ -1,0 +1,79 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: activator
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: activator
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: autoscaler
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: autoscaler
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: controller
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: controller
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: webhook
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: webhook
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

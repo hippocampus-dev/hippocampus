@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grafana
+spec:
+  gateways:
+    - grafana
+  hosts:
+    - grafana.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: grafana
+            port:
+              number: 3000

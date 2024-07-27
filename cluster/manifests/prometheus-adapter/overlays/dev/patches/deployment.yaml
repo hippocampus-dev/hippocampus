@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-adapter
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 128Mi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: metrics-server
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: metrics-server
+      containers:
+        - name: prometheus-adapter
+          args:
+            - /adapter
+            - --secure-port=6443
+            - --tls-cert-file=/var/run/serving-cert/serving.crt
+            - --tls-private-key-file=/var/run/serving-cert/serving.key
+            - --prometheus-url=http://mimir-proxy.mimir.svc.cluster.local:8080/prometheus
+            - --metrics-relist-interval=1m
+            - --config=/etc/adapter/config.yaml

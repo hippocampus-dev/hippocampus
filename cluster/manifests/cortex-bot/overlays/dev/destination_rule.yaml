@@ -1,0 +1,43 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: cortex-bot
+spec:
+  exportTo:
+    - .
+  host: cortex-bot
+  subsets:
+    - name: default
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: cortex-bot-redis
+spec:
+  exportTo:
+    - .
+  host: cortex-bot-redis
+  subsets:
+    - name: default
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: cortex-bot-redis-haproxy
+spec:
+  exportTo:
+    - .
+  host: cortex-bot-redis-haproxy
+  subsets:
+    - name: default
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: embedding-retrieval.embedding-retrieval.svc.cluster.local
+spec:
+  exportTo:
+    - .
+  host: embedding-retrieval.embedding-retrieval.svc.cluster.local
+  subsets:
+    - name: default

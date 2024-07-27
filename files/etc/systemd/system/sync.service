@@ -1,0 +1,5 @@
+[Service]
+Type=oneshot
+
+User=kai
+ExecStart=/usr/local/bin/sync.sh

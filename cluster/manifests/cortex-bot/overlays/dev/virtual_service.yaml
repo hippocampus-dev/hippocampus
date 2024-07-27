@@ -1,0 +1,107 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cortex-bot
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - cortex-bot
+  http:
+    - match:
+        - sourceNamespace: cortex-bot
+          sourceLabels:
+            app.kubernetes.io/name: slack-bolt-proxy
+      route:
+        - destination:
+            host: cortex-bot
+            port:
+              number: 8080
+            subset: default
+      retries:
+        attempts: 3
+        perTryTimeout: 1s
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+    - route:
+        - destination:
+            host: cortex-bot
+            port:
+              number: 8080
+            subset: default
+      # https://github.com/istio/istio/blob/1.22.2/pilot/pkg/networking/core/route/retry/retry.go#L34
+      retries:
+        attempts: 0
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cortex-bot-redis
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - cortex-bot-redis
+  tcp:
+    - match:
+        - sourceNamespace: cortex-bot
+          sourceLabels:
+            app.kubernetes.io/name: cortex-bot
+      route:
+        - destination:
+            host: cortex-bot-redis
+            port:
+              number: 6379
+            subset: default
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cortex-bot-redis-haproxy
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - cortex-bot-redis-haproxy
+  tcp:
+    - match:
+        - sourceNamespace: cortex-bot
+          sourceLabels:
+            app.kubernetes.io/name: cortex-bot
+      route:
+        - destination:
+            host: cortex-bot-redis-haproxy
+            port:
+              number: 6379
+            subset: default
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: embedding-retrieval.embedding-retrieval.svc.cluster.local
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - embedding-retrieval.embedding-retrieval.svc.cluster.local
+  http:
+    - match:
+        - sourceNamespace: cortex-bot
+          sourceLabels:
+            app.kubernetes.io/name: cortex-bot
+      route:
+        - destination:
+            host: embedding-retrieval.embedding-retrieval.svc.cluster.local
+            port:
+              number: 8080
+            subset: default
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

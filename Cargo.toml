@@ -1,0 +1,37 @@
+[workspace]
+members = [
+    "packages/elapsed",
+    "packages/elapsed_macro",
+    "packages/elf",
+    "packages/enum_derive",
+    "packages/error",
+    "packages/gcs",
+    "packages/gcs/examples/*",
+    "packages/hedged",
+    "packages/hippocampus-client",
+    "packages/hippocampus-core",
+    "packages/hippocampus-core/examples/*",
+    "packages/hippocampus-core/benches",
+    "packages/hippocampus-server",
+    "packages/hippocampus-standalone",
+    "packages/hippocampus-web",
+    "packages/hippocampusql",
+    "packages/husky",
+    "packages/jwt",
+    "packages/jwt_derive",
+    "packages/opentelemetry-tracing",
+    "packages/retry",
+    "packages/serde_binary",
+]
+exclude = [
+    "envoy",
+    "insight",
+    "cluster/applications/connectracer",
+    "cluster/applications/proxy-wasm",
+    "taurin/src-tauri"
+]
+
+[profile.release]
+lto = true
+strip = "symbols"
+panic = "abort"

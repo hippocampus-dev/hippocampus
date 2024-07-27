@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cortex-api
+
+resources:
+- ../../base
+- authorization_policy.yaml
+- destination_rule.yaml
+- envoy_filter.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- request_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+- waypoint.yaml
+- redis
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+generators:
+- secrets_from_vault.yaml
+images:
+- digest: sha256:6a47422b05a2f82064bf867624c5fbfbe30992999a007119d95e78e2fdf92732
+  name: ghcr.io/kaidotio/hippocampus/redis-proxy
+  newName: ghcr.io/kaidotio/hippocampus/redis-proxy
+- digest: sha256:2149a23902d01a13e1fa5bda87fc3c4e3594d2731f5ded047e4dbfe90b32e002
+  name: quay.io/rebuy/exporter-merger
+  newName: ghcr.io/kaidotio/hippocampus/mirror/quay.io/rebuy/exporter-merger

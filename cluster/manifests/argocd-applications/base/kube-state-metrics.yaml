@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-state-metrics
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: notifications
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: notifications
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:kaidotio/hippocampus
+    targetRevision: main
+    path: cluster/manifests/kube-state-metrics/overlays/dev
+    kustomize:
+      version: custom
+      commonAnnotationsEnvsubst: true
+      commonAnnotations:
+        repository: ${ARGOCD_APP_SOURCE_REPO_URL}
+        #revision: ${ARGOCD_APP_REVISION}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false

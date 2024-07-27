@@ -1,0 +1,33 @@
+[package]
+name = "hippocampus-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0.18", features = ["derive"] }
+futures = { version = "0.3.16" }
+tokio = { version = "1.10.0", features = ["macros", "rt-multi-thread", "signal"] }
+tracing = { version = "0.1.37" }
+tracing-opentelemetry = { version = "0.18.0" }
+tracing-subscriber = { version = "0.3.16", features = ["json", "env-filter"] }
+axum = { version = "0.6.0" }
+tonic = { version = "0.8.3" }
+tonic-health = { version = "0.8.0" }
+prost = "0.11.5"
+dotenv = "0.15.0"
+opentelemetry = { version = "0.18.0", features = ["rt-tokio"] }
+opentelemetry-prometheus = { version = "0.11.0" }
+opentelemetry-otlp = { version = "0.11.0", features = ["tls", "tls-roots"] }
+pprof = { version = "0.11.0", features = ["protobuf-codec"] }
+libflate = { version = "1.2.0" }
+prometheus = { version = "0.13.3" }
+
+error = { path = "../error" }
+opentelemetry-tracing = { path = "../opentelemetry-tracing" }
+
+[build-dependencies]
+tonic-build = { version = "0.8.4" }
+
+[features]
+default = ["tracing"]
+tracing = []

@@ -1,0 +1,24 @@
+builds:
+  - main: main.go
+    binary: kubectl-patchstring
+    flags:
+      - -trimpath
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+
+changelog:
+  skip: true
+
+checksum:
+  disable: true
+
+archives:
+  - format: binary

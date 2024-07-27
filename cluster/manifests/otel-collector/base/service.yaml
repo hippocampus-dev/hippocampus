@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+spec:
+  # istio-proxy supports client-side load balancing
+  #clusterIP: None
+  selector:
+    app.kubernetes.io/name: otel-collector
+  ports:
+    - name: grpc
+      port: 4317
+      protocol: TCP
+      targetPort: grpc

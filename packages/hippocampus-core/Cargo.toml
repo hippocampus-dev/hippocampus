@@ -1,0 +1,43 @@
+[package]
+name = "hippocampus-core"
+version = "0.1.0"
+authors = ["kai"]
+edition = "2018"
+
+[dependencies]
+lindera = { version = "0.31.0" }
+lindera-core = { version = "0.31.0" }
+rayon = { version = "1.5.0" }
+futures = { version = "0.3.16" }
+serde = { version = "1.0.127", features = ["derive"] }
+serde_json = { version = "1.0.66" }
+async-trait = { version = "0.1.68" }
+tokio = { version = "1.10.0", features = ["macros"] }
+tracing = { version = "0.1.37" }
+tracing-opentelemetry = { version = "0.18.0" }
+opentelemetry = { version = "0.18.0", features = ["rt-tokio"] }
+rustc-hash = "2.0.0"
+
+cdrs-tokio = { version = "8.1.0", features = ["derive"], optional = true }
+
+rusqlite = { version = "0.29.0", features = ["bundled"], optional = true }
+
+elapsed = { path = "../elapsed" }
+hippocampusql = { path = "../hippocampusql" }
+gcs = { path = "../gcs" }
+serde_binary = { path = "../serde_binary" }
+error = { path = "../error" }
+retry = { path = "../retry" }
+
+[dev-dependencies]
+mockall = { version = "0.11.0" }
+
+[features]
+default = ["ipadic"]
+ipadic = ["lindera/ipadic"]
+#unidic = ["lindera/unidic"]
+ko-dic = ["lindera/ko-dic"]
+#cc-cedict = ["lindera/cc-cedict"]
+tracing = ["gcs/tracing"]
+cassandra = ["cdrs-tokio"]
+sqlite = ["rusqlite"]

@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: cortex-api
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cortex-api
+  jwtRules:
+    - issuer: https://token.actions.githubusercontent.com
+      jwksUri: https://token.actions.githubusercontent.com/.well-known/jwks
+      outputClaimToHeaders:
+        - claim: sub
+          header: X-Auth-Request-User

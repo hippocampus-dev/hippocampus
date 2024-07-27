@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  # kustomize does not support NetworkPolicy ingress merge
+  name: memcached-peer
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: memcached
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mcrouter
+      ports:
+        - protocol: TCP
+          port: 11211

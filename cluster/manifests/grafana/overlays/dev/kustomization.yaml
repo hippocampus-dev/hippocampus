@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: grafana
+
+resources:
+- ../../base
+- cron_job.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+
+configMapGenerator:
+- files:
+  - files/datasource.yaml
+  name: datasources
+  options:
+    immutable: true
+images:
+- digest: sha256:2624a433caf0387cbebc6c318a53b801441b2509c86cd398fd0e3ab725155272
+  name: ghcr.io/kaidotio/hippocampus/headless-page-renderer
+  newName: ghcr.io/kaidotio/hippocampus/headless-page-renderer

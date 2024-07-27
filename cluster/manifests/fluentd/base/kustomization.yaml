@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- daemon_set.yaml
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/fluentd-forward-fluent.conf
+  - files/kubernetes.conf
+  - files/tail_container_parse.conf
+  name: fluentd-forward
+  options:
+    immutable: true
+- files:
+  - files/nginx.conf
+  name: fluentd-aggregator-proxy
+  options:
+    immutable: true
+- files:
+  - files/fluentd-aggregator-fluent.conf
+  - files/metrics.conf
+  name: fluentd-aggregator
+  options:
+    immutable: true
+images:
+- digest: sha256:e13e18b0472b1844325300e725584f00cf42d293d69c17d9662cdd72a06d88bb
+  name: fluent/fluentd-kubernetes-daemonset
+  newName: ghcr.io/kaidotio/hippocampus/mirror/fluent/fluentd-kubernetes-daemonset
+- digest: sha256:8eaf33c1f10f9b6c8d9dcf62dc8b00114b6316b67d6fc816a5372e94137a03a0
+  name: ghcr.io/kaidotio/hippocampus/fluentd-aggregator
+  newName: ghcr.io/kaidotio/hippocampus/fluentd-aggregator
+- digest: sha256:4669f6671aca20a34c3dfcd017e84fb3cae40788ea664866eaea698e3dfe241c
+  name: nginx
+  newName: ghcr.io/kaidotio/hippocampus/mirror/nginx

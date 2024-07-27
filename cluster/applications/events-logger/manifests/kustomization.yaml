@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+images:
+- digest: sha256:4cbbd0f92b28b8f0654b4b035d572daeeb36ec3cc01c7f38a085544d5e313333
+  name: ghcr.io/kaidotio/hippocampus/cloudevents-logger
+  newName: ghcr.io/kaidotio/hippocampus/cloudevents-logger
+- digest: sha256:514477142f8b57cf0cbea09ec272e8475994de821d9dbc80b1ed492e3d8eb207
+  name: ghcr.io/kaidotio/hippocampus/events-logger
+  newName: ghcr.io/kaidotio/hippocampus/events-logger

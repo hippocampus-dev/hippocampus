@@ -1,0 +1,17 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: httpbin
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: httpbin
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: httpbin-istio
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: httpbin-istio

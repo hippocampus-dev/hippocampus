@@ -1,0 +1,17 @@
+nameReference:
+  - group: serving.knative.dev
+    version: v1
+    kind: Service
+    fieldSpecs:
+      - path: spec/subscriber/ref/name
+        group: eventing.knative.dev
+        version: v1
+        kind: Trigger
+  - group: eventing.knative.dev
+    version: v1
+    kind: Broker
+    fieldSpecs:
+      - path: spec/broker
+        group: eventing.knative.dev
+        version: v1
+        kind: Trigger

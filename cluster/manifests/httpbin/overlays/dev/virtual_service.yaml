@@ -1,0 +1,31 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: httpbin
+spec:
+  gateways:
+    - httpbin
+  hosts:
+    - httpbin.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: httpbin
+            port:
+              number: 8000
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: httpbin-istio
+spec:
+  gateways:
+    - httpbin-istio
+  hosts:
+    - httpbin-istio.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: httpbin-istio
+            port:
+              number: 8000

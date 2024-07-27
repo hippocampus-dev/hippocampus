@@ -1,0 +1,8 @@
+[package]
+name = "hedged"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.10.0", features = ["time", "sync", "macros", "rt-multi-thread"] }
+futures = { version = "0.3.16" }

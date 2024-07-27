@@ -1,0 +1,565 @@
+name: Mirror docker images
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/99_mirroring.yaml"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  redis:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: redis
+      TAG: 7.2.5
+      KUSTOMIZATION: cluster/manifests/exactly-one-pod-hook/overlays/dev
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  redis-stack:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: redis/redis-stack
+      TAG: 6.2.6-v7
+      KUSTOMIZATION: cluster/manifests/utilities/redis
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  exporter-merger:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/rebuy/exporter-merger
+      TAG: v0.4.0
+      KUSTOMIZATION: cluster/manifests/cortex-api/overlays/dev,cluster/manifests/cortex-bot/overlays/dev
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  redis-exporter:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: oliver006/redis_exporter
+      TAG: v1.50.0
+      KUSTOMIZATION: cluster/manifests/utilities/redis
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  haproxy:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: haproxy
+      TAG: 2.2.4
+      KUSTOMIZATION: cluster/manifests/utilities/redis
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  haproxy-exporter:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/prometheus/haproxy-exporter
+      TAG: v0.12.0
+      KUSTOMIZATION: cluster/manifests/utilities/redis
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  memcached:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: memcached
+      TAG: 1.6.20
+      KUSTOMIZATION: cluster/manifests/utilities/memcached
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  memcached-exporter:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/prometheus/memcached-exporter
+      TAG: v0.11.3
+      KUSTOMIZATION: cluster/manifests/utilities/memcached
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  mcrouter:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: jphalip/mcrouter
+      TAG: 0.36.0
+      KUSTOMIZATION: cluster/manifests/utilities/memcached
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  minio:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: minio/minio
+      TAG: RELEASE.2023-05-04T21-44-30Z
+      KUSTOMIZATION: cluster/manifests/utilities/minio
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  mc:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: minio/mc
+      TAG: RELEASE.2023-05-04T18-10-16Z
+      KUSTOMIZATION: cluster/manifests/mimir/overlays/dev,cluster/manifests/loki/overlays/dev,cluster/manifests/tempo/overlays/dev,cluster/manifests/cortex-bot/overlays/dev,cluster/manifests/embedding-gateway/overlays/dev,cluster/manifests/whisper-worker/overlays/dev,cluster/manifests/assets/overlays/dev
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  httpbin:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: kennethreitz/httpbin
+      TAG: latest
+      KUSTOMIZATION: cluster/manifests/utilities/httpbin
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  opentelemetry-collector:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: otel/opentelemetry-collector-contrib
+      TAG: 0.77.0
+      KUSTOMIZATION: cluster/manifests/otel-agent/base,cluster/manifests/otel-collector/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  oauth2-proxy:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/oauth2-proxy/oauth2-proxy
+      TAG: v7.4.0
+      KUSTOMIZATION: cluster/manifests/oauth2-proxy/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  grafana:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: grafana/grafana
+      TAG: 10.2.3
+      KUSTOMIZATION: cluster/manifests/grafana/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  tempo:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: grafana/tempo
+      TAG: 2.3.1
+      KUSTOMIZATION: cluster/manifests/tempo/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  loki:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: grafana/loki
+      TAG: 2.9.3
+      KUSTOMIZATION: cluster/manifests/loki/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  mimir:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: grafana/mimir
+      TAG: 2.11.0
+      KUSTOMIZATION: cluster/manifests/mimir/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  vault:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: vault
+      TAG: 1.13.2
+      KUSTOMIZATION: cluster/manifests/vault/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  argocd:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/argoproj/argocd
+      TAG: v2.10.4
+      KUSTOMIZATION: cluster/manifests/argocd/overlays/dev
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  golang:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: golang
+      TAG: 1.20-bullseye
+      KUSTOMIZATION: cluster/manifests/argocd/overlays/dev
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  fluentd-kubernetes-daemonset:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: fluent/fluentd-kubernetes-daemonset
+      TAG: v1.16-debian-forward-1
+      KUSTOMIZATION: cluster/manifests/fluentd/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  qdrant:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: qdrant/qdrant
+      TAG: v1.10.0
+      KUSTOMIZATION: cluster/manifests/utilities/qdrant
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  cert-manager-cainjector:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/jetstack/cert-manager-cainjector
+      TAG: v1.12.0
+      KUSTOMIZATION: cluster/manifests/cert-manager/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  cert-manager-controller:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/jetstack/cert-manager-controller
+      TAG: v1.12.0
+      KUSTOMIZATION: cluster/manifests/cert-manager/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  cert-manager-webhook:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/jetstack/cert-manager-webhook
+      TAG: v1.12.0
+      KUSTOMIZATION: cluster/manifests/cert-manager/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  metrics-server:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: registry.k8s.io/metrics-server/metrics-server
+      TAG: v0.6.3
+      KUSTOMIZATION: cluster/manifests/metrics-server/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  addon-resizer:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: gcr.io/google-containers/addon-resizer-amd64
+      TAG: 2.3
+      KUSTOMIZATION: cluster/manifests/metrics-server/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  node-problem-detector:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: registry.k8s.io/node-problem-detector/node-problem-detector
+      TAG: v0.8.7
+      KUSTOMIZATION: cluster/manifests/node-problem-detector/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  kube-state-metrics:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: registry.k8s.io/kube-state-metrics/kube-state-metrics
+      TAG: v2.9.2
+      KUSTOMIZATION: cluster/manifests/kube-state-metrics/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  node-exporter:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: quay.io/prometheus/node-exporter
+      TAG: v1.6.0
+      KUSTOMIZATION: cluster/manifests/node-exporter/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  node-local-dns:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: registry.k8s.io/dns/k8s-dns-node-cache
+      TAG: 1.22.20
+      KUSTOMIZATION: cluster/manifests/node-local-dns/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  cluster-proportional-autoscaler:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: registry.k8s.io/cpa/cluster-proportional-autoscaler
+      TAG: 1.8.6
+      KUSTOMIZATION: cluster/manifests/dns-autoscaler/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  jupyterhub-istio-proxy:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: splunk/jupyterhub-istio-proxy
+      TAG: 0.3.0
+      KUSTOMIZATION: cluster/manifests/jupyterhub/overlays/dev
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  prometheus:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: prom/prometheus
+      TAG: v2.45.2
+      KUSTOMIZATION: cluster/manifests/prometheus/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  nginx:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: nginx
+      TAG: 1.25.3-bookworm
+      KUSTOMIZATION: cluster/manifests/fluentd/base,cluster/manifests/mimir/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  cadvisor:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: gcr.io/cadvisor/cadvisor
+      TAG: v0.47.2
+      KUSTOMIZATION: cluster/manifests/additional-cadvisor/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  cfssl:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: cfssl/cfssl
+      TAG: v1.6.4
+      KUSTOMIZATION: cluster/manifests/prometheus-adapter/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  prometheus-adapter:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: registry.k8s.io/prometheus-adapter/prometheus-adapter
+      TAG: v0.11.2
+      KUSTOMIZATION: cluster/manifests/prometheus-adapter/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  kubectl:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: bitnami/kubectl
+      TAG: 1.29.3
+      KUSTOMIZATION: cluster/manifests/github-actions-runner-controller/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  registry:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: registry
+      TAG: 2
+      KUSTOMIZATION: cluster/manifests/github-actions-runner-controller/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh
+  k6-operator:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: ghcr.io/grafana/k6-operator
+      TAG: controller-v0.0.14
+      KUSTOMIZATION: cluster/manifests/k6-operator/base
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/bin/mirror.sh

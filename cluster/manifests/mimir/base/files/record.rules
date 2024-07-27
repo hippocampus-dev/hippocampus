@@ -1,0 +1,72 @@
+groups:
+  - name: mixin_pod_workload
+    rules:
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              label_replace(
+                kube_pod_owner{owner_kind="ReplicaSet"},
+                "replicaset","$1","owner_name","(.*)"
+              ) * on(replicaset,namespace) group_left(owner_name) group(kube_replicaset_owner) by (replicaset,namespace,owner_name),
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: deployment
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+               kube_pod_owner{owner_kind="DaemonSet"},
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: daemonset
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              kube_pod_owner{owner_kind="StatefulSet"},
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: statefulset
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              label_replace(
+                kube_pod_owner{owner_kind="Job"},
+                "job_name","$1","owner_name","(.*)"
+              ) * on(job_name, namespace) group_left(owner_name) group(kube_job_owner{owner_kind="CronJob"}) by (job_name,namespace,owner_name),
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: cronjob
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              label_replace(
+                kube_pod_owner{owner_kind="Job"},
+                "job_name","$1","owner_name","(.*)"
+              ) * on(job_name, namespace) group_left(owner_name) group(kube_job_owner{owner_kind!="CronJob"}) by (job_name,namespace,owner_name),
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: job
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              kube_pod_owner{owner_kind="Node"},
+              "workload","$1","pod","(.*)-minikube.*"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: node

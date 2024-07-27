@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:c6fa45fa9608c5887d3482f5868e2b00571bda2d865490c93b023cf9c3f1d03d
+  name: ghcr.io/kaidotio/hippocampus/anonymous-proxy
+  newName: ghcr.io/kaidotio/hippocampus/anonymous-proxy
+- digest: sha256:8877e33d6bcddb73b1c4a52a05b1f97475b2dd95bf15696af690a76eac3aca12
+  name: ghcr.io/kaidotio/hippocampus/jwks-proxy
+  newName: ghcr.io/kaidotio/hippocampus/jwks-proxy

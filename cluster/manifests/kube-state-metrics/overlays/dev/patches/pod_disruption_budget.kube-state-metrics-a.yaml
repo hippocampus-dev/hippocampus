@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kube-state-metrics-a
+spec:
+  maxUnavailable: 1

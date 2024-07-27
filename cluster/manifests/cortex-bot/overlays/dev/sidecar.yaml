@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: cortex-bot
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: cortex-bot
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY # Some agents request to external
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./api.openai.com
+        - ./openaipublic.blob.core.windows.net
+        - ./www.slack.com
+        - ./wss-primary.slack.com
+        - ./cortex-bot-redis.cortex-bot.svc.cluster.local
+        - ./cortex-bot-redis-haproxy.cortex-bot.svc.cluster.local
+        - ./cortex-bot-minio.cortex-bot.svc.cluster.local
+        - embedding-retrieval/embedding-retrieval.embedding-retrieval.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

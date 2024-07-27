@@ -1,0 +1,8 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: prometheus-adapter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-adapter

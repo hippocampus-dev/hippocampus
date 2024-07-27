@@ -1,0 +1,14 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: dead-letter
+  labels:
+    strimzi.io/cluster: eventing
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # Kafka + 1
+spec:
+  partitions: 1
+  replicas: 1
+  config:
+    retention.ms: 3600000
+    segment.bytes: 1073741824

@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jupyterhub
+spec:
+  gateways:
+    - jupyterhub
+  hosts:
+    - notebook.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: proxy
+            port:
+              number: 8080

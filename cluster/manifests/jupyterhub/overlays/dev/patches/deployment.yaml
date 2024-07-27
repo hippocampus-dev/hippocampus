@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 128Mi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        # Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+        #prometheus.io/scrape: "true"
+        #prometheus.io/scheme: http
+        #prometheus.io/port: "8002"
+        #prometheus.io/path: /metrics
+    spec:
+      serviceAccountName: proxy
+      automountServiceAccountToken: true
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jupyterproxy
+              app.kubernetes.io/component: proxy
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jupyterproxy
+              app.kubernetes.io/component: proxy
+      containers:
+        - name: proxy
+          envFrom:
+            - secretRef:
+                name: proxy
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 32Mi
+            requests:
+              cpu: 5m
+              memory: 32Mi
+          # Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+          #env:
+          #  - name: CONFIGURABLE_PROXY_REDIS_URI
+          #    value: redis://jupyterhub-redis-haproxy.jupyterhub.svc.cluster.local:6379
+          image: splunk/jupyterhub-istio-proxy
+          args: []
+          env:
+            - name: ISTIO_GATEWAY
+              value: jupyterhub
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SUB_DOMAIN_HOST
+              value: notebook.minikube.127.0.0.1.nip.io
+            - name: VIRTUAL_SERVICE_PREFIX
+              value: jupyterhub
+            - name: WAIT_FOR_WARMUP
+              value: "false" # Avoid hairpinning
+            - name: CLUSTER_DOMAIN
+              value: "cluster.local"
+          ports:
+            - name: api
+              containerPort: 8000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: api
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: api
+            initialDelaySeconds: 60
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5

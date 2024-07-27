@@ -1,0 +1,26 @@
+# for workspace global venv
+[tool.poetry]
+name = "workspace"
+version = "0.1.0"
+description = ""
+authors = ["Kai Aihara <kaidotio@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11,<3.12"
+
+playgpt = { path = "playgpt", develop = true }
+cortex = { path = "cluster/applications/packages/cortex", develop = true }
+bot = { path = "cluster/applications/bot", develop = true }
+api = { path = "cluster/applications/api", develop = true }
+embedding-gateway = { path = "cluster/applications/embedding-gateway", develop = true }
+embedding-retrieval = { path = "cluster/applications/embedding-retrieval", develop = true }
+embedding-retrieval-loader = { path = "cluster/applications/embedding-retrieval-loader", develop = true }
+slack-bolt-proxy = { path = "cluster/applications/slack-bolt-proxy", develop = true }
+jupyterhub_config = { path = "cluster/manifests/jupyterhub/base/files", develop = true }
+whisper-worker = { path = "cluster/applications/whisper-worker", develop = true }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

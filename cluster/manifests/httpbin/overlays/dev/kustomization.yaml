@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: httpbin
+
+resources:
+  - ../../base
+  - authorization_policy.yaml
+  - envoy_filter.yaml
+  - gateway.yaml
+  - namespace.yaml
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - request_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+  - virtual_service.yaml
+  - wasm_plugin.yaml
+  - waypoint.yaml
+
+patches:
+  - path: patches/deployment.httpbin.yaml
+  - path: patches/deployment.httpbin-istio.yaml
+  - path: patches/horizontal_pod_autoscaler.httpbin.yaml
+  - path: patches/horizontal_pod_autoscaler.httpbin-istio.yaml
+  - path: patches/pod_disruption_budget.httpbin.yaml
+  - path: patches/pod_disruption_budget.httpbin-istio.yaml
+  - path: patches/service.httpbin.yaml
+  - path: patches/service.httpbin-istio.yaml

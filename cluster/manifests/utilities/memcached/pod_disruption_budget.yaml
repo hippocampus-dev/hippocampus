@@ -1,0 +1,17 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: memcached
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: memcached
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mcrouter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mcrouter

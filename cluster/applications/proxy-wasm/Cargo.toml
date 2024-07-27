@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "packages/cookie-manipulator",
+    "packages/envoy-trusted-header",
+    "packages/envoy-xauthrequest",
+    "packages/fallback-filter",
+    "packages/header-getter",
+    "packages/header-setter",
+    "packages/metrics",
+    "packages/metrics-exporter",
+]

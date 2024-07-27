@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: jupyterhub
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - notebook.minikube.127.0.0.1.nip.io
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

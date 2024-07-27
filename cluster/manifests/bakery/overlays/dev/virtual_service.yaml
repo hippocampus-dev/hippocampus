@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bakery
+spec:
+  gateways:
+    - bakery
+  hosts:
+    - bakery.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: bakery
+            port:
+              number: 8080

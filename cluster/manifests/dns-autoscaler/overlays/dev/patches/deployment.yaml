@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dns-autoscaler
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: autoscaler
+          args:
+            - --v=2
+            - --namespace=kube-system
+            - --configmap=dns-autoscaler
+            - --target=deployment/coredns
+            - --default-params={"linear":{"coresPerReplica":16,"nodesPerReplica":1,"min":4,"max":100}}
+            - --alsologtostderr

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+data:
+  repositories: |
+    - url: git@github.com:kaidotio/hippocampus
+  repository.credentials: |
+    - url: git@github.com:kaidotio
+      sshPrivateKeySecret:
+        name: argocd-credentials
+        key: sshPrivateKey
+  resource.ignoreResourceUpdatesEnabled: "true"
+  resource.customizations.ignoreResourceUpdates.all: |
+    jsonPointers:
+      - /status
+  kustomize.version.custom: "/mnt/custom-tools/kustomize"
+  kustomize.buildOptions.custom: "--enable-alpha-plugins"
+  controller.self.heal.timeout.seconds: "60"

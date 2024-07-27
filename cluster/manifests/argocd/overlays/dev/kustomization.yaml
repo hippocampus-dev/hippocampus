@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argocd
+
+resources:
+- ../../base
+- cluster_role_binding.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- peer_authentication.yaml
+- virtual_service.yaml
+- redis
+
+patches:
+- path: patches/config_map.argocd-cm.yaml
+- path: patches/config_map.argocd-cmd-params-cm.yaml
+- path: patches/deployment.argocd-repo-server.yaml
+- path: patches/deployment.argocd-server.yaml
+- path: patches/pod_disruption_budget.argocd-application-controller.yaml
+- path: patches/pod_disruption_budget.argocd-repo-server.yaml
+- path: patches/pod_disruption_budget.argocd-server.yaml
+- path: patches/service.argocd-metrics.yaml
+- path: patches/service.argocd-repo-server.yaml
+- path: patches/service.argocd-server.yaml
+- path: patches/service.argocd-server-metrics.yaml
+- path: patches/stateful_set.argocd-application-controller.yaml
+
+configMapGenerator:
+- files:
+  - files/secretsfromvault/go.mod
+  - files/secretsfromvault/go.sum
+  - files/secretsfromvault/main.go
+  name: secretsfromvault-src
+  options:
+    immutable: true
+images:
+- digest: sha256:8fd44351d719dbf3f86ad095f9056040c33ccdeac9a18b54dec81fd152a31853
+  name: golang
+  newName: ghcr.io/kaidotio/hippocampus/mirror/golang
+- digest: sha256:7a33af2751e259d94ddb7433a2ce998adfad800fa5f8d5f0fb84ce8b65b7ed0d
+  name: quay.io/argoproj/argocd
+  newName: ghcr.io/kaidotio/hippocampus/mirror/quay.io/argoproj/argocd

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: connectracer
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: connectracer
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: connectracer
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            # need to run eBPF
+            #runAsUser: 65532
+            #runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/connectracer
+          imagePullPolicy: IfNotPresent
+          args:
+            - --address=0.0.0.0:8080
+            - --hosts=example.com
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+            - name: PROCFS_PATH
+              value: &procfs /proc
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: procfs
+              mountPath: *procfs
+      volumes:
+        - name: procfs
+          hostPath:
+            path: /proc

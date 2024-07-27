@@ -1,0 +1,10 @@
+[package]
+name = "retry"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.10.0", features = ["time"] }
+rand = { version = "0.8.5" }
+
+error = { path = "../error" }

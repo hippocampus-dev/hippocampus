@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: memcached
+spec:
+  serviceName: memcached
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: memcached
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: memcached
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: memcached
+          imagePullPolicy: IfNotPresent
+          args:
+            - memcached
+            - -C
+            - -m
+            - $(MEMORY_REQUESTS)M
+            - -I
+            - 128m
+            - -c
+            - "10240"
+            - -t
+            - "4"
+            - -R
+            - "100"
+          env:
+            - name: MEMORY_REQUESTS
+              valueFrom:
+                resourceFieldRef:
+                  containerName: memcached
+                  divisor: 1Mi
+                  resource: requests.memory
+          resources:
+            requests:
+              memory: 1Gi
+          ports:
+            - name: tcp
+              containerPort: 11211
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: tcp
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+        - name: exporter
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: quay.io/prometheus/memcached-exporter
+          imagePullPolicy: IfNotPresent

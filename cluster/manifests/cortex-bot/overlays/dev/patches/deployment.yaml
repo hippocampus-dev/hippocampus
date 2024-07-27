@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cortex-bot
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 128Mi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8083"
+        prometheus.io/path: /metrics
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-bot
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-bot
+      containers:
+        - name: cortex-bot
+          envFrom:
+            - secretRef:
+                name: cortex-bot
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+            - name: RATE_LIMIT_PER_INTERVAL
+              value: "200000"
+            - name: SLACK_APP_TOKEN
+              value: "" # Use FastAPI mode. If you want to use SocketModeHandler, remove this part.
+            - name: SLACK_BOT_MEMBER_ID
+              value: U02CMRJA1GQ
+            - name: ALLOW_EXT_SHARED_CHANNEL
+              value: "true"
+            - name: ALLOW_RESTRICTED_USER
+              value: "true"
+            - name: ALLOW_TEAMS
+              value: "T02BY6T3YE6"
+            - name: ALLOW_EMAIL_DOMAINS
+              value: ""
+            - name: REDIS_HOST
+              value: 127.0.0.1
+            - name: REDIS_PORT
+              value: "6379"
+            - name: EMBEDDING_RETRIEVAL_ENDPOINT
+              value: http://embedding-retrieval.embedding-retrieval.svc.cluster.local:8080
+            - name: S3_ENDPOINT
+              value: http://cortex-bot-minio.cortex-bot.svc.cluster.local:9000
+            - name: AWS_ACCESS_KEY_ID
+              value: minio
+            - name: AWS_SECRET_ACCESS_KEY
+              value: miniominio
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 5m
+        - name: redis-proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/redis-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --local-address=127.0.0.1:6379
+            - --monitor-address=127.0.0.1:8082
+            - --remote-address=cortex-bot-redis-haproxy.cortex-bot.svc.cluster.local:6379
+            - --reader-routing=true
+            - --reader-remote-address=cortex-bot-redis.cortex-bot.svc.cluster.local:6379
+            - --min-idle-connections=3
+            - --max-idle-connections=3
+            - --max-idle-time-seconds=3600
+            - --max-lifetime-seconds=86400
+          resources:
+            requests:
+              cpu: 5m
+        - name: exporter-merger
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: quay.io/rebuy/exporter-merger
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MERGER_PORT
+              value: "8083"
+            - name: MERGER_URLS
+              value: http://127.0.0.1:8080/metrics http://127.0.0.1:8082/metrics

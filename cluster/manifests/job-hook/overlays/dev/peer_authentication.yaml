@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: job-hook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: job-hook
+  mtls:
+    mode: PERMISSIVE # AdmissionWebhook

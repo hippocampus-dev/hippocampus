@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- network_policy.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/init-mcrouter.sh
+  name: mcrouter
+  options:
+    immutable: true
+- files:
+  - files/liveness-probe.sh
+  name: mcrouter-probe
+  options:
+    immutable: true
+images:
+- digest: sha256:261610ab86126dd27659d0635edfb3fae0e73d93b2f8fd972d9b06eca80eda91
+  name: jphalip/mcrouter
+  newName: ghcr.io/kaidotio/hippocampus/mirror/jphalip/mcrouter
+- digest: sha256:3a453689b8b1843bd509a32aaa7aeb0d8bb4260b87f9f67343d25f90981d09d1
+  name: memcached
+  newName: ghcr.io/kaidotio/hippocampus/mirror/memcached
+- digest: sha256:51b4c2ea1a8d9264bd2524ec96d6f0a930bc9b480f24a5d187c621366398054d
+  name: quay.io/prometheus/memcached-exporter
+  newName: ghcr.io/kaidotio/hippocampus/mirror/quay.io/prometheus/memcached-exporter

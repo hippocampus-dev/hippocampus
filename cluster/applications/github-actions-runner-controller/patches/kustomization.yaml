@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: skaffold-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: skaffold
+
+namespace: skaffold-github-actions-runner-controller
+
+resources:
+  - ../manifests
+  - namespace.yaml
+
+patches:
+  - path: deployment.yaml
+  # CRD does not support namePrefix
+  - patch: |
+      $patch: delete
+      kind: _
+      metadata:
+        name: _
+    target:
+      kind: CustomResourceDefinition

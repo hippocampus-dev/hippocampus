@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: proxy
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/configurable-http-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --port=8080
+            - --api-port=8081
+            - --metrics-port=8082
+            - --default-target=http://hub.jupyterhub.svc.cluster.local:8081
+            - --error-target=http://hub.jupyterhub.svc.cluster.local:8081/hub/error
+            - --log-level=warn
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: api
+              containerPort: 8081
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /_chp_healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /_chp_healthz
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "3"]

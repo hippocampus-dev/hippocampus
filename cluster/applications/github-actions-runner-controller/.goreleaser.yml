@@ -1,0 +1,22 @@
+builds:
+  - main: bin/runner.go
+    binary: runner
+    flags:
+      - -trimpath
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+
+changelog:
+  skip: true
+
+checksum:
+  disable: true
+
+archives:
+  - format: binary

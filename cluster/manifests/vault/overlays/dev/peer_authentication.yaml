@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: vault
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vault
+  mtls:
+    mode: STRICT

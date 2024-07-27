@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:31bc59323629d308637e83eff3147ce21bd7cbe2011dacd778e29c3297e29192
+  name: ghcr.io/kaidotio/hippocampus/persistentvolumeclaim-hook
+  newName: ghcr.io/kaidotio/hippocampus/persistentvolumeclaim-hook

@@ -1,0 +1,45 @@
+name: Release/insight
+on:
+  release:
+    types:
+      - created
+permissions:
+  contents: write
+  packages: read
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  release:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      GOPATH: /opt/actions-runner/_work/_temp/go
+      GOBIN: /opt/actions-runner/_work/_temp/build-tools/bin
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-insight-packages-${{ hashFiles('insight/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-insight-packages-
+      - uses: actions/cache@v4
+        with:
+          path: insight/target
+          key: ${{ runner.os }}-insight-${{ hashFiles('insight/**') }}
+          restore-keys: |
+            ${{ runner.os }}-insight-
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: |
+          # Download a binary instead of compiling
+          #go install github.com/goreleaser/goreleaser@latest
+          curl -fsSL https://github.com/goreleaser/goreleaser/releases/download/v1.24.0/goreleaser_Linux_x86_64.tar.gz | tar zx --no-same-owner -C /usr/local/bin goreleaser
+          curl -fsSL https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz | tar zx --no-same-owner -C /usr/local/bin cross
+      - run: |
+          rustup component add rustfmt
+          rustup component add rust-src
+          # Download a binary instead of compiling
+          #${GOBIN}/goreleaser release
+          goreleaser release
+        working-directory: insight

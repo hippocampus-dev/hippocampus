@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: proxy-wasm
+spec:
+  gateways:
+    - proxy-wasm
+  hosts:
+    - proxy-wasm.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: proxy-wasm
+            port:
+              number: 8080

@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-actions-runner-controller
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: github-actions-runner-controller
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: github-actions-runner-controller
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: fetch-nodeport
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: bitnami/kubectl:1.29.3
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+          args:
+            - -c
+            - echo '{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"'$(CONFIGMAP_NAME)'"},"data":{"NODEPORT":"'`kubectl get service $(SERVICE_NAME) -n $(NAMESPACE) -o jsonpath='{$.spec.ports[0].nodePort}'`'"}}' | kubectl apply -n $(NAMESPACE) -f -
+          env:
+            - name: CONFIGMAP_NAME
+              value: metadata
+            - name: SERVICE_NAME
+              value: $(SERVICE_NAME)
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+      containers:
+        - name: controller
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/github-actions-runner-controller
+          imagePullPolicy: IfNotPresent
+          args:
+            - --enable-leader-election
+            - --push-registry-host=$(SERVICE_NAME)-0.$(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:5000
+            - --pull-registry-host=127.0.0.1:$(NODEPORT)
+          env:
+            - name: SERVICE_NAME
+              value: $(SERVICE_NAME)
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NODEPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: metadata
+                  key: NODEPORT
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5

@@ -1,0 +1,36 @@
+https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/47cd5302d866fa60cf8fb81f0e34d42e38f6100c/sd_xl_base_1.0.safetensors
+  out=models/Stable-diffusion/sd_xl_base_1.0.safetensors
+https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/90b043fc33607938c549f5c9d982c734ae7fb7e0/sd_xl_refiner_1.0.safetensors
+  out=models/Stable-diffusion/sd_xl_refiner_1.0.safetensors
+https://huggingface.co/stabilityai/sdxl-vae/resolve/6f5909a7e596173e25d4e97b07fd19cdf9611c76/sdxl_vae.safetensors
+  out=models/VAE/sd_xl_base_1.0.vae.safetensors
+https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/426a94fabbae18f63b8165c6e2a0daebfccedfbd/v1-5-pruned-emaonly.ckpt
+  out=models/Stable-diffusion/v1-5-pruned-emaonly.ckpt
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11e_sd15_ip2p.pth
+  out=extensions/sd-webui-controlnet/models/control_v11e_sd15_ip2p.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11e_sd15_shuffle.pth
+  out=extensions/sd-webui-controlnet/models/control_v11e_sd15_shuffle.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11f1e_sd15_tile.pth
+  out=extensions/sd-webui-controlnet/models/control_v11f1e_sd15_tile.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11f1p_sd15_depth.pth
+  out=extensions/sd-webui-controlnet/models/control_v11f1p_sd15_depth.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_canny.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_canny.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_inpaint.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_inpaint.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_lineart.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_lineart.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_mlsd.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_mlsd.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_normalbae.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_normalbae.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_openpose.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_openpose.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_scribble.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_scribble.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_seg.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_seg.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_softedge.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15_softedge.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15s2_lineart_anime.pth
+  out=extensions/sd-webui-controlnet/models/control_v11p_sd15s2_lineart_anime.pth

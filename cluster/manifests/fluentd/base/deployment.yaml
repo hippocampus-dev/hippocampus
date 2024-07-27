@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluentd-aggregator-proxy
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: fluentd-aggregator-proxy
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          command:
+            - nginx
+          args:
+            - -c
+            - /mnt/nginx.conf
+            - -g
+            - "daemon off;"
+          ports:
+            - name: tcp
+              containerPort: 24224
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: tcp
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "3"]
+          volumeMounts:
+            - name: fluentd-aggregator-proxy
+              mountPath: /mnt
+              readOnly: true
+            - name: tmp
+              mountPath: /var/run
+      volumes:
+        - name: fluentd-aggregator-proxy
+          configMap:
+            name: fluentd-aggregator-proxy
+        - name: tmp
+          emptyDir:
+            medium: Memory

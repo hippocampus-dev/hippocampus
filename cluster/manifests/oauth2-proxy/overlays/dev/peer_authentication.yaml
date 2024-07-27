@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: oauth2-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oauth2-proxy
+  mtls:
+    mode: STRICT

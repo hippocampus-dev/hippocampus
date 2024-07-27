@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod1
+  annotations:
+    exactly-one-pod-hook.kaidotio.github.io/exactly-one-pod: "true"
+    exactly-one-pod-hook.kaidotio.github.io/key: "my-pod"
+    exactly-one-pod-hook.kaidotio.github.io/expiration: "86400"
+spec:
+  containers:
+    - name: my-container
+      image: nginx
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod2
+  annotations:
+    exactly-one-pod-hook.kaidotio.github.io/exactly-one-pod: "true"
+    exactly-one-pod-hook.kaidotio.github.io/key: "my-pod"
+    exactly-one-pod-hook.kaidotio.github.io/expiration: "86400"
+spec:
+  containers:
+    - name: my-container
+      image: nginx

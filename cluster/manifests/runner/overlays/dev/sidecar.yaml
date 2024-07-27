@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: runner
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: runner
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./github.com
+        - ./api.github.com
+        - ./objects.githubusercontent.com
+        - ./auth.docker.io
+        - ./production.cloudflare.docker.com
+        - ./actions-results-receiver-production.githubapp.com
+        - ./results-receiver.actions.githubusercontent.com
+        - ./vstoken.actions.githubusercontent.com
+        - ./*.blob.core.windows.net
+        - ./*.actions.githubusercontent.com
+        - ./archive.ubuntu.com
+        - httpbin/httpbin-istio.httpbin.svc.cluster.local
+        - cortex-api/cortex-api.cortex-api.svc.cluster.local
+        - github-actions-runner-controller/github-actions-runner-controller-registry.github-actions-runner-controller.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

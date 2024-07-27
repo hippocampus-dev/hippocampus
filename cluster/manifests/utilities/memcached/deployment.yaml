@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcrouter
+spec:
+  revisionHistoryLimit: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: mcrouter
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-init
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: jphalip/mcrouter
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+            - /mnt/init-mcrouter.sh
+          env:
+            - name: SERVICE_NAME
+              value: $(SERVICE_NAME)
+            - name: MEMCACHED_REPLICAS
+              value: $(MEMCACHED_REPLICAS)
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: config
+              mountPath: /etc/mcrouter
+            - name: mcrouter
+              mountPath: /mnt
+              readOnly: true
+      containers:
+        - name: mcrouter
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: jphalip/mcrouter
+          imagePullPolicy: IfNotPresent
+          command:
+            - mcrouter
+          args:
+            - -p
+            - "5000"
+            - --config-file
+            - /etc/mcrouter/config.json
+            - --num-proxies
+            - "$(REQUESTS_CPU_COUNT)"
+          env:
+            - name: REQUESTS_CPU_COUNT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: mcrouter
+                  resource: limits.cpu
+          resources:
+            limits:
+              cpu: 1000m
+          ports:
+            - name: tcp
+              containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: tcp
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - /mnt/liveness-probe.sh
+            initialDelaySeconds: 60
+            periodSeconds: 10 # https://github.com/kubernetes/kubernetes/issues/82440
+            successThreshold: 1
+            failureThreshold: 20
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: data
+              mountPath: /var/mcrouter
+            - name: config
+              mountPath: /etc/mcrouter
+              readOnly: true
+            - name: mcrouter-probe
+              mountPath: /mnt
+              readOnly: true
+            - name: spool
+              mountPath: /var/spool/mcrouter
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: data
+          emptyDir:
+            medium: Memory
+        - name: config
+          emptyDir:
+            medium: Memory
+        - name: mcrouter
+          configMap:
+            name: mcrouter
+        - name: mcrouter-probe
+          configMap:
+            name: mcrouter-probe
+        - name: spool
+          emptyDir:
+            medium: Memory

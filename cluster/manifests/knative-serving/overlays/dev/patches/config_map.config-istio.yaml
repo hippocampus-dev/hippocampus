@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-istio
+  namespace: knative-serving
+data:
+  external-gateways: |
+    - name: knative-ingress-gateway
+      namespace: knative-serving
+      service: istio-ingressgateway.istio-system.svc.cluster.local
+
+  # Use cluster-local-gateway instead
+  local-gateways: |
+    - name: cluster-local-gateway
+      namespace: istio-system
+      service: cluster-local-gateway.istio-system.svc.cluster.local

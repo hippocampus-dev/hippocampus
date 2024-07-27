@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vault
+spec:
+  serviceName: vault
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: vault
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: vault
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: vault
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: vault
+          imagePullPolicy: IfNotPresent
+          args:
+            - vault
+            - server
+            - -config=/mnt/config.hcl
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: VAULT_ADDR
+              value: http://127.0.0.1:8200
+            - name: VAULT_API_ADDR
+              value: http://$(POD_IP):8200
+            - name: VAULT_LOG_LEVEL
+              value: info
+            - name: SKIP_SETCAP
+              value: "true"
+          ports:
+            - name: tcp
+              containerPort: 8200
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - vault
+                - status
+                - -tls-skip-verify
+            initialDelaySeconds: 5
+            periodSeconds: 10 # https://github.com/kubernetes/kubernetes/issues/82440
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - /mnt/init.sh
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: vault
+              mountPath: /mnt
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: vault
+          configMap:
+            name: vault

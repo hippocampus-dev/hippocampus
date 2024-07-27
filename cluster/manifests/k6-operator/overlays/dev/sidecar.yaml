@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: k6-operator
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: k6-operator
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - tempo/tempo-query-frontend.tempo.svc.cluster.local
+        - loki/loki-proxy.loki.svc.cluster.local
+        - mimir/mimir-proxy.mimir.svc.cluster.local
+        - mimir/mimir-alertmanager.mimir.svc.cluster.local

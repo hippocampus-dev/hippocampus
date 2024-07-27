@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: embedding-retrieval
+spec:
+  gateways:
+    - embedding-retrieval
+  hosts:
+    - embedding-retrieval.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: embedding-retrieval
+            port:
+              number: 8080

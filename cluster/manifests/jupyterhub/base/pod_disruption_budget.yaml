@@ -1,0 +1,19 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: hub
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: proxy

@@ -1,0 +1,10 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: Runner
+metadata:
+  name: example
+spec:
+  image: ubuntu:22.04
+  repository: hippocampus-dev/hippocampus
+  tokenSecretKeyRef:
+    name: credentials
+    key: GITHUB_TOKEN

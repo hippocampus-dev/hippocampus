@@ -1,0 +1,9 @@
+commonLabels:
+  - group: security.istio.io
+    version: v1beta1
+    kind: PeerAuthentication
+    path: spec/selector/matchLabels
+  - group: networking.istio.io
+    version: v1beta1
+    kind: Sidecar
+    path: spec/workloadSelector/labels

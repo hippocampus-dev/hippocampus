@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: slack-bolt-proxy
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: slack-bolt-proxy
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./www.slack.com
+        - ./wss-primary.slack.com
+        - ./cortex-bot.cortex-bot.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

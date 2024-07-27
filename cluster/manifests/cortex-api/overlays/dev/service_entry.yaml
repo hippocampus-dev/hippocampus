@@ -1,0 +1,31 @@
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: api.openai.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - api.openai.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: openaipublic.blob.core.windows.net
+spec:
+  exportTo:
+    - .
+  hosts:
+    - openaipublic.blob.core.windows.net
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS

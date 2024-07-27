@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: strimzi-cluster-operator
+
+resources:
+  - ../../base
+  - cluster_role_binding.yaml
+  - namespace.yaml
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - pod_disruption_budget.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/cluster_role_binding.strimzi-cluster-operator.yaml
+  - path: patches/cluster_role_binding.strimzi-cluster-operator-kafka-broker-delegation.yaml
+  - path: patches/cluster_role_binding.strimzi-cluster-operator-kafka-client-delegation.yaml
+  - path: patches/deployment.yaml
+  - path: patches/role_binding.strimzi-cluster-operator.yaml
+  - path: patches/role_binding.strimzi-cluster-operator-entity-operator-delegation.yaml
+  - path: patches/role_binding.strimzi-cluster-operator-leader-election.yaml
+  - path: patches/role_binding.strimzi-cluster-operator-watched.yaml
+  - patch: |-
+      - op: remove
+        path: /spec/template/spec/containers/0/resources
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0
+        value:
+          name: STRIMZI_NAMESPACE
+          value: "*"
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: strimzi-cluster-operator

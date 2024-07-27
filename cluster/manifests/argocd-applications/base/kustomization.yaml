@@ -1,0 +1,56 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - additional-cadvisor.yaml
+  - anonymous-proxy.yaml
+  - argocd.yaml
+  - argocd-notifications-controller.yaml
+  - assets.yaml
+  - bakery.yaml
+  - cert-manager.yaml
+  - cilium-addons.yaml
+  - connectracer.yaml
+  - cortex-api.yaml
+  - cortex-bot.yaml
+  - dns-autoscaler.yaml
+  - embedding-gateway.yaml
+  - embedding-retrieval.yaml
+  - events-logger.yaml
+  - exactly-one-pod-hook.yaml
+  - fluentd.yaml
+  - gateway-api.yaml
+  - github-actions-runner-controller.yaml
+  - grafana.yaml
+  - httpbin.yaml
+  - istio-addons.yaml
+  - kube-state-metrics.yaml
+  - kubernetes-addons.yaml
+  - job-hook.yaml
+  - jupyterhub.yaml
+  - k6-operator.yaml
+  - knative-eventing.yaml
+  - knative-eventing-kafka.yaml
+  - knative-serving.yaml
+  - libsodium-encryptor.yaml
+  - loki.yaml
+  - metrics-server.yaml
+  - mimir.yaml
+  - node-exporter.yaml
+  - node-local-dns.yaml
+  - node-problem-detector.yaml
+  - oauth2-proxy.yaml
+  - otel-agent.yaml
+  - otel-collector.yaml
+  - persistentvolumeclaim-hook.yaml
+  - priorities.yaml
+  - prometheus.yaml
+  - prometheus-adapter.yaml
+  - proxy-wasm.yaml
+  - runner.yaml
+  - slack-bolt-proxy.yaml
+  - strimzi-cluster-operator.yaml
+  - tempo.yaml
+  - validating_admission.yaml
+  - vault.yaml
+  - whisper-worker.yaml

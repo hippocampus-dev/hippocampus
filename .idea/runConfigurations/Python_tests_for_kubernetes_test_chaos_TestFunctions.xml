@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Python tests for kubernetes.test_chaos.TestFunctions" type="tests" factoryName="Autodetect" nameIsGenerated="true">
+    <module name="hippocampus" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <env name="QDRANT_NAMESPACE" value="chatgpt-retrieval-plugin" />
+      <env name="LABEL_SELECTOR" value="app.kubernetes.io/name=qdrant" />
+      <env name="STATEFUL_SET_NAME" value="chatgpt-retrieval-plugin-qdrant" />
+      <env name="QDRANT_HOST" value="qdrant.minikube.127.0.0.1.nip.io" />
+      <env name="QDRANT_PORT" value="10080" />
+    </envs>
+    <option name="SDK_HOME" value="$USER_HOME$/.cache/pypoetry/virtualenvs/workspace-D9Cnf7T6-py3.11/bin/python" />
+    <option name="SDK_NAME" value="Poetry (hippocampus)" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/playground/tests/qdrant" />
+    <option name="IS_MODULE_SDK" value="true" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <option name="_new_additionalArguments" value="&quot;&quot;" />
+    <option name="_new_target" value="&quot;kubernetes.test_chaos.TestFunctions&quot;" />
+    <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+    <method v="2" />
+  </configuration>
+</component>

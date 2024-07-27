@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+GUEST_NAME=$1
+OPERATION=$2
+SUB_OPERATION=$3
+
+if [[ "$GUEST_NAME" =~ _passthrough$ ]] && [ "$OPERATION" == "prepare" ] && [ "$SUB_OPERATION" == "begin" ]; then
+  killall openbox
+  sleep 3
+  groups=($(lspci | grep "VGA compatible controller: NVIDIA" | cut -d' ' -f 1 | xargs -L1 -I{} find /sys/kernel/iommu_groups/*/devices/ -name "0000:{}" | xargs dirname | xargs dirname | sort -u))
+  for group in "${groups[@]}"; do
+    find "${group}/devices/" -type l | awk -F/ '{print $NF}' | tr ':.' '_' | xargs -L1 -I{} eval "virsh nodedev-detach pci_{}"
+  done
+  modprobe vfio_pci
+fi
+
+if [[ "$GUEST_NAME" =~ _passthrough$ ]] && [ "$OPERATION" == "release" ] && [ "$SUB_OPERATION" == "end" ]; then
+  modprobe -r vfio_pci
+fi

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-features
+  namespace: knative-serving
+data:
+  kubernetes.podspec-volumes-emptydir: "enabled"
+  kubernetes.podspec-persistent-volume-claim: "enabled"
+  kubernetes.podspec-persistent-volume-write: "enabled"
+  kubernetes.podspec-affinity: "enabled"
+  kubernetes.podspec-hostaliases: "enabled"
+  kubernetes.podspec-nodeselector: "enabled"
+  kubernetes.podspec-tolerations: "enabled"
+  kubernetes.podspec-fieldref: "enabled"
+  kubernetes.podspec-priorityclassname: "enabled"
+  kubernetes.podspec-dryrun: "enabled"
+  kubernetes.podspec-runtimeclassname: "enabled"
+  kubernetes.podspec-securitycontext: "enabled"
+  kubernetes.podspec-init-containers: "enabled"
+  kubernetes.podspec-topologyspreadconstraints: "enabled"
+  kubernetes.podspec-dnspolicy: "enabled"
+  kubernetes.podspec-schedulername: "enabled"

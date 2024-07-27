@@ -1,0 +1,77 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: embedding-retrieval
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-retrieval
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+        - namespaceSelector:
+            matchLabels:
+              name: cortex-bot
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-bot
+        - namespaceSelector:
+            matchLabels:
+              name: cortex-api
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-api
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: embedding-retrieval-qdrant
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: qdrant
+      variant: embedding-retrieval
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: embedding-retrieval
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-retrieval
+      ports:
+        - protocol: TCP
+          port: 6333

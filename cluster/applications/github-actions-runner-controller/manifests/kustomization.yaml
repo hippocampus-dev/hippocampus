@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- crd/github-actions-runner.kaidotio.github.io_runners.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+- stateful_set.yaml
+
+replacements:
+- source:
+    fieldPath: metadata.name
+    kind: Service
+    name: github-actions-runner-controller-registry
+  targets:
+  - fieldPaths:
+    - spec.template.spec.initContainers.[name=fetch-nodeport].env.[name=SERVICE_NAME].value
+    - spec.template.spec.containers.[name=controller].env.[name=SERVICE_NAME].value
+    select:
+      kind: Deployment
+      name: github-actions-runner-controller
+
+images:
+- digest: sha256:ecad564353236ea64dfe03c7375e39ccb9c79b2bc95b622de26d67d48187d62f
+  name: ghcr.io/kaidotio/hippocampus/github-actions-runner-controller
+  newName: ghcr.io/kaidotio/hippocampus/github-actions-runner-controller

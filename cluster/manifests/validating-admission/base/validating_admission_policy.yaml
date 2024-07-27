@@ -1,0 +1,101 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: poddisruptionbudgets.validating.kaidotio.github.io
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - policy
+        apiVersions:
+          - "*"
+        resources:
+          - poddisruptionbudgets
+        operations:
+          - CREATE
+          - UPDATE
+  variables:
+    - name: maxUnavailable
+      expression: "has(object.spec.maxUnavailable) ? object.spec.maxUnavailable > 0 : true"
+  validations:
+    - expression: "variables.maxUnavailable"
+      message: PodDisruptionBudget must have maxUnavailable set to a positive value
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: pods.validating.kaidotio.github.io
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - "*"
+        resources:
+          - pods
+        operations:
+          - CREATE
+          - UPDATE
+  variables:
+    - name: volumeNames
+      expression: "has(object.spec.volumes) ? object.spec.volumes.map(volume, volume.name) : []"
+    - name: initContainerVolumeMountNames
+      expression: "has(object.spec.initContainers) ? object.spec.initContainers.map(container, has(container.volumeMounts) ? container.volumeMounts.map(volumeMount, volumeMount.name) : []) : []"
+    - name: containerVolumeMountNames
+      expression: "has(object.spec.containers) ? object.spec.containers.map(container, has(container.volumeMounts) ? container.volumeMounts.map(volumeMount, volumeMount.name): []) : []"
+    - name: volumeMountNames
+      expression: "variables.initContainerVolumeMountNames + variables.containerVolumeMountNames"
+  validations:
+    - expression: "variables.volumeNames.all(volumeName, variables.volumeMountNames.exists(containerVolumeMountNames, volumeName in containerVolumeMountNames))"
+      message: volumes must be mounted in initContainers and containers
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: services.validating.kaidotio.github.io
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - "*"
+        resources:
+          - services
+        operations:
+          - CREATE
+          - UPDATE
+  variables:
+    - name: knownPorts
+      expression: "has(object.spec.ports) ? object.spec.ports.map(port, port.name).filter(name, name.find('^(grpc|http|tls|tcp|udp)') != '') : []"
+  validations:
+    - expression: "!has(object.spec.ports) || size(variables.knownPorts) == size(object.spec.ports)"
+      message: spec.ports[].name should be /^(grpc|http|tls|tcp|udp)/
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: daemonsets.validating.kaidotio.github.io
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    namespaceSelector:
+      matchLabels:
+        name: kube-system
+    resourceRules:
+      - apiGroups:
+          - apps
+        apiVersions:
+          - "*"
+        resources:
+          - daemonsets
+        operations:
+          - CREATE
+          - UPDATE
+  validations:
+    - expression: "object.spec.template.spec.priorityClassName == 'system-node-critical'"
+      message: DaemonSet in kube-system namespace must use system-node-critical priority class

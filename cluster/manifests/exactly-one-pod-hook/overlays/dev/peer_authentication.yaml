@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: exactly-one-pod-hook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: exactly-one-pod-hook
+  mtls:
+    mode: PERMISSIVE # AdmissionWebhook

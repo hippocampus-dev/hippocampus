@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/prometheus.yml
+  name: prometheus
+images:
+- digest: sha256:b8fdbafa98b52285fff0923d21ac4155b11511b7915b420c4dac01c48be88634
+  name: prom/prometheus
+  newName: ghcr.io/kaidotio/hippocampus/mirror/prom/prometheus

@@ -1,0 +1,35 @@
+name: Test/sheethub
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/40_sheethub.yaml"
+      - "sheethub/**"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-sheethub-${{ hashFiles('sheethub/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-sheethub-
+      - uses: actions/setup-node@v4
+        id: setup_node_id
+        with:
+          node-version: lts/*
+      - run: |
+          npm ci
+          npm run test
+        working-directory: sheethub

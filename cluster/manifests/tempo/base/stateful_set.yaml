@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tempo-compactor
+spec:
+  serviceName: tempo-compactor
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: compactor
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: compactor
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/tempo
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=compactor
+            - -config.file=/mnt/tempo.yaml
+          env:
+            - name: JAEGER_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local.:14268/api/traces
+            - name: JAEGER_SAMPLER_TYPE
+              value: const
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+          ports:
+            - name: memberlist
+              containerPort: 7946
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tempo-ingester
+spec:
+  serviceName: tempo-ingester
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: ingester
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ingester
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/tempo
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=ingester
+            - -config.file=/mnt/tempo.yaml
+          env:
+            - name: JAEGER_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local.:14268/api/traces
+            - name: JAEGER_SAMPLER_TYPE
+              value: const
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+          ports:
+            - name: http
+              containerPort: 3100
+              protocol: TCP
+            - name: memberlist
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /var/tempo
+      volumes:
+        - name: data
+          emptyDir:
+            medium: Memory

@@ -1,0 +1,68 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mimir
+
+resources:
+- ../../base
+- job.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- memcached
+- minio
+
+patches:
+- path: patches/deployment.mimir-distributor.yaml
+- path: patches/deployment.mimir-proxy.yaml
+- path: patches/deployment.mimir-querier.yaml
+- path: patches/deployment.mimir-query-frontend.yaml
+- path: patches/deployment.mimir-query-scheduler.yaml
+- path: patches/horizontal_pod_autoscaler.mimir-distributor.yaml
+- path: patches/horizontal_pod_autoscaler.mimir-proxy.yaml
+- path: patches/horizontal_pod_autoscaler.mimir-querier.yaml
+- path: patches/horizontal_pod_autoscaler.mimir-query-frontend.yaml
+- path: patches/horizontal_pod_autoscaler.mimir-query-scheduler.yaml
+- path: patches/pod_disruption_budget.mimir-alertmanager.yaml
+- path: patches/pod_disruption_budget.mimir-distributor.yaml
+- path: patches/pod_disruption_budget.mimir-ingester.yaml
+- path: patches/pod_disruption_budget.mimir-proxy.yaml
+- path: patches/pod_disruption_budget.mimir-querier.yaml
+- path: patches/pod_disruption_budget.mimir-query-frontend.yaml
+- path: patches/pod_disruption_budget.mimir-query-scheduler.yaml
+- path: patches/pod_disruption_budget.mimir-store-gateway.yaml
+- path: patches/pod_disruption_budget.mimir-ruler.yaml
+- path: patches/service.mimir-distributor.yaml
+- path: patches/service.mimir-proxy.yaml
+- path: patches/service.mimir-query-frontend.yaml
+- path: patches/service.mimir-ruler.yaml
+- path: patches/stateful_set.mimir-alertmanager.yaml
+- path: patches/stateful_set.mimir-compactor.yaml
+- path: patches/stateful_set.mimir-ingester.yaml
+- path: patches/stateful_set.mimir-ruler.yaml
+- path: patches/stateful_set.mimir-store-gateway.yaml
+
+replacements:
+- source:
+    fieldPath: spec.replicas
+    kind: StatefulSet
+    name: mimir-alertmanager
+  targets:
+  - fieldPaths:
+    - spec.template.spec.containers.[name=alertmanager].env.[name=REPLICATION_FACTOR].value
+    select:
+      kind: StatefulSet
+      name: mimir-alertmanager
+
+configMapGenerator:
+- files:
+  - files/mimir.yaml
+  name: mimir
+  options:
+    immutable: true
+images:
+- digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+  name: minio/mc
+  newName: ghcr.io/kaidotio/hippocampus/mirror/minio/mc

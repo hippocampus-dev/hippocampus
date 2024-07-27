@@ -1,0 +1,46 @@
+name: Test/hippocampus
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/40_hippocampus.yaml"
+      - "packages/**"
+      - "Cargo.lock"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-hippocampus-packages-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-hippocampus-packages-
+      - uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-hippocampus-${{ hashFiles('packages/**') }}
+          restore-keys: |
+            ${{ runner.os }}-hippocampus-
+      - uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-hippocampus
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: |
+          sudo apt-get update -y
+          sudo apt-get upgrade -y
+          sudo apt-get install -y --no-install-recommends protobuf-compiler
+      - run: cargo test

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cortex-bot
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: cortex-bot
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+        sysctls:
+          - name: net.ipv4.ip_local_port_range
+            value: "10000 65535"
+      containers:
+        - name: cortex-bot
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/cortex-bot
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: warning
+            - name: WEB_CONCURRENCY
+              value: "1" # opentelemetry does not support multiprocessing
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:4317
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "1.0"
+            - name: OTEL_BSP_SCHEDULE_DELAY
+              value: "5000"
+            - name: OTEL_BSP_EXPORT_TIMEOUT
+              value: "30000"
+            - name: OTEL_BSP_MAX_QUEUE_SIZE
+              value: "2048"
+            - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+              value: "512"
+          volumeMounts:
+            - name: matplotlib-config
+              mountPath: /home/nonroot/.config/matplotlib
+            - name: fontconfig-cache
+              mountPath: /home/nonroot/.cache/fontconfig
+            - name: huggingface-cache
+              mountPath: /home/nonroot/.cache/huggingface
+            - name: matplotlib-cache
+              mountPath: /home/nonroot/.cache/matplotlib
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: matplotlib-config
+          emptyDir:
+            medium: Memory
+        - name: fontconfig-cache
+          emptyDir:
+            medium: Memory
+        - name: huggingface-cache
+          emptyDir:
+            medium: Memory
+        - name: matplotlib-cache
+          emptyDir:
+            medium: Memory
+        - name: tmp
+          emptyDir:
+            medium: Memory

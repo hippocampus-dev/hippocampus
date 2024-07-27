@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: tempo
+
+resources:
+- ../../base
+- job.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- memcached
+- minio
+
+patches:
+- path: patches/deployment.tempo-distributor.yaml
+- path: patches/deployment.tempo-metrics-generator.yaml
+- path: patches/deployment.tempo-querier.yaml
+- path: patches/deployment.tempo-query-frontend.yaml
+- path: patches/horizontal_pod_autoscaler.tempo-distributor.yaml
+- path: patches/horizontal_pod_autoscaler.tempo-metrics-generator.yaml
+- path: patches/horizontal_pod_autoscaler.tempo-querier.yaml
+- path: patches/horizontal_pod_autoscaler.tempo-query-frontend.yaml
+- path: patches/pod_disruption_budget.tempo-distributor.yaml
+- path: patches/pod_disruption_budget.tempo-metrics-generator.yaml
+- path: patches/pod_disruption_budget.tempo-ingester.yaml
+- path: patches/pod_disruption_budget.tempo-querier.yaml
+- path: patches/pod_disruption_budget.tempo-query-frontend.yaml
+- path: patches/service.tempo-distributor.yaml
+- path: patches/service.tempo-query-frontend.yaml
+- path: patches/stateful_set.tempo-compactor.yaml
+- path: patches/stateful_set.tempo-ingester.yaml
+
+configMapGenerator:
+- files:
+  - files/tempo.yaml
+  name: tempo
+  options:
+    immutable: true
+images:
+- digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+  name: minio/mc
+  newName: ghcr.io/kaidotio/hippocampus/mirror/minio/mc

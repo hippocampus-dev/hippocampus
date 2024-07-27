@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "playgpt"
+version = "0.1.0"
+description = ""
+authors = ["Kai Aihara <kaidotio@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11,<3.12"
+playwright = "^1.32.1"
+asyncio = "^3.4.3"
+fastapi = "^0.100.0"
+uvicorn = "^0.22.0"
+tiktoken = "^0.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

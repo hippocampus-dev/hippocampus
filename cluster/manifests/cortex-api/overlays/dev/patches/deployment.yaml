@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cortex-api
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 256Mi # Use proxy-wasm
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 256Mi # Use proxy-wasm
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8083"
+        prometheus.io/path: /metrics
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-api
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-api
+      containers:
+        - name: cortex-api
+          envFrom:
+            - secretRef:
+                name: cortex-api
+          env:
+            - name: REDIS_HOST
+              value: 127.0.0.1
+            - name: REDIS_PORT
+              value: "6379"
+            - name: EMBEDDING_RETRIEVAL_ENDPOINT
+              value: http://embedding-retrieval.embedding-retrieval.svc.cluster.local:8080
+          resources:
+            requests:
+              cpu: 5m
+        - name: redis-proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/redis-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --local-address=127.0.0.1:6379
+            - --monitor-address=127.0.0.1:8082
+            - --remote-address=cortex-api-redis-haproxy.cortex-api.svc.cluster.local:6379
+            - --reader-routing=true
+            - --reader-remote-address=cortex-api-redis.cortex-api.svc.cluster.local:6379
+          resources:
+            requests:
+              cpu: 5m
+        - name: exporter-merger
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: quay.io/rebuy/exporter-merger
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MERGER_PORT
+              value: "8083"
+            - name: MERGER_URLS
+              value: http://127.0.0.1:8080/metrics http://127.0.0.1:8082/metrics

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment1
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: my-deployment1
+  template:
+    metadata:
+      labels:
+        <<: *labels
+      annotations:
+        exactly-one-pod-hook.kaidotio.github.io/exactly-one-pod: "true"
+        exactly-one-pod-hook.kaidotio.github.io/key: "my-deployment"
+        exactly-one-pod-hook.kaidotio.github.io/expiration: "86400"
+    spec:
+      containers:
+        - name: my-container
+          image: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment2
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: my-deployment2
+  template:
+    metadata:
+      labels:
+        <<: *labels
+      annotations:
+        exactly-one-pod-hook.kaidotio.github.io/exactly-one-pod: "true"
+        exactly-one-pod-hook.kaidotio.github.io/key: "my-deployment"
+        exactly-one-pod-hook.kaidotio.github.io/expiration: "86400"
+    spec:
+      containers:
+        - name: my-container
+          image: nginx

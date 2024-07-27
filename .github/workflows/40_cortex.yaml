@@ -1,0 +1,38 @@
+name: Test/cortex
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/40_cortex.yaml"
+      - "cluster/applications/packages/cortex/**"
+      - "!cluster/applications/packages/cortex/manifests/**"
+      - "!cluster/applications/packages/cortex/patches/**"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/workflows/bin/cleanup.sh
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-cortex-${{ hashFiles('cluster/applications/packages/cortex/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cortex-
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - run: |
+          pip install --upgrade poetry --break-system-packages
+          poetry install
+          poetry run -- python -m unittest discover -s tests
+        working-directory: cluster/applications/packages/cortex

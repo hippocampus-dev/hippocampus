@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-problem-detector
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: node-problem-detector
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-node-critical
+      automountServiceAccountToken: true
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: node-problem-detector
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry.k8s.io/node-problem-detector/node-problem-detector
+          imagePullPolicy: IfNotPresent
+          args:
+            - --logtostderr
+            - --enable-k8s-exporter=true
+            - --prometheus-address=0.0.0.0
+            - --prometheus-port=20257
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: log
+              mountPath: /var/log
+              readOnly: true
+            - name: kmsg
+              mountPath: /dev/kmsg
+              readOnly: true
+            # Make sure node problem detector is in the same timezone
+            # with the host.
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: node-problem-detector
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: log
+          # Config `log` to your system log directory
+          hostPath:
+            path: /var/log/
+        - name: kmsg
+          hostPath:
+            path: /dev/kmsg
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+        - name: node-problem-detector
+          configMap:
+            name: node-problem-detector

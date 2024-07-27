@@ -1,0 +1,48 @@
+{
+  "productName": "taurin",
+  "version": "0.1.0",
+  "identifier": "kaidotio.github.io",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "taurin",
+        "width": 1000,
+        "center": true,
+        "maximizable": false,
+        "minimizable": false,
+        "closable": false,
+        "hiddenTitle": true,
+        "skipTaskbar": true,
+        "decorations": false,
+        "focus": true,
+        "alwaysOnTop": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon16.png",
+      "icons/icon32.png",
+      "icons/icon48.png",
+      "icons/icon128.png",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM0NTk5RDYzQjFDNUQzMDQKUldRRTA4V3hZNTFaeEduTCtzcTJ4SjJFZTV2TmJPNDAveXA0WitzNkwybFJWcWVkK21CSFM2bUEK",
+      "endpoints": [
+        "https://github.com/hippocampus-dev/hippocampus/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

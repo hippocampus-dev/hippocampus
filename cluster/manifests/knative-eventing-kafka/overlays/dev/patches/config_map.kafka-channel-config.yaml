@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-channel-config
+  namespace: knative-eventing
+data:
+  bootstrap.servers: "eventing-kafka-bootstrap:9092"

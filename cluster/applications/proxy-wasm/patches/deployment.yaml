@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-wasm
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: server
+          image: ghcr.io/kaidotio/hippocampus/skaffold
+          ports:
+            - name: http-base
+              containerPort: 8081
+              protocol: TCP
+        - name: httpbin
+          image: kennethreitz/httpbin:latest

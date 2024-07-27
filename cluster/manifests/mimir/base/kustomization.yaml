@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/nginx.conf
+  name: mimir-proxy
+  options:
+    immutable: true
+- files:
+  - files/system.alerts.rules
+  name: system.alerts.rules
+  options:
+    immutable: true
+- files:
+  - files/record.rules
+  name: record.rules
+  options:
+    immutable: true
+- files:
+  - files/kube-system/cilium-operator.alerts.rules
+  name: cilium-operator.alerts.rules
+  options:
+    immutable: true
+
+images:
+- digest: sha256:f30c53b46b0887ff05cde367e053b8709f7fca41e122ea9d47c8e07736035a51
+  name: grafana/mimir
+  newName: ghcr.io/kaidotio/hippocampus/mirror/grafana/mimir
+- digest: sha256:4669f6671aca20a34c3dfcd017e84fb3cae40788ea664866eaea698e3dfe241c
+  name: nginx
+  newName: ghcr.io/kaidotio/hippocampus/mirror/nginx

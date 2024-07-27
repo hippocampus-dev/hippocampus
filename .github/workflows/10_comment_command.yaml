@@ -1,0 +1,30 @@
+name: Comment command
+on:
+  issue_comment:
+    types:
+      - created
+      - edited
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REPOSITORY: ${{ github.repository }}
+  NUMBER: ${{ github.event.issue.number }}
+  BODY: ${{ github.event.comment.body }}
+  PULL_REQUEST_EVENT: ${{ toJSON(github.event.issue.pull_request) }}
+  REPOSITORY_EVENT: ${{ toJSON(github.event.repository) }}
+jobs:
+  comment:
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    env:
+      MODEL: gpt-4o
+    if: github.event.issue.state == 'open'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: bash .github/workflows/10_comment_command/main.sh

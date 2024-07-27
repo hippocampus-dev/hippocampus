@@ -1,0 +1,10 @@
+[user]
+  name = Kai Aihara
+  email = kaidotio@gmail.com
+
+[core]
+  excludesfile = /home/kai/.gitignore
+  autocrlf = input
+
+[credential "https://source.developers.google.com"]
+  helper = gcloud.sh

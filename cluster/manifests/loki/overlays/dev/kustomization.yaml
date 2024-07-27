@@ -1,0 +1,55 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: loki
+
+resources:
+- ../../base
+- job.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- memcached
+- minio
+
+patches:
+- path: patches/deployment.loki-distributor.yaml
+- path: patches/deployment.loki-proxy.yaml
+- path: patches/deployment.loki-querier.yaml
+- path: patches/deployment.loki-query-frontend.yaml
+- path: patches/deployment.loki-query-scheduler.yaml
+- path: patches/horizontal_pod_autoscaler.loki-distributor.yaml
+- path: patches/horizontal_pod_autoscaler.loki-proxy.yaml
+- path: patches/horizontal_pod_autoscaler.loki-querier.yaml
+- path: patches/horizontal_pod_autoscaler.loki-query-frontend.yaml
+- path: patches/horizontal_pod_autoscaler.loki-query-scheduler.yaml
+- path: patches/pod_disruption_budget.loki-distributor.yaml
+- path: patches/pod_disruption_budget.loki-index-gateway.yaml
+- path: patches/pod_disruption_budget.loki-ingester.yaml
+- path: patches/pod_disruption_budget.loki-proxy.yaml
+- path: patches/pod_disruption_budget.loki-querier.yaml
+- path: patches/pod_disruption_budget.loki-query-frontend.yaml
+- path: patches/pod_disruption_budget.loki-query-scheduler.yaml
+- path: patches/pod_disruption_budget.loki-ruler.yaml
+- path: patches/service.loki-distributor.yaml
+- path: patches/service.loki-proxy.yaml
+- path: patches/service.loki-querier.yaml
+- path: patches/service.loki-query-frontend.yaml
+- path: patches/service.loki-ruler.yaml
+- path: patches/stateful_set.loki-compactor.yaml
+- path: patches/stateful_set.loki-index-gateway.yaml
+- path: patches/stateful_set.loki-ingester.yaml
+- path: patches/stateful_set.loki-ruler.yaml
+
+configMapGenerator:
+- files:
+  - files/loki.yaml
+  name: loki
+  options:
+    immutable: true
+images:
+- digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+  name: minio/mc
+  newName: ghcr.io/kaidotio/hippocampus/mirror/minio/mc

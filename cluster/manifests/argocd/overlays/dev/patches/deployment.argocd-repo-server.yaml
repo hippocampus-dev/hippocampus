@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 128Mi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8084"
+        prometheus.io/path: /metrics
+    spec:
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: argocd-repo-server
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: argocd-repo-server
+      initContainers:
+        - name: build-custom-tools
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            # https://istio.io/latest/docs/setup/additional-setup/cni/#compatibility-with-application-init-containers
+            runAsUser: 1337
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: golang
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              set -e
+              
+              git clone https://github.com/kubernetes-sigs/kustomize.git -b kustomize/v5.0.3 --single-branch --depth=1 /tmp/kustomize
+              cp -r /mnt/secretsfromvault-src /tmp/kustomize/plugin/secretsfromvault
+              cd /tmp/kustomize/plugin/secretsfromvault
+              go work use .
+              mkdir -p /mnt/plugin/secretsfromvault
+              go build -buildmode plugin -o /mnt/plugin/secretsfromvault/SecretsFromVault.so
+              cd /tmp/kustomize
+              make kustomize
+              cp $(GOBIN)/kustomize /mnt/custom-tools/kustomize
+          env:
+            - name: GOPATH
+              value: /tmp/go
+            - name: GOBIN
+              value: /tmp/go/bin
+            - name: GOCACHE
+              value: /tmp/.cache
+            - name: GOTMPDIR
+              value: /tmp
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: custom-tools
+              mountPath: /mnt/custom-tools
+            - name: plugin
+              mountPath: /mnt/plugin
+            - name: secretsfromvault-src
+              mountPath: /mnt/secretsfromvault-src
+              readOnly: true
+      containers:
+        - name: argocd-repo-server
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            # [openssl depends on /etc/passwd](https://github.com/openssh/openssh-portable/blob/V_9_6_P1/ssh.c#L710)
+            # but containerd does not write an entry to /etc/passwd [such as cri-o](https://github.com/cri-o/cri-o/blob/v1.29.1/server/container_create.go#L240)
+            runAsUser: 999
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: VAULT_ADDR
+              value: http://vault.vault.svc.cluster.local:8200
+            - name: XDG_CONFIG_HOME
+              value: /home/argocd
+          volumeMounts:
+            - name: custom-tools
+              mountPath: /mnt/custom-tools
+              readOnly: true
+            - name: plugin
+              mountPath: /home/argocd/kustomize/plugin/kustomize.kaidotio.github.io/v1
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: custom-tools
+          emptyDir:
+            medium: Memory
+        - name: plugin
+          emptyDir:
+            medium: Memory
+        - name: secretsfromvault-src
+          configMap:
+            name: secretsfromvault-src

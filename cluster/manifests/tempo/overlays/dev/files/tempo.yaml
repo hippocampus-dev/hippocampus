@@ -1,0 +1,132 @@
+compactor:
+  compaction:
+    block_retention: 24h
+    retention_concurrency: 10
+  ring:
+    kvstore:
+      store: memberlist
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc: {}
+
+ingester:
+  lifecycler:
+    ring:
+      replication_factor: 1
+
+memberlist:
+  abort_if_cluster_join_fails: false
+  join_members:
+    - tempo-gossip-ring.tempo.svc.cluster.local.
+
+querier:
+  frontend_worker:
+    frontend_address: tempo-query-frontend-discovery.tempo.svc.cluster.local.:9095
+  max_concurrent_queries: 20
+  search:
+    query_timeout: &query_timeout 30s
+  trace_by_id:
+    query_timeout: 10s
+
+query_frontend:
+  max_outstanding_per_tenant: 2000
+  search:
+    concurrent_jobs: 1000
+  trace_by_id:
+    query_shards: 50
+    concurrent_shards: 0
+
+metrics_generator:
+  metrics_ingestion_time_range_slack: 30s
+  registry:
+    collection_interval: 15s
+    # metrics-generator stores metrics in memory
+    stale_duration: 15m
+  ring:
+    kvstore:
+      store: memberlist
+  storage:
+    path: /var/tempo/wal
+    remote_write:
+      - url: http://mimir-distributor.mimir.svc.cluster.local.:3100/api/v1/push
+        send_exemplars: true
+    remote_write_flush_deadline: 15s # default terminationGracePeriodSeconds is 30s
+  processor:
+    service_graphs:
+      max_items: 10000
+      wait: 10s
+      workers: 10
+      histogram_buckets:
+        - 0.1
+        - 0.2
+        - 0.4
+        - 0.8
+        - 1.6
+        - 3.2
+        - 6.4
+        - 12.8
+    span_metrics:
+      histogram_buckets:
+        - 0.002
+        - 0.004
+        - 0.008
+        - 0.016
+        - 0.032
+        - 0.064
+        - 0.128
+        - 0.256
+        - 0.512
+        - 1.02
+        - 2.05
+        - 4.1
+
+server:
+  grpc_server_max_recv_msg_size: 4194304
+  grpc_server_max_send_msg_size: 4194304
+  http_server_read_timeout: *query_timeout
+  http_server_write_timeout: *query_timeout
+  http_listen_port: 3100
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      endpoint: tempo-minio.tempo.svc.cluster.local:9000
+      bucket: tempo
+      access_key: minio
+      secret_key: miniominio
+      insecure: true
+    cache: memcached
+    cache_max_block_age: 48h
+    memcached:
+      addresses: tempo-mcrouter.tempo.svc.cluster.local.:5000
+      timeout: 100ms
+      consistent_hash: false
+    pool:
+      max_workers: 400
+      queue_depth: 20000
+    wal:
+      path: /var/tempo/wal
+    block:
+      version: vParquet2
+    search:
+      cache_control:
+        footer: true
+
+overrides:
+  defaults:
+    ingestion:
+      # RATE_LIMITED
+      burst_size_bytes: 20000000
+      rate_limit_bytes: 15000000
+    metrics_generator:
+      processors:
+        - service-graphs
+        - span-metrics
+        #- local-blocks
+
+usage_report:
+  reporting_enabled: false

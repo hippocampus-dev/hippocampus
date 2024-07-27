@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-compactor
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/component: compactor
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-distributor
+spec:
+  # istio-proxy supports client-side load balancing
+  #clusterIP: None
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/component: distributor
+  ports:
+    - name: grpc
+      port: 4317
+      protocol: TCP
+      targetPort: grpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-gossip-ring
+spec:
+  publishNotReadyAddresses: true
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/part-of: memberlist
+  ports:
+    - name: tcp
+      port: 7946
+      protocol: TCP
+      targetPort: memberlist
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-ingester
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/component: ingester
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-query-frontend-discovery
+spec:
+  publishNotReadyAddresses: true
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/component: query-frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-query-frontend
+spec:
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/component: query-frontend
+  ports:
+    - name: http
+      port: 3100
+      protocol: TCP
+      targetPort: http

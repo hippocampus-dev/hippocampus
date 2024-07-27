@@ -1,0 +1,78 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: whisper-worker-redis-haproxy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: redis-haproxy
+      variant: whisper-worker
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: whisper-worker
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: whisper-worker
+        - namespaceSelector:
+            matchLabels:
+              name: whisper-worker
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: minio
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: whisper-worker-minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+      variant: whisper-worker
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: whisper-worker
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: whisper-worker
+        - namespaceSelector:
+            matchLabels:
+              name: whisper-worker
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: whisper-worker-mc
+      ports:
+        - protocol: TCP
+          port: 9000

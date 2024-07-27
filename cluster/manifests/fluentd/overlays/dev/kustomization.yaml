@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: fluentd
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/daemon_set.fluentd-forward.yaml
+  - path: patches/deployment.fluentd-aggregator-proxy.yaml
+  - path: patches/horizontal_pod_autoscaler.fluentd-aggregator.yaml
+  - path: patches/horizontal_pod_autoscaler.fluentd-aggregator-proxy.yaml
+  - path: patches/pod_disruption_budget.fluentd-aggregator.yaml
+  - path: patches/pod_disruption_budget.fluentd-aggregator-proxy.yaml
+  - path: patches/pod_disruption_budget.fluentd-processor.yaml
+  - path: patches/service.fluentd-aggregator.yaml
+  - path: patches/service.fluentd-aggregator-proxy.yaml
+  - path: patches/stateful_set.fluentd-aggregator.yaml
+
+configMapGenerator:
+  - files:
+      - files/systemd.conf
+    name: fluentd-forward
+    behavior: merge

@@ -1,0 +1,14 @@
+name: Test/github-actions-runner-controller
+on:
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  id-token: write
+jobs:
+  test:
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    steps:
+      - run: |
+          ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_ACTION_PATH}" | jq -r .value)
+          curl -fsSL -H "Authorization: Bearer ${ID_TOKEN}" httpbin-istio.httpbin.svc.cluster.local:8000/ip

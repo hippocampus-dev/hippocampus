@@ -1,0 +1,54 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: poddisruptionbudgets.validating.kaidotio.github.io
+spec:
+  policyName: poddisruptionbudgets.validating.kaidotio.github.io
+  validationActions:
+    - Deny
+    - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: pods.validating.kaidotio.github.io
+spec:
+  policyName: pods.validating.kaidotio.github.io
+  validationActions:
+    - Deny
+    - Audit
+  matchResources:
+    namespaceSelector:
+      matchExpressions:
+        - key: name
+          operator: NotIn
+          values:
+            - istio-system
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: services.validating.kaidotio.github.io
+spec:
+  policyName: services.validating.kaidotio.github.io
+  validationActions:
+    - Deny
+    - Audit
+  matchResources:
+    namespaceSelector:
+      matchExpressions:
+        - key: name
+          operator: NotIn
+          values:
+            - kube-system
+            - argocd
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: daemonsets.validating.kaidotio.github.io
+spec:
+  policyName: daemonsets.validating.kaidotio.github.io
+  validationActions:
+    - Deny
+    - Audit

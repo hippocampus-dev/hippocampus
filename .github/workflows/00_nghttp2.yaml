@@ -1,0 +1,81 @@
+name: nghttp2
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/00_nghttp2.yaml"
+      - "cluster/applications/nghttp2/**"
+      - "!cluster/applications/nghttp2/manifests/**"
+      - "!cluster/applications/nghttp2/patches/**"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  publish:
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    env:
+      IMAGE: nghttp2
+      KUSTOMIZATION: ""
+    steps:
+      - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/docker-build
+          key: ${{ runner.os }}-nghttp2-docker-${{ hashFiles('cluster/applications/nghttp2/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-nghttp2-docker-
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - run: |
+          IMAGE_PATH=${GITHUB_REPOSITORY}/${IMAGE}
+          GHCR_IMAGE=ghcr.io/${IMAGE_PATH}
+          TAG=${GITHUB_REF##*/}
+          opt=''
+          if [ -d /home/runner/.cache/docker-build ]; then
+            opt='--cache-from type=local,src=/home/runner/.cache/docker-build'
+          else
+            opt='--cache-from type=registry,ref=$GHCR_IMAGE:main'
+          fi
+          (
+            cd cluster/applications/nghttp2
+
+            docker buildx build --output type=docker,name=$GHCR_IMAGE:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build .
+          )
+          DIGEST=$(docker push $GHCR_IMAGE:$TAG | grep -Eo 'sha256:[a-f0-9]{64}')
+
+          if [ -n "$KUSTOMIZATION" ]; then
+            git config --global user.email "kaidotio@gmail.com"
+            git config --global user.name "kaidotio"
+            branch=${IMAGE}
+            git checkout -b ${branch}
+
+            IFS_BAK=$IFS
+            IFS=,
+            targets=($KUSTOMIZATION)
+            IFS=$IFS_BAK
+            for target in "${targets[@]}"; do
+              (
+                cd ${target}
+                kustomize edit set image ${GHCR_IMAGE}=${GHCR_IMAGE}@${DIGEST}
+              )
+            done
+
+            git add ${targets[*]}
+            if git commit -m "Update ${IMAGE}"; then
+              git push -f origin ${branch}
+              if [ $(gh pr list --head ${branch} --json id | jq '. | length') -eq 0 ]; then
+                gh pr create --title "Update ${IMAGE}" --body "${GHCR_IMAGE}@${DIGEST}"
+              fi
+            fi
+          fi

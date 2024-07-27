@@ -1,0 +1,37 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: cluster-local-gateway
+spec:
+  selector:
+    istio: cluster-local-gateway
+  servers:
+    - hosts:
+        - "*"
+      port:
+        number: 80
+        name: http
+        protocol: HTTP
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-egressgateway
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+    - hosts:
+        - "*"
+      port:
+        number: 80
+        name: http
+        protocol: HTTP
+    - hosts:
+        - "*"
+      port:
+        number: 443
+        name: tls
+        protocol: TLS
+      tls:
+        mode: PASSTHROUGH

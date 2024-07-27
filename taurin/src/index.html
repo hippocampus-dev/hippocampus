@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>taurin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.2/css/all.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+    import {Router, Link} from "https://cdn.skypack.dev/preact-router@4.1.2";
+    import {h, render} from "https://cdn.skypack.dev/preact@10.22.1";
+    import {useState, useEffect, useRef} from "https://cdn.skypack.dev/preact@10.22.1/hooks";
+
+    const {getVersion} = window.__TAURI__.app;
+    const {getCurrent, PhysicalSize} = window.__TAURI__.window;
+    const {Store} = window.__TAURI__.store;
+
+    const store = new Store("settings.bin");
+
+    const lines = [
+        "value1",
+        "value2",
+        "value3",
+        "value4",
+        "value5",
+        "value6",
+        "value7",
+    ];
+
+    console.log(window.__TAURI__);
+
+    const App = ({}) => {
+        const [query, setQuery] = useState("");
+        const ref = useRef(null);
+
+        useEffect(() => {
+            const f = async () => {
+                const current = getCurrent();
+                await current.setSize(new PhysicalSize(ref.current.offsetWidth, ref.current.offsetHeight));
+            };
+            f();
+        }, [query]);
+
+        return (
+            h("div", {ref: ref, class: "flex flex-col items-center bg-gray-100 p-6 space-y-4 h-full"}, [
+                h("div", {class: "flex items-center w-full lg:w-1/2 mt-4"}, [
+                    h("label", {for: "search-box", class: "sr-only"}, "Search for given file"),
+                    h("input", {
+                        type: "text",
+                        value: query,
+                        placeholder: "Search for given file",
+                        id: "search-box",
+                        onInput: (event) => setQuery(event.target.value),
+                        autofocus: true,
+                        class: "w-full rounded-md border-4 border-orange-600 focus:ring-4 focus:ring-orange-600 p-4",
+                    }),
+                    h(Link, {href: "/settings", class: "ml-4 text-gray-600 hover:text-gray-900", "data-native": ""}, [
+                        h("i", {class: "fa fa-cog", "aria-hidden": "true"})
+                    ]),
+                ]),
+                h("table", {class: "min-w-full"}, [
+                    h("tbody", {class: "bg-white divide-y divide-orange-600"}, (() => {
+                        if (query === "") {
+                            return [];
+                        }
+                        const filteredLines = lines.filter((line) => line.includes(query));
+                        return filteredLines.map((line) => h("tr", {class: "hover:bg-gray-100"}, [
+                            h("td", {class: "px-6 py-4 whitespace-nowrap"}, line),
+                        ]));
+                    })()),
+                ]),
+            ])
+        );
+    }
+
+    const SwitchSetting = ({label, checked, onChange}) => {
+        return (
+            h("label", {class: "text-lg flex justify-between items-center"},
+                label,
+                h("input", {
+                    type: "checkbox",
+                    onChange: () => {
+                        if (onChange) {
+                            onChange(!checked);
+                        }
+                    },
+                    checked: checked,
+                    class: "sr-only",
+                }),
+                h("div", {class: `w-10 h-6 rounded-full transition-colors ${checked ? "bg-blue-600" : "bg-gray-300"} cursor-pointer`}, [
+                    h("div", {
+                        class: `w-5 h-5 bg-white rounded-full transform transition-transform ${
+                            checked ? "translate-x-4" : ""
+                        }`,
+                    }),
+                ]),
+            )
+        );
+    };
+
+    const InputSetting = ({label, value, setValue}) => {
+        const [currentValue, setCurrentValue] = useState(value);
+
+        useEffect(() => {
+            setCurrentValue(value);
+        }, [value]);
+
+        return (
+            h("div", {class: "flex justify-between items-center"}, [
+                h("label", {class: "text-lg flex justify-between items-center w-full mr-4"},
+                    label,
+                    h("input", {
+                        type: "text",
+                        value: currentValue,
+                        onInput: (event) => setCurrentValue(event.target.value),
+                        class: "rounded-md border-4 border-orange-600 focus:ring-4 focus:ring-orange-600 p-4 ml-auto"
+                    }),
+                ),
+                h("button", {
+                    onClick: () => setValue(currentValue),
+                    disabled: currentValue === value,
+                    class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                }, "Save")
+            ])
+        );
+    }
+
+    const Settings = ({}) => {
+        const [version, setVersion] = useState(false);
+        const [autoStart, setAutoStart] = useState(false);
+        const [autoUpdate, setAutoUpdate] = useState(false);
+        const [hotKey, setHotKey] = useState("alt+space");
+        const ref = useRef(null);
+
+        useEffect(() => {
+            store.get("Enable Auto Start").then((storedAutoStart) => {
+                if (storedAutoStart !== null) {
+                    setAutoStart(storedAutoStart);
+                }
+            });
+            store.get("Enable Auto Update").then((storedAutoUpdate) => {
+                if (storedAutoUpdate !== null) {
+                    setAutoUpdate(storedAutoUpdate);
+                }
+            });
+            store.get("Hot-key").then((storedHotKey) => {
+                if (storedHotKey !== null) {
+                    setHotKey(storedHotKey);
+                }
+            });
+        }, []);
+
+        useEffect(() => {
+            const f = async () => {
+                const current = getCurrent();
+                await current.setSize(new PhysicalSize(ref.current.offsetWidth, ref.current.offsetHeight));
+
+                const version = await getVersion();
+                setVersion(version);
+            };
+            f();
+        }, []);
+
+        useEffect(() => {
+            store.set("Enable Auto Start", autoStart);
+            store.save();
+        }, [autoStart]);
+
+        useEffect(() => {
+            store.set("Enable Auto Update", autoUpdate);
+            store.save();
+        }, [autoUpdate]);
+
+        useEffect(() => {
+            store.set("Hot-key", hotKey);
+            store.save();
+        }, [hotKey]);
+
+        return (
+            h("div", {ref: ref, class: "flex flex-col items-center bg-gray-100 p-6 space-y-4 h-full"}, [
+                h("div", {class: "flex items-center w-full lg:w-1/2 mt-4"}, [
+                    h(Link, {href: "/", class: "text-gray-600 hover:text-gray-900", "data-native": ""}, [
+                        h("i", {class: "fa fa-arrow-left", "aria-hidden": "true"})
+                    ]),
+                    h("span", {class: "ml-auto text-gray-600"}, version),
+                ]),
+                h("div", {class: "w-full lg:w-1/2 mt-4"}, [
+                    h(SwitchSetting, {
+                        label: "Enable Auto Start",
+                        checked: autoStart,
+                        onChange: (value) => setAutoStart(value),
+                    }),
+                ]),
+                h("div", {class: "w-full lg:w-1/2 mt-4"}, [
+                    h(SwitchSetting, {
+                        label: "Enable Auto Update",
+                        checked: autoUpdate,
+                        onChange: (value) => setAutoUpdate(value),
+                    }),
+                ]),
+                h("div", {class: "w-full lg:w-1/2 mt-4"}, [
+                    h(InputSetting, {
+                        label: "Hot-key",
+                        value: hotKey,
+                        setValue: setHotKey,
+                    }),
+                ]),
+                h("button", {
+                    onClick: () => {
+                        setAutoStart(false);
+                        setHotKey("alt+space");
+                    },
+                    class: "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded",
+                }, "Reset to default"),
+            ])
+        );
+    }
+
+    const Main = ({}) => {
+        return (
+            h(Router, {}, [
+                h(App, {path: "/"}),
+                h(Settings, {path: "/settings"}),
+            ])
+        );
+    }
+
+    render(h(Main, {}), document.getElementById("app"));
+</script>
+</body>
+</html>

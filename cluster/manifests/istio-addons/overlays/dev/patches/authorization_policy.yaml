@@ -1,0 +1,18 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: istio-ingressgateway-ext-authz
+spec:
+  rules:
+    - to:
+        - operation:
+            hosts:
+              - argocd.minikube.127.0.0.1.nip.io
+              - cortex-api.minikube.127.0.0.1.nip.io
+              - hubble-ui.minikube.127.0.0.1.nip.io
+              - httpbin.minikube.127.0.0.1.nip.io
+              - httpbin-istio.minikube.127.0.0.1.nip.io
+              - grafana.minikube.127.0.0.1.nip.io
+              - notebook.minikube.127.0.0.1.nip.io
+              - bakery.minikube.127.0.0.1.nip.io
+              - prometheus.minikube.127.0.0.1.nip.io

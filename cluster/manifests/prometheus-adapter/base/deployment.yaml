@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-adapter
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: prometheus-adapter
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-cluster-critical
+      serviceAccountName: prometheus-adapter
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: gensecret
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: cfssl/cfssl
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              set -e
+              
+              cd /tmp && openssl req -x509 -sha256 -new -nodes -days 36500 -newkey rsa:2048 -keyout ca.key -out ca.crt -subj "/CN=ca" && echo "{\"signing\":{\"default\":{\"expiry\":\"43800h\",\"usages\":[\"signing\",\"key encipherment\"]}}}" > ca-config.json
+              mkdir -p output
+              touch output/apiserver.pem
+              touch output/apiserver-key.pem
+              echo "{\"CN\":\"custom-metrics-apiserver\",\"hosts\":[\"custom-metrics-apiserver.monitoring\",\"custom-metrics-apiserver.monitoring.svc\"],\"key\":{\"algo\":\"rsa\",\"size\":2048}}" | cfssl gencert -ca=ca.crt -ca-key=ca.key -config=ca-config.json - | cfssljson -bare output/apiserver
+              cat output/apiserver.pem > /var/run/serving-cert/serving.crt
+              cat output/apiserver-key.pem > /var/run/serving-cert/serving.key
+          volumeMounts:
+            - name: serving-cert
+              mountPath: /var/run/serving-cert
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: prometheus-adapter
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry.k8s.io/prometheus-adapter/prometheus-adapter
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https
+              containerPort: 6443
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "3"]
+          volumeMounts:
+            - name: prometheus-adapter
+              mountPath: /etc/adapter/
+              readOnly: true
+            - name: serving-cert
+              mountPath: /var/run/serving-cert
+              readOnly: true
+      volumes:
+        - name: prometheus-adapter
+          configMap:
+            name: prometheus-adapter
+        - name: serving-cert
+          emptyDir:
+            medium: Memory
+        - name: tmp
+          emptyDir:
+            medium: Memory

@@ -1,0 +1,60 @@
+plugins:
+  ephemeral-container-pods:
+    shortCut: Shift-E
+    description: Run Ephemeral Container
+    scopes:
+      - pods
+    command: kubectl
+    background: false
+    args:
+      - debug
+      - $NAME
+      - -it
+      - --profile=restricted
+      - --image=ghcr.io/kaidotio/hippocampus/ephemeral-container:main
+      - --image-pull-policy=Always
+      - -n=$NAMESPACE
+  ephemeral-container-containers:
+    shortCut: Shift-E
+    description: Run Ephemeral Container
+    scopes:
+      - containers
+    command: kubectl
+    background: false
+    args:
+      - debug
+      - $POD
+      - --target=$NAME
+      - -it
+      - --profile=restricted
+      - --image=ghcr.io/kaidotio/hippocampus/ephemeral-container:main
+      - --image-pull-policy=Always
+      - -n=$NAMESPACE
+  ephemeral-container-nodes:
+    shortCut: Shift-E
+    description: Run Ephemeral Container
+    scopes:
+      - nodes
+    command: kubectl
+    background: false
+    args:
+      - debug
+      - nodes/$NAME
+      - -it
+      - --profile=netadmin
+      - --image=ghcr.io/kaidotio/hippocampus/ephemeral-container:main
+      - --image-pull-policy=Always
+  deploy-debug-container:
+    shortCut: Shift-D
+    description: Deploy Debug Container
+    scopes:
+      - nodes
+    command: kubectl
+    background: false
+    args:
+      - run
+      - --rm
+      - $NAME
+      - --image=placerholder
+      - --overrides={"spec":{"nodeSelector":{"kubernetes.io/hostname":"$NAME"},"tolerations":[{"effect":"NoExecute","operator":"Exists"},{"effect":"NoSchedule","operator":"Exists"}],"containers":[{"name":"shell","image":"ghcr.io/kaidotio/hippocampus/ephemeral-container:main","imagePullPolicy":"Always","command":["bash"],"env":[{"name":"CONTAINER_RUNTIME_ENDPOINT","value":"unix:///run/containerd/containerd.sock"}],"stdin":true,"tty":true,"securityContext":{"privileged":true},"volumeMounts":[{"name":"tracefs","mountPath":"/sys/kernel/debug","readOnly":true},{"name":"procfs","mountPath":"/host/proc","readOnly":true},{"name":"containerd","mountPath":"/run/containerd/containerd.sock","readOnly":true}]}],"volumes":[{"name":"tracefs","hostPath":{"path":"/sys/kernel/debug"}},{"name":"procfs","hostPath":{"path":"/proc"}},{"name":"containerd","hostPath":{"path":"/run/containerd/containerd.sock"}}]}}
+      - -i
