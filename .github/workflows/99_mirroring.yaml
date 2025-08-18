@@ -26,7 +26,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/exactly-one-pod-hook/overlays/dev
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -39,7 +39,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -52,7 +52,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cortex-api/overlays/dev,cluster/manifests/cortex-bot/overlays/dev
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -65,7 +65,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -78,7 +78,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -91,7 +91,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -104,7 +104,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/memcached
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -117,7 +117,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/memcached
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -130,7 +130,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/memcached
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -143,7 +143,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/minio
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -156,7 +156,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/mimir/overlays/dev,cluster/manifests/loki/overlays/dev,cluster/manifests/tempo/overlays/dev,cluster/manifests/cortex-bot/overlays/dev,cluster/manifests/embedding-gateway/overlays/dev,cluster/manifests/whisper-worker/overlays/dev,cluster/manifests/assets/overlays/dev
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -169,7 +169,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/httpbin
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -182,7 +182,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/otel-agent/base,cluster/manifests/otel-collector/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -195,7 +195,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/oauth2-proxy/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -208,7 +208,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/grafana/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -221,7 +221,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/tempo/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -234,7 +234,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/loki/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -247,7 +247,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/mimir/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -260,7 +260,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/vault/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -273,7 +273,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/argocd/overlays/dev
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -286,7 +286,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/argocd/overlays/dev
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -299,7 +299,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/fluentd/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -312,7 +312,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/qdrant
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -325,7 +325,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cert-manager/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -338,7 +338,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cert-manager/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -351,7 +351,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cert-manager/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -364,7 +364,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/metrics-server/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -377,7 +377,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/metrics-server/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -390,7 +390,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/node-problem-detector/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -403,7 +403,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/kube-state-metrics/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -416,7 +416,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/node-exporter/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -429,7 +429,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/node-local-dns/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -442,7 +442,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/dns-autoscaler/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -455,7 +455,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/jupyterhub/overlays/dev
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -468,7 +468,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/prometheus/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -481,7 +481,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/fluentd/base,cluster/manifests/mimir/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -494,7 +494,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/additional-cadvisor/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -507,7 +507,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/prometheus-adapter/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -520,7 +520,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/prometheus-adapter/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -533,7 +533,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/github-actions-runner-controller/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -546,7 +546,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/github-actions-runner-controller/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh
@@ -559,7 +559,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/k6-operator/base
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/bin/mirror.sh

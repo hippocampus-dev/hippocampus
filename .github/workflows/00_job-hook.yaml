@@ -28,7 +28,7 @@ jobs:
       KUSTOMIZATION: cluster/applications/job-hook/manifests
     steps:
       - run: docker login ghcr.io -u $GITHUB_REPOSITORY_OWNER -p $GITHUB_TOKEN
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/cache@v4
         with:
           path: /home/runner/.cache/docker-build

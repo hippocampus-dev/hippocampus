@@ -59,7 +59,7 @@ jobs:
           sudo apt-get upgrade -y
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
         if: matrix.platform == 'ubuntu-22.04'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: |
           npm ci
         working-directory: taurin

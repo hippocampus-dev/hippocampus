@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: bash .github/workflows/bin/cleanup.sh
       - uses: actions/cache@v4
         with:

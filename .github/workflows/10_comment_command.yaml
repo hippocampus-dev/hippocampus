@@ -24,7 +24,7 @@ jobs:
       MODEL: gpt-4o
     if: github.event.issue.state == 'open'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: bash .github/workflows/10_comment_command/main.sh
