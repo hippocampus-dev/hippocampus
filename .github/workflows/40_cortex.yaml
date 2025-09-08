@@ -28,7 +28,7 @@ jobs:
           key: ${{ runner.os }}-cortex-${{ hashFiles('cluster/applications/packages/cortex/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-cortex-
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: 3.11
       - run: |
