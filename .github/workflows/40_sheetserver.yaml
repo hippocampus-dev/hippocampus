@@ -25,7 +25,7 @@ jobs:
           key: ${{ runner.os }}-sheetserver-${{ hashFiles('sheetserver/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-sheetserver-
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         id: setup_node_id
         with:
           node-version: lts/*
