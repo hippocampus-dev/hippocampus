@@ -25,7 +25,7 @@ jobs:
       IMAGE: cross/x86_64-unknown-linux-gnu
       KUSTOMIZATION: ""
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/cleanup.sh
       - uses: actions/cache@v4
         with:
@@ -87,7 +87,7 @@ jobs:
       IMAGE: cross/x86_64-unknown-linux-musl
       KUSTOMIZATION: ""
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/cache@v4
         with:
           path: /home/runner/.cache/docker-build

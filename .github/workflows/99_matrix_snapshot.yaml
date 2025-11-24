@@ -16,7 +16,7 @@ jobs:
     outputs:
       include: ${{ steps.load.outputs.include }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: load
         run: |
           INCLUDE='[]'
@@ -58,7 +58,7 @@ jobs:
     outputs:
       issue-url: ${{ steps.create-issue.outputs.issue-url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: create-issue
         run: |
           BODY=$(cat <<EOS
@@ -87,7 +87,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.load.outputs.include) }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v6
         with:
           name: ${{ matrix.artifactName }}

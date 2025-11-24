@@ -48,7 +48,7 @@ jobs:
       - run: |
           sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
         if: matrix.platform == 'ubuntu-24.04'
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: |
           npm ci
         working-directory: taurin

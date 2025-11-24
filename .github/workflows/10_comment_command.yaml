@@ -25,7 +25,7 @@ jobs:
       MODEL: gpt-5
     if: github.repository_owner == 'kaidotio'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - run: |

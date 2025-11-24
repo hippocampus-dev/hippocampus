@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 10
     runs-on: [self-hosted, github-actions-runner-controller]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: |
           if gh release download -p "armyknife_*_linux_amd64" -D bin; then
             mv bin/armyknife_*_linux_amd64 bin/armyknife

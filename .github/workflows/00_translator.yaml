@@ -24,7 +24,7 @@ jobs:
       IMAGE: translator
       KUSTOMIZATION: cluster/manifests/translator/base
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/cleanup.sh
       - uses: actions/cache@v4
         with:

@@ -34,7 +34,7 @@ jobs:
     runs-on: [self-hosted, github-actions-runner-controller]
     needs: snapshot
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v6
         with:
           name: ${{ needs.snapshot.outputs.artifactName }}

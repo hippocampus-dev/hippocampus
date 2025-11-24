@@ -29,7 +29,7 @@ jobs:
       GOPATH: /tmp/go
       GOBIN: /tmp/build-tools/bin
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: |
           go install sigs.k8s.io/kustomize/kustomize/v5@latest
       - run: |

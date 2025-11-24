@@ -16,7 +16,7 @@ jobs:
     outputs:
       include: ${{ steps.load.outputs.include }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: load
         run: |
           INCLUDE='[]'
@@ -55,7 +55,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.load.outputs.include) }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v6
         with:
           name: ${{ matrix.artifactName }}

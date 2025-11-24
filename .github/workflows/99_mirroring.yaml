@@ -27,7 +27,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cilium-etcd/base,cluster/manifests/utilities/etcd
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   redis:
     if: github.repository_owner == 'kaidotio'
@@ -39,7 +39,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/exactly-one-pod-hook/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   redis-stack:
     if: github.repository_owner == 'kaidotio'
@@ -51,7 +51,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   exporter-merger:
     if: github.repository_owner == 'kaidotio'
@@ -63,7 +63,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cortex-api/overlays/dev,cluster/manifests/cortex-bot/overlays/dev,cluster/manifests/embedding-retrieval/overlays/dev,cluster/manifests/translator/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   redis-exporter:
     if: github.repository_owner == 'kaidotio'
@@ -75,7 +75,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   haproxy:
     if: github.repository_owner == 'kaidotio'
@@ -87,7 +87,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   haproxy-exporter:
     if: github.repository_owner == 'kaidotio'
@@ -99,7 +99,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/redis
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   atlas-operator:
     if: github.repository_owner == 'kaidotio'
@@ -111,7 +111,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/atlas-operator/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   blackbox-exporter:
     if: github.repository_owner == 'kaidotio'
@@ -123,7 +123,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/blackbox-exporter/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   tidb-operator:
     if: github.repository_owner == 'kaidotio'
@@ -135,7 +135,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/tidb-operator/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   tidb-backup-manager:
     if: github.repository_owner == 'kaidotio'
@@ -147,7 +147,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/tidb-operator/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   pd:
     if: github.repository_owner == 'kaidotio'
@@ -159,7 +159,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   tidb:
     if: github.repository_owner == 'kaidotio'
@@ -171,7 +171,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   tikv:
     if: github.repository_owner == 'kaidotio'
@@ -183,7 +183,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   ticdc:
     if: github.repository_owner == 'kaidotio'
@@ -195,7 +195,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/slack-logger/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   memcached:
     if: github.repository_owner == 'kaidotio'
@@ -207,7 +207,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/memcached
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   memcached-exporter:
     if: github.repository_owner == 'kaidotio'
@@ -219,7 +219,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/memcached
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   mcrouter:
     if: github.repository_owner == 'kaidotio'
@@ -231,7 +231,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/memcached
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   mcrouter-exporter:
     if: github.repository_owner == 'kaidotio'
@@ -243,7 +243,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/memcached
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   minio:
     if: github.repository_owner == 'kaidotio'
@@ -255,7 +255,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/minio
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   mc:
     if: github.repository_owner == 'kaidotio'
@@ -267,7 +267,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/mimir/overlays/dev,cluster/manifests/loki/overlays/dev,cluster/manifests/tempo/overlays/dev,cluster/manifests/pyroscope/overlays/dev,cluster/manifests/cortex-bot/overlays/dev,cluster/manifests/embedding-gateway/overlays/dev,cluster/manifests/whisper-worker/overlays/dev,cluster/manifests/assets/overlays/dev,cluster/manifests/http-kvs/overlays/dev,cluster/manifests/kube-crud-server/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   httpbin:
     if: github.repository_owner == 'kaidotio'
@@ -279,7 +279,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/httpbin
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   opentelemetry-collector:
     if: github.repository_owner == 'kaidotio'
@@ -291,7 +291,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/otel-agent/base,cluster/manifests/otel-collector/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   oauth2-proxy:
     if: github.repository_owner == 'kaidotio'
@@ -303,7 +303,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/oauth2-proxy/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   grafana:
     if: github.repository_owner == 'kaidotio'
@@ -315,7 +315,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/grafana/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   mcp-grafana:
     if: github.repository_owner == 'kaidotio'
@@ -327,7 +327,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/grafana/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   tempo:
     if: github.repository_owner == 'kaidotio'
@@ -339,7 +339,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/tempo/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   loki:
     if: github.repository_owner == 'kaidotio'
@@ -351,7 +351,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/loki/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   mimir:
     if: github.repository_owner == 'kaidotio'
@@ -363,7 +363,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/mimir/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   vault:
     if: github.repository_owner == 'kaidotio'
@@ -375,7 +375,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/vault/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   argocd:
     if: github.repository_owner == 'kaidotio'
@@ -387,7 +387,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/argocd/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   golang:
     if: github.repository_owner == 'kaidotio'
@@ -399,7 +399,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/argocd/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   fluentd:
     if: github.repository_owner == 'kaidotio'
@@ -411,7 +411,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   fluentd-kubernetes-daemonset:
     if: github.repository_owner == 'kaidotio'
@@ -423,7 +423,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/fluentd/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   qdrant:
     if: github.repository_owner == 'kaidotio'
@@ -435,7 +435,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/qdrant
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   cert-manager-cainjector:
     if: github.repository_owner == 'kaidotio'
@@ -447,7 +447,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cert-manager/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   cert-manager-controller:
     if: github.repository_owner == 'kaidotio'
@@ -459,7 +459,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cert-manager/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   cert-manager-webhook:
     if: github.repository_owner == 'kaidotio'
@@ -471,7 +471,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cert-manager/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   metrics-server:
     if: github.repository_owner == 'kaidotio'
@@ -483,7 +483,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/metrics-server/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   addon-resizer:
     if: github.repository_owner == 'kaidotio'
@@ -495,7 +495,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/metrics-server/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   node-problem-detector:
     if: github.repository_owner == 'kaidotio'
@@ -507,7 +507,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/node-problem-detector/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   kube-state-metrics:
     if: github.repository_owner == 'kaidotio'
@@ -519,7 +519,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/kube-state-metrics/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   node-exporter:
     if: github.repository_owner == 'kaidotio'
@@ -531,7 +531,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/node-exporter/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   node-local-dns:
     if: github.repository_owner == 'kaidotio'
@@ -543,7 +543,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/node-local-dns/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   cluster-proportional-autoscaler:
     if: github.repository_owner == 'kaidotio'
@@ -555,7 +555,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/dns-autoscaler/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   jupyterhub-istio-proxy:
     if: github.repository_owner == 'kaidotio'
@@ -567,7 +567,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/jupyterhub/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   prometheus:
     if: github.repository_owner == 'kaidotio'
@@ -579,7 +579,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/prometheus/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   nginx:
     if: github.repository_owner == 'kaidotio'
@@ -591,7 +591,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/fluentd/base,cluster/manifests/mimir/base,cluster/manifests/loki/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   cadvisor:
     if: github.repository_owner == 'kaidotio'
@@ -603,7 +603,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/additional-cadvisor/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   cfssl:
     if: github.repository_owner == 'kaidotio'
@@ -615,7 +615,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/prometheus-adapter/base,cluster/manifests/vpa/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   prometheus-adapter:
     if: github.repository_owner == 'kaidotio'
@@ -627,7 +627,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/prometheus-adapter/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   kubectl:
     if: github.repository_owner == 'kaidotio'
@@ -639,7 +639,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/github-actions-runner-controller/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   registry:
     if: github.repository_owner == 'kaidotio'
@@ -651,7 +651,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/github-actions-runner-controller/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   k6-operator:
     if: github.repository_owner == 'kaidotio'
@@ -663,7 +663,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/k6-operator/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   ratelimit:
     if: github.repository_owner == 'kaidotio'
@@ -675,7 +675,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/envoy-ratelimit/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   statsd-exporter:
     if: github.repository_owner == 'kaidotio'
@@ -687,7 +687,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/statsd-exporter
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   vpa-admission-controller:
     if: github.repository_owner == 'kaidotio'
@@ -699,7 +699,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/vpa/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   vpa-recommender:
     if: github.repository_owner == 'kaidotio'
@@ -711,7 +711,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/vpa/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   vpa-updater:
     if: github.repository_owner == 'kaidotio'
@@ -723,7 +723,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/vpa/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   pyroscope:
     if: github.repository_owner == 'kaidotio'
@@ -735,7 +735,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/pyroscope/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   descheduler:
     if: github.repository_owner == 'kaidotio'
@@ -747,7 +747,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/descheduler/base
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   elasticsearch:
     if: github.repository_owner == 'kaidotio'
@@ -759,7 +759,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/elasticsearch
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   elasticsearch_exporter:
     if: github.repository_owner == 'kaidotio'
@@ -771,7 +771,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/utilities/elasticsearch
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   proxyv2:
     if: github.repository_owner == 'kaidotio'
@@ -783,7 +783,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   pilot:
     if: github.repository_owner == 'kaidotio'
@@ -795,7 +795,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   install-cni:
     if: github.repository_owner == 'kaidotio'
@@ -807,7 +807,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   ztunnel:
     if: github.repository_owner == 'kaidotio'
@@ -819,7 +819,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh
   fluent-bit:
     if: github.repository_owner == 'kaidotio'
@@ -831,5 +831,5 @@ jobs:
       KUSTOMIZATION: cluster/manifests/kube-crud-server/overlays/dev
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .github/workflows/bin/mirror.sh

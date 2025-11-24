@@ -26,7 +26,7 @@ jobs:
       IMAGE: job-hook
       KUSTOMIZATION: cluster/applications/job-hook/manifests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/cache@v4
         with:
           path: /home/runner/.cache/docker-build
