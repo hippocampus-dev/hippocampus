@@ -1,0 +1,60 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: translator
+spec:
+  exportTo:
+    - .
+  host: translator
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 1s
+      baseEjectionTime: 1m
+      maxEjectionPercent: 100
+      minHealthPercent: 0
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: translator-redis
+spec:
+  exportTo:
+    - .
+  host: translator-redis
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: translator-redis-haproxy
+spec:
+  exportTo:
+    - .
+  host: translator-redis-haproxy
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname

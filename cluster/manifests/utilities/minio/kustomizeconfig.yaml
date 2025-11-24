@@ -1,0 +1,9 @@
+nameReference:
+  - group: apps
+    version: v1
+    kind: StatefulSet
+    fieldSpecs:
+      - path: spec/targetRef/name
+        group: autoscaling.k8s.io
+        version: v1
+        kind: VerticalPodAutoscaler

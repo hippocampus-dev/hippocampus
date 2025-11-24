@@ -1,0 +1,77 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: elasticsearch
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: adhoc
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: elasticsearch
+      ports:
+        - protocol: TCP
+          port: 9300
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: grafana
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+      ports:
+        - protocol: TCP
+          port: 9200
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: elasticsearch-ingest
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: ingest
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: fluentd
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: fluentd-aggregator
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 9200

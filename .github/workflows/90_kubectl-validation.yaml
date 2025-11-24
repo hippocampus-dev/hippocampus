@@ -1,0 +1,36 @@
+name: kubectl-validation
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - cluster/manifests/**/*.yaml
+      - .github/workflows/90_kubectl-validation.yaml
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    if: github.repository_owner == 'kaidotio' && github.event.pull_request.draft == false && github.event.pull_request.state == 'open'
+    env:
+      XDG_CONFIG_HOME: ${{ github.workspace }}/files/home/kai
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          shopt -s lastpipe
+          git fetch origin ${{ github.base_ref }}
+          git diff origin/${{ github.base_ref }} --name-only --diff-filter=d | grep '^cluster/manifests/.*\.yaml$' | xargs -r dirname | grep '/overlays/dev$' | sort -u | while IFS= read -r d; do
+            if ! kustomize build --enable-alpha-plugins "$d" | kubectl apply --dry-run=server -f -; then
+              exit 1
+            fi
+          done

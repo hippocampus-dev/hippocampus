@@ -1,0 +1,25 @@
+name: Issue Metrics
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  report:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - run: |
+          first_day=$(date -d "last month" +%Y-%m-01)
+          last_day=$(date -d "$first_day +1 month -1 day" +%Y-%m-%d)
+
+          echo "last_month=$first_day..$last_day" >> "$GITHUB_ENV"
+      - uses: github/issue-metrics@v3
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SEARCH_QUERY: repo:${{ github.repository }} is:"issue pr" created:${{ env.last_month }}
+      - run: cat issue_metrics.md >> $GITHUB_STEP_SUMMARY

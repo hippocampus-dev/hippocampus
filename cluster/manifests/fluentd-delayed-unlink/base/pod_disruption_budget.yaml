@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fluentd-delayed-unlink
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-delayed-unlink
+      app.kubernetes.io/component: ""

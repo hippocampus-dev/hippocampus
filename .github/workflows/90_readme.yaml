@@ -1,0 +1,58 @@
+name: Update README
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - "cluster/applications/**"
+      - "packages/**"
+      - "armyknife/**"
+      - "insight/**"
+      - "terraform/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  update-readme:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, local]
+    env:
+      GIT_CONFIG_GLOBAL: /tmp/gitconfig
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          direct_prompt: |
+            Analyze the changes in this push to determine if the repository root README.md needs to be updated.
+
+            Your tasks:
+            1. Check if any directories were added, removed, or significantly restructured
+            2. If directory structure changed, determine if the repository tree visualization needs updating
+            3. Update the repository root README.md only if necessary based on the changes
+            4. Ensure all GitHub Actions workflow badges are correctly listed
+            5. Maintain existing README.md structure and style
+
+            Important:
+            - Only update README.md if there are meaningful changes (new services, directory reorganization, etc.)
+            - Do NOT update for minor code changes within existing directories
+            - Keep the output minimal and focused
+            - Create a pull request with a descriptive title and body if updates are made
+            - Do NOT commit directly to the main branch

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- pod_disruption_budget.yaml
+
+images:
+- digest: sha256:fc1ed5de0e4e8ed450403d67b0ff858e317175da3fd73cb4cc7da69d98b09141
+  name: ghcr.io/kaidotio/hippocampus/translator
+  newName: ghcr.io/kaidotio/hippocampus/translator

@@ -1,0 +1,104 @@
+name: Claude Code Review
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+  claude:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    if: github.repository_owner == 'kaidotio' && github.event.pull_request.user.login == 'kaidotio'
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          direct_prompt: |
+            Please review this pull request and provide feedback on:
+            - Code quality and best practices
+            - Potential bugs or issues
+            - Performance considerations
+            - Security concerns
+            - Test coverage
+            
+            Be constructive and helpful in your feedback.
+            All interactions should be in Japanese.
+
+            OBJECTIVE:
+            Perform a security-focused code review to identify HIGH-CONFIDENCE security vulnerabilities that could have real exploitation potential. This is not a general code review - focus ONLY on security implications newly added by this PR. Do not comment on existing security concerns.
+
+            CRITICAL INSTRUCTIONS:
+            1. MINIMIZE FALSE POSITIVES: Only flag issues where you're >80% confident of actual exploitability
+            2. AVOID NOISE: Skip theoretical issues, style concerns, or low-impact findings
+            3. FOCUS ON IMPACT: Prioritize vulnerabilities that could lead to unauthorized access, data breaches, or system compromise
+            4. EXCLUSIONS: Do NOT report the following issue types:
+               - Denial of Service (DOS) vulnerabilities, even if they allow service disruption
+               - Secrets or sensitive data stored on disk (these are handled by other processes)
+               - Rate limiting or resource exhaustion issues
+
+            SECURITY CATEGORIES TO EXAMINE:
+
+            **Input Validation Vulnerabilities:**
+            - SQL injection via unsanitized user input
+            - Command injection in system calls or subprocesses
+            - XXE injection in XML parsing
+            - Template injection in templating engines
+            - NoSQL injection in database queries
+            - Path traversal in file operations
+
+            **Authentication & Authorization Issues:**
+            - Authentication bypass logic
+            - Privilege escalation paths
+            - Session management flaws
+            - JWT token vulnerabilities
+            - Authorization logic bypasses
+
+            **Crypto & Secrets Management:**
+            - Hardcoded API keys, passwords, or tokens
+            - Weak cryptographic algorithms or implementations
+            - Improper key storage or management
+            - Cryptographic randomness issues
+            - Certificate validation bypasses
+
+            **Injection & Code Execution:**
+            - Remote code execution via deseralization
+            - Pickle injection in Python
+            - YAML deserialization vulnerabilities
+            - Eval injection in dynamic code execution
+            - XSS vulnerabilities in web applications (reflected, stored, DOM-based)
+
+            **Data Exposure:**
+            - Sensitive data logging or storage
+            - PII handling violations
+            - API endpoint data leakage
+            - Debug information exposure
+
+            Additional notes:
+            - Even if something is only exploitable from the local network, it can still be a HIGH severity issue
+
+            ANALYSIS METHODOLOGY:
+
+            Phase 1 - Repository Context Research (Use file search tools):
+            - Identify existing security frameworks and libraries in use
+            - Look for established secure coding patterns in the codebase
+            - Examine existing sanitization and validation patterns
+            - Understand the project's security model and threat model
+
+            Phase 2 - Comparative Analysis:
+            - Compare new code changes against existing security patterns
+            - Identify deviations from established secure practices
+            - Look for inconsistent security implementations
+            - Flag code that introduces new attack surfaces
+
+            Phase 3 - Vulnerability Assessment:
+            - Examine each modified file for security implications
+            - Trace data flow from user inputs to sensitive operations
+            - Look for privilege boundaries being crossed unsafely
+            - Identify injection points and unsafe deserialization

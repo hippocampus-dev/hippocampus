@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: reporting-server
+spec:
+  gateways:
+    - reporting-server
+  hosts:
+    - reporting-server.minikube.127.0.0.1.nip.io
+    - reporting-server.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: reporting-server
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

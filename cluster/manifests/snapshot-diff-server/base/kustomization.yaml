@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:7adca939c5a1ea3bb59bdb13e1022995513b69e40dbb0d42e48f77f84b291b8b
+  name: ghcr.io/kaidotio/hippocampus/snapshot-controller
+  newName: ghcr.io/kaidotio/hippocampus/snapshot-controller
+- digest: sha256:4e6def3e0cd722f745d5ff26c6e7f97a64b76cdb82824da1dee678f94a368363
+  name: ghcr.io/kaidotio/hippocampus/snapshot-controller/snapshot-diff-server
+  newName: ghcr.io/kaidotio/hippocampus/snapshot-controller/snapshot-diff-server

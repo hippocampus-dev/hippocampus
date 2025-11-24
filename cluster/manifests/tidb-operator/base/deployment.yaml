@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tidb-operator
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: tidb-operator
+      app.kubernetes.io/component: controller-manager
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: tidb-operator
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: pingcap/tidb-operator
+          imagePullPolicy: IfNotPresent
+          command:
+            - /usr/local/bin/tidb-controller-manager
+          args:
+            - --tidb-backup-manager-image=ghcr.io/kaidotio/hippocampus/mirror/pingcap/tidb-backup-manager:v1.6.3
+            - --tidb-discovery-image=ghcr.io/kaidotio/hippocampus/mirror/pingcap/tidb-operator:v1.6.3
+            - --auto-failover=true
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: metrics
+              containerPort: 6060
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5

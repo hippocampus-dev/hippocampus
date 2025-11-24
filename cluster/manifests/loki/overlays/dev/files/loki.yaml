@@ -1,0 +1,213 @@
+auth_enabled: false
+
+common:
+  # https://github.com/grafana/loki/blob/v2.9.3/pkg/loki/modules.go#L737
+  compactor_grpc_address: loki-compactor.loki.svc.cluster.local.:9095
+
+compactor:
+  working_directory: /var/loki/compactor
+  delete_request_store: s3
+  retention_enabled: true
+  max_compaction_parallelism: 1
+  compactor_ring:
+    kvstore:
+      store: memberlist
+
+distributor:
+  ring:
+    kvstore:
+      store: memberlist
+
+ingester_client:
+  grpc_client_config:
+    max_recv_msg_size: &max_recv_msg_size 96000000
+    max_send_msg_size: &max_send_msg_size 96000000
+
+ingester:
+  chunk_encoding: snappy
+  chunk_idle_period: 30m
+  max_chunk_age: &max_chunk_age 2h
+  autoforget_unhealthy: true
+  lifecycler:
+    ring:
+      kvstore:
+        store: memberlist
+      replication_factor: 1
+    num_tokens: 512
+  wal:
+    dir: /var/loki/wal
+    flush_on_shutdown: true
+
+memberlist:
+  abort_if_cluster_join_fails: false
+  cluster_label: loki
+  join_members:
+    - loki-gossip-ring.loki.svc.cluster.local.
+
+index_gateway:
+  mode: ring
+  ring:
+    kvstore:
+      store: memberlist
+    replication_factor: 1
+
+frontend:
+  max_outstanding_per_tenant: 2000
+  compress_responses: true
+  tail_proxy_url: http://loki-querier.loki.svc.cluster.local.:3100
+  scheduler_address: loki-query-scheduler-discovery.loki.svc.cluster.local.:9095
+  scheduler_worker_concurrency: 5
+  grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+frontend_worker:
+  scheduler_address: loki-query-scheduler-discovery.loki.svc.cluster.local.:9095
+  grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+querier:
+  query_ingesters_within: 3h # *max_chunk_age + 1
+  max_concurrent: 10
+
+query_scheduler:
+  scheduler_ring:
+    kvstore:
+      store: memberlist
+  max_outstanding_requests_per_tenant: 2000
+  grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+query_range:
+  cache_results: true
+  results_cache:
+    cache:
+      memcached_client:
+        addresses: loki-mcrouter.loki.svc.cluster.local.:5000
+        timeout: 100ms
+        consistent_hash: false
+        max_item_size: 17179869184
+
+ruler:
+  query_stats_enabled: true
+  enable_sharding: true
+  ring:
+    kvstore:
+      store: memberlist
+    num_tokens: 512
+  storage:
+    type: local
+    local:
+      directory: /etc/loki/rules
+  rule_path: /var/loki
+  alertmanager_url: http://mimir-alertmanager.mimir.svc.cluster.local.:3100/alertmanager
+  remote_write:
+    enabled: true
+    client:
+      url: http://mimir-distributor.mimir.svc.cluster.local.:3100/api/v1/push
+  evaluation:
+    mode: remote
+    query_frontend:
+      address: loki-query-frontend.loki.svc.cluster.local.:9095
+
+schema_config:
+  configs:
+    - from: "1900-01-01"
+      index:
+        period: 24h
+        prefix: loki_index_
+      object_store: s3
+      schema: v11
+      store: boltdb-shipper
+    - from: "2023-01-01"
+      index:
+        period: 24h
+        prefix: loki_index_
+      object_store: s3
+      schema: v11
+      store: tsdb
+    - from: "2025-04-01"
+      index:
+        period: 24h
+        prefix: loki_index_
+      object_store: s3
+      schema: v13
+      store: tsdb
+
+chunk_store_config:
+  chunk_cache_config:
+    memcached_client:
+      addresses: loki-mcrouter.loki.svc.cluster.local.:5000
+      timeout: 100ms
+      consistent_hash: false
+      max_item_size: 17179869184
+  write_dedupe_cache_config:
+    memcached_client:
+      addresses: loki-mcrouter.loki.svc.cluster.local.:5000
+      timeout: 100ms
+      consistent_hash: false
+      max_item_size: 17179869184
+
+limits_config:
+  retention_period: 3h
+  retention_stream:
+    - selector: '{namespace="kube-system"}'
+      priority: 1
+      period: 24h
+  ingestion_rate_mb: 128
+  ingestion_burst_size_mb: 256
+  per_stream_rate_limit: 64MB
+  per_stream_rate_limit_burst: 128MB
+  max_chunks_per_query: 2000000
+  max_query_series: 500
+  max_query_parallelism: 32
+  tsdb_max_query_parallelism: 512
+  max_streams_matchers_per_query: 1000
+  max_concurrent_tail_requests: 10
+  max_entries_limit_per_query: 5000
+  split_queries_by_interval: 10m
+  max_querier_bytes_read: 16GB
+  query_timeout: &query_timeout 1m
+
+server:
+  grpc_server_max_recv_msg_size: *max_send_msg_size
+  grpc_server_max_send_msg_size: *max_recv_msg_size
+  http_server_read_timeout: *query_timeout
+  http_server_write_timeout: *query_timeout
+  http_listen_port: 3100
+
+storage_config:
+  aws:
+    s3: http://minio:miniominio@loki-minio.loki.svc.cluster.local:9000/loki
+    s3forcepathstyle: true
+  boltdb_shipper:
+    active_index_directory: /var/loki/boltdb-shipper-index
+    resync_interval: 5m
+    cache_location: /var/loki/boltdb-shipper-cache
+    cache_ttl: 168h
+    index_gateway_client:
+      server_address: dns:///loki-index-gateway.loki.svc.cluster.local.:9095
+      grpc_client_config:
+        max_recv_msg_size: *max_recv_msg_size
+        max_send_msg_size: *max_send_msg_size
+  tsdb_shipper:
+    active_index_directory: /var/loki/tsdb-shipper-index
+    resync_interval: 5m
+    cache_location: /var/loki/tsdb-shipper-cache
+    cache_ttl: 168h
+    index_gateway_client:
+      server_address: dns:///loki-index-gateway.loki.svc.cluster.local.:9095
+      grpc_client_config:
+        max_recv_msg_size: *max_recv_msg_size
+        max_send_msg_size: *max_send_msg_size
+  index_queries_cache_config:
+    memcached_client:
+      addresses: loki-mcrouter.loki.svc.cluster.local.:5000
+      timeout: 100ms
+      consistent_hash: false
+      max_item_size: 17179869184
+
+analytics:
+  reporting_enabled: false

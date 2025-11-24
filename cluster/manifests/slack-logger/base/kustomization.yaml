@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../../applications/slack-logger
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:3e915bdf1161ab460261a874229674d94a3c638d4961c00e30b5217b119429b7
+  name: ghcr.io/kaidotio/hippocampus/slack-logger
+  newName: ghcr.io/kaidotio/hippocampus/slack-logger

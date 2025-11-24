@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>hippocampus</title>
+</head>
+<body>
+    <div>
+        <h1>Options</h1>
+        <form id="options-form">
+            <input type="checkbox" id="enable-styler" name="enable-styler">
+            <label for="enable-styler">Enable Styler</label>
+
+            <br>
+
+            <label for="api-key">API Key:</label>
+            <input type="text" id="api-key" name="api-key">
+
+            <br><br>
+
+            <h2>Slack Reaction Shortcuts</h2>
+            <label for="slack-prefix-key">Prefix Key:</label>
+            <select id="slack-prefix-key" name="slack-prefix-key">
+                <option value="ctrl">Ctrl</option>
+                <option value="alt">Alt</option>
+                <option value="ctrl+shift">Ctrl+Shift</option>
+                <option value="ctrl+alt">Ctrl+Alt</option>
+                <option value="alt+shift">Alt+Shift</option>
+                <option value="ctrl+shift+alt">Ctrl+Shift+Alt</option>
+            </select>
+
+            <br><br>
+
+            <h3>Key Bindings</h3>
+            <div id="slack-emoji-bindings">
+                <div style="display: grid; grid-template-columns: 50px 200px; gap: 10px; margin-bottom: 10px;">
+                    <label>Key</label>
+                    <label>Emoji Name</label>
+                </div>
+            </div>
+
+            <br>
+
+            <button type="button" id="slack-add-binding">Add Binding</button>
+
+            <br><br>
+
+            <h2>Tab Auto-Close Settings</h2>
+            <p style="color: #666; font-size: 14px;">Add URL patterns where new tabs should be automatically closed (e.g., *.example.com, https://github.com/*)</p>
+            <div id="auto-close-url-patterns">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="new-url-pattern" placeholder="Enter URL pattern" style="flex: 1; padding: 5px;">
+                    <button type="button" id="add-url-pattern">Add Pattern</button>
+                </div>
+                <div id="url-patterns-list">
+                </div>
+            </div>
+
+            <br><br>
+
+            <h2>YouTube Blocked Channels</h2>
+            <div id="youtube-blocked-channels">
+            </div>
+
+            <br><br>
+
+            <button type="submit">Save</button>
+        </form>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>
