@@ -1,0 +1,205 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: eventing-controller
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: eventing-controller
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: eventing-webhook
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: eventing-webhook
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-broker-dispatcher
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-broker-dispatcher
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-broker-receiver
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-broker-receiver
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-channel-dispatcher
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-channel-dispatcher
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-channel-receiver
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-channel-receiver
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-controller
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-controller
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-sink-receiver
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-sink-receiver
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-source-dispatcher
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-source-dispatcher
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kafka-eventing-webhook
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-eventing-webhook
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: pingsource-mt-adapter
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: pingsource-mt-adapter
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

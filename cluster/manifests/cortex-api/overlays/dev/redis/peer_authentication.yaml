@@ -1,0 +1,21 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: redis-haproxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: redis-haproxy
+  mtls:
+    mode: STRICT

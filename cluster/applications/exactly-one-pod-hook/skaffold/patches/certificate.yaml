@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: exactly-one-pod-hook
+spec:
+  issuerRef:
+    name: skaffold-exactly-one-pod-hook-selfsigned
+  dnsNames:
+    - skaffold-exactly-one-pod-hook.skaffold-exactly-one-pod-hook.svc
+    - skaffold-exactly-one-pod-hook.skaffold-exactly-one-pod-hook.svc.cluster.local

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- daemon_set.yaml
+- service.yaml
+- pod_disruption_budget.yaml
+images:
+- digest: sha256:28a90219b078628cf6ae5fabb79564e0097b2811e535cb4e0e3cff470be41a60
+  name: otel/opentelemetry-collector-contrib
+  newName: ghcr.io/kaidotio/hippocampus/mirror/otel/opentelemetry-collector-contrib

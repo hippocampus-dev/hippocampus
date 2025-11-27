@@ -1,0 +1,189 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-admission-controller
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: admission-controller
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: vpa-admission-controller
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: gensecret
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: cfssl/cfssl
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              set -e
+
+              cd /tmp && openssl req -x509 -sha256 -new -nodes -days 36500 -newkey rsa:2048 -keyout ca.key -out ca.crt -subj "/CN=ca" && echo "{\"signing\":{\"default\":{\"expiry\":\"43800h\",\"usages\":[\"signing\",\"key encipherment\"]}}}" > ca-config.json
+              mkdir -p output
+              touch output/apiserver.pem
+              touch output/apiserver-key.pem
+              echo "{\"CN\":\"vpa-webhook\",\"hosts\":[\"vpa-webhook.$(NAMESPACE)\",\"vpa-webhook.$(NAMESPACE).svc\"],\"key\":{\"algo\":\"rsa\",\"size\":2048}}" | cfssl gencert -ca=ca.crt -ca-key=ca.key -config=ca-config.json - | cfssljson -bare output/apiserver
+              cat output/apiserver.pem > /etc/tls-certs/serverCert.pem
+              cat output/apiserver-key.pem > /etc/tls-certs/serverKey.pem
+              cat ca.crt > /etc/tls-certs/caCert.pem
+              cat ca.key > /etc/tls-certs/caKey.pem
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/tls-certs
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: admission-controller
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry.k8s.io/autoscaling/vpa-admission-controller
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: https
+              containerPort: 8000
+              protocol: TCP
+            - name: prometheus
+              containerPort: 8944
+              protocol: TCP
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/tls-certs
+              readOnly: true
+      volumes:
+        - name: tls-certs
+          emptyDir:
+            medium: Memory
+        - name: tmp
+          emptyDir:
+            medium: Memory
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-recommender
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: recommender
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: vpa-recommender
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: recommender
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry.k8s.io/autoscaling/vpa-recommender
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: prometheus
+              containerPort: 8944
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpa-updater
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: updater
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: vpa-updater
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: updater
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry.k8s.io/autoscaling/vpa-updater
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: prometheus
+              containerPort: 8944
+              protocol: TCP

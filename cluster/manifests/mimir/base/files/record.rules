@@ -1,0 +1,187 @@
+groups:
+  - name: kube_pod_all_container_info
+    rules:
+      - record: kube_pod_all_container_info
+        expr: |
+          kube_pod_container_info
+      - record: kube_pod_all_container_info
+        expr: |
+          kube_pod_init_container_info
+  - name: kube_pod_all_container_resource_limits
+    rules:
+      - record: kube_pod_all_container_resource_limits
+        expr: |
+          kube_pod_container_resource_limits
+      - record: kube_pod_all_container_resource_limits
+        expr: |
+          kube_pod_init_container_resource_limits
+  - name: kube_pod_all_container_resource_requests
+    rules:
+      - record: kube_pod_all_container_resource_requests
+        expr: |
+          kube_pod_container_resource_requests
+      - record: kube_pod_all_container_resource_requests
+        expr: |
+          kube_pod_init_container_resource_requests
+  - name: kube_pod_all_container_state_started
+    rules:
+      - record: kube_pod_all_container_state_started
+        expr: |
+          kube_pod_container_state_started
+      - record: kube_pod_all_container_state_started
+        expr: |
+          kube_pod_init_container_state_started
+  - name: kube_pod_all_container_status_last_terminated_exitcode
+    rules:
+      - record: kube_pod_all_container_status_last_terminated_exitcode
+        expr: |
+          kube_pod_container_status_last_terminated_exitcode
+      - record: kube_pod_all_container_status_last_terminated_exitcode
+        expr: |
+          kube_pod_init_container_status_last_terminated_exitcode
+  - name: kube_pod_all_container_status_last_terminated_reason
+    rules:
+      - record: kube_pod_all_container_status_last_terminated_reason
+        expr: |
+          kube_pod_container_status_last_terminated_reason
+      - record: kube_pod_all_container_status_last_terminated_reason
+        expr: |
+          kube_pod_init_container_status_last_terminated_reason
+  - name: kube_pod_all_container_status_ready
+    rules:
+      - record: kube_pod_all_container_status_ready
+        expr: |
+          kube_pod_container_status_ready
+      - record: kube_pod_all_container_status_ready
+        expr: |
+          kube_pod_init_container_status_ready
+  - name: kube_pod_all_container_status_restarts_total
+    rules:
+      - record: kube_pod_all_container_status_restarts_total
+        expr: |
+          kube_pod_container_status_restarts_total
+      - record: kube_pod_all_container_status_restarts_total
+        expr: |
+          kube_pod_init_container_status_restarts_total
+  - name: kube_pod_all_container_status_running
+    rules:
+      - record: kube_pod_all_container_status_running
+        expr: |
+          kube_pod_container_status_running
+      - record: kube_pod_all_container_status_running
+        expr: |
+          kube_pod_init_container_status_running
+  - name: kube_pod_all_container_status_terminated
+    rules:
+      - record: kube_pod_all_container_status_terminated
+        expr: |
+          kube_pod_container_status_terminated
+      - record: kube_pod_all_container_status_terminated
+        expr: |
+          kube_pod_init_container_status_terminated
+  - name: kube_pod_all_container_status_terminated_reason
+    rules:
+      - record: kube_pod_all_container_status_terminated_reason
+        expr: |
+          kube_pod_container_status_terminated_reason
+      - record: kube_pod_all_container_status_terminated_reason
+        expr: |
+          kube_pod_init_container_status_terminated_reason
+  - name: kube_pod_all_container_status_waiting
+    rules:
+      - record: kube_pod_all_container_status_waiting
+        expr: |
+          kube_pod_container_status_waiting
+      - record: kube_pod_all_container_status_waiting
+        expr: |
+          kube_pod_init_container_status_waiting
+  - name: kube_pod_all_container_status_waiting_reason
+    rules:
+      - record: kube_pod_all_container_status_waiting_reason
+        expr: |
+          kube_pod_container_status_waiting_reason
+      - record: kube_pod_all_container_status_waiting_reason
+        expr: |
+          kube_pod_init_container_status_waiting_reason
+  - name: mixin_pod_workload
+    rules:
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              label_replace(
+                kube_pod_owner{owner_kind="ReplicaSet"},
+                "replicaset","$1","owner_name","(.*)"
+              ) * on(replicaset,namespace) group_left(owner_name) group(kube_replicaset_owner) by (replicaset,namespace,owner_name),
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: deployment
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+               kube_pod_owner{owner_kind="DaemonSet"},
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: daemonset
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              kube_pod_owner{owner_kind="StatefulSet"},
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: statefulset
+      # StrimziPodSet is a custom resource definition used by Strimzi to manage Kafka clusters.
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              kube_pod_owner{owner_kind="StrimziPodSet"},
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: statefulset
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              label_replace(
+                kube_pod_owner{owner_kind="Job"},
+                "job_name","$1","owner_name","(.*)"
+              ) * on(job_name, namespace) group_left(owner_name) group(kube_job_owner{owner_kind="CronJob"}) by (job_name,namespace,owner_name),
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: cronjob
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              label_replace(
+                kube_pod_owner{owner_kind="Job"},
+                "job_name","$1","owner_name","(.*)"
+              ) * on(job_name, namespace) group_left(owner_name) group(kube_job_owner{owner_kind!="CronJob"}) by (job_name,namespace,owner_name),
+              "workload","$1","owner_name","(.*)"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: job
+      - record: mixin_pod_workload
+        expr: |
+          group(
+            label_replace(
+              kube_pod_owner{owner_kind="Node"},
+              "workload","$1","pod","(.*)-minikube.*"
+            )
+          ) by (namespace,workload,pod)
+        labels:
+          workload_type: node

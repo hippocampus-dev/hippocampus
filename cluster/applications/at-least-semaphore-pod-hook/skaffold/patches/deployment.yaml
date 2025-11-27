@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: at-least-semaphore-pod-hook
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: hook
+          image: ghcr.io/kaidotio/hippocampus/skaffold
+          args:
+            - webhook
+            - --redis-addresses=skaffold-redis-0.skaffold-redis:6379,skaffold-redis-1.skaffold-redis:6379,skaffold-redis-2.skaffold-redis:6379
+            - --queue-redis-address=skaffold-redis-0.skaffold-redis:6379
+          env:
+            - name: VARIANT
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['variant']
+          volumeMounts:
+            # delve uses /home/nonroot/.config for storing delve configuration
+            - name: tmp
+              mountPath: /home/nonroot/.config
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

@@ -1,0 +1,15 @@
+[Unit]
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+User=kai
+ExecStart=/usr/local/bin/startup.sh
+ExecStop=/usr/local/bin/shutdown.sh
+TimeoutStopSec=1800
+
+[Install]
+WantedBy=multi-user.target

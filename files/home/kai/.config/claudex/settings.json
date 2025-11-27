@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "DISABLE_MICROCOMPACT": "true"
+  },
+  "permissions": {
+    "allow": [
+      "Task",
+      "Glob",
+      "Grep",
+      "LS",
+      "Read",
+      "Edit",
+      "MultiEdit",
+      "Write",
+      "TodoRead",
+      "TodoWrite",
+      "WebSearch",
+      "WebFetch",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(make:*)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(cargo:*)",
+      "Bash(go:*)",
+      "Bash(uv:*)",
+      "Bash(npm:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "mcp__notify__notify",
+      "mcp__tmux__mark",
+      "mcp__tmux__unmark",
+      "mcp__tmux__rename",
+      "mcp__gemini__gemini",
+      "mcp__codex__codex",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__playwright__browser_file_upload",
+      "mcp__playwright__browser_install",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_navigate_back",
+      "mcp__playwright__browser_navigate_forward",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_pdf_save",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_drag",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_select_option",
+      "mcp__playwright__browser_tab_list",
+      "mcp__playwright__browser_tab_new",
+      "mcp__playwright__browser_tab_select",
+      "mcp__playwright__browser_tab_close",
+      "mcp__playwright__browser_generate_playwright_test",
+      "mcp__playwright__browser_wait_for"
+    ],
+    "deny": []
+  },
+  "model": "opus",
+  "enableAllProjectMcpServers": true,
+  "hooks": {
+    "PreToolUse": [],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/format.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '@sh \"notify-send -u low -t 30000 Claude \\(.message)\"' | sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send -u low -t 30000 Claude \"Stopping Claude\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": []
+  },
+  "alwaysThinkingEnabled": false,
+  "feedbackSurveyState": {
+    "lastShownTime": 2069451551000
+  }
+}
