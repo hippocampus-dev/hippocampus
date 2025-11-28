@@ -10,6 +10,9 @@ resources:
 - role_binding.yaml
 - service_account.yaml
 images:
+- digest: sha256:80196cf11a7abe795eb4a448263d2098287b9d716eab22ee9effd1fb098917f3
+  name: ghcr.io/hippocampus-dev/hippocampus/events-logger
+  newName: ghcr.io/hippocampus-dev/hippocampus/events-logger
 - digest: sha256:d384223ed9cbd1162148409941097cc8c464803cf570c056d8b92b1023bdd946
   name: ghcr.io/kaidotio/hippocampus/events-logger
   newName: ghcr.io/kaidotio/hippocampus/events-logger
