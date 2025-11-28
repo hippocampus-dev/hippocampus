@@ -10,6 +10,9 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
+- digest: sha256:12a5f0aa056f6abf212af1709923ba92a3343e9ec09906661c22e54da082da09
+  name: ghcr.io/hippocampus-dev/hippocampus/exactly-one-pod-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/exactly-one-pod-hook
 - digest: sha256:9f9f05997818db6091a8c34767a6322683b2343c0d6b9383b503b15b3231f14d
   name: ghcr.io/kaidotio/hippocampus/exactly-one-pod-hook
   newName: ghcr.io/kaidotio/hippocampus/exactly-one-pod-hook
