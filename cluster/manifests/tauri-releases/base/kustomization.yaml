@@ -7,6 +7,9 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
+- digest: sha256:a1024f1c0b14e96ac6194eb2b1371ebe2ef5c2ea2267ddcce767967144750b24
+  name: ghcr.io/hippocampus-dev/hippocampus/tauri-releases
+  newName: ghcr.io/hippocampus-dev/hippocampus/tauri-releases
 - digest: sha256:674e44bcaf8effcd1ed66dc5411217b9f6b608981b703e99e8829e1753498c35
   name: ghcr.io/kaidotio/hippocampus/tauri-releases
   newName: ghcr.io/kaidotio/hippocampus/tauri-releases
