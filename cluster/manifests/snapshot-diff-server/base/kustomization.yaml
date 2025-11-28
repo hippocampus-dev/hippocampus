@@ -7,6 +7,9 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
+- digest: sha256:e76388be2de75f926dec3e7376b62dd40848bc0238c72a6ef70050dcaee69535
+  name: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller/snapshot-diff-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller/snapshot-diff-server
 - digest: sha256:7adca939c5a1ea3bb59bdb13e1022995513b69e40dbb0d42e48f77f84b291b8b
   name: ghcr.io/kaidotio/hippocampus/snapshot-controller
   newName: ghcr.io/kaidotio/hippocampus/snapshot-controller
