@@ -10,6 +10,9 @@ resources:
 - service_account.yaml
 images:
 - digest: sha256:0417de2a68544c1e90a11d31abcff9769b63632adbd6bf1e70e2ffccd1629842
+- digest: sha256:b533c9749158bc2ac9e3ec974cba8379b450000a6a11e41f28838935e9cd0028
+  name: ghcr.io/hippocampus-dev/hippocampus/kube-crud-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/kube-crud-server
 - digest: sha256:f22b20b40d961e5ca721f3ba94b4e1a1c808ccbab48bda0cc952a58db232e1f0
   name: ghcr.io/kaidotio/hippocampus/kube-crud-server
   newName: ghcr.io/kaidotio/hippocampus/kube-crud-server
