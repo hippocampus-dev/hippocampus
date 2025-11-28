@@ -1,0 +1,14 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "ui": {
+    "theme": "Default"
+  },
+  "general": {
+    "previewFeatures": true
+  },
+  "contextFileName": "AGENTS.md"
+}

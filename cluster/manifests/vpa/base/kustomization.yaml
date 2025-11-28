@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://raw.githubusercontent.com/kubernetes/autoscaler/vpa-release-1.0/vertical-pod-autoscaler/deploy/vpa-v1-crd-gen.yaml
+- https://raw.githubusercontent.com/kubernetes/autoscaler/vpa-release-1.0/vertical-pod-autoscaler/deploy/vpa-rbac.yaml
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+images:
+- digest: sha256:691ddcf90c7965dd6aa6d9ac94b7de4ab223b033f3c937a625b284a05275db73
+  name: cfssl/cfssl
+  newName: ghcr.io/kaidotio/hippocampus/mirror/cfssl/cfssl
+- digest: sha256:bf0e2edf147b887e1121e6b1d96e58b3f4e748482d5ccf49c12aa9ec68c88f30
+  name: registry.k8s.io/autoscaling/vpa-admission-controller
+  newName: ghcr.io/kaidotio/hippocampus/mirror/registry.k8s.io/autoscaling/vpa-admission-controller
+- digest: sha256:4388946978a7c81501aa17d028329f5a4398dfa697a4863b8618b1b0f13fdcff
+  name: registry.k8s.io/autoscaling/vpa-recommender
+  newName: ghcr.io/kaidotio/hippocampus/mirror/registry.k8s.io/autoscaling/vpa-recommender
+- digest: sha256:497d8c0d784bae0f8faed17cf280c0e38a28546186c21bbdeac0170d8d5dd8cb
+  name: registry.k8s.io/autoscaling/vpa-updater
+  newName: ghcr.io/kaidotio/hippocampus/mirror/registry.k8s.io/autoscaling/vpa-updater

@@ -1,0 +1,21 @@
+groups:
+  - name: api-priority-and-fairness
+    rules:
+      - alert: APIServerFlowcontrolPriorityLevelRequestUtilizationHigh
+        annotations:
+          message: |
+            {{ $labels.priority_level }} priority level request utilization is high (current value: {{ $value }}).
+        expr: |
+          histogram_quantile(0.9, sum(rate(apiserver_flowcontrol_priority_level_request_utilization_bucket{phase="executing"}[5m])) by (le,priority_level)) > 0.8
+        for: 1m
+        labels:
+          severity: warning
+      - alert: APIServerFlowcontrolPriorityLevelSeatUtilizationHigh
+        annotations:
+          message: |
+            {{ $labels.priority_level }} priority level seat utilization is high (current value: {{ $value }}).
+        expr: |
+          histogram_quantile(0.9, sum(rate(apiserver_flowcontrol_priority_level_seat_utilization_bucket{phase="executing"}[5m])) by (le,priority_level)) > 0.8
+        for: 1m
+        labels:
+          severity: warning

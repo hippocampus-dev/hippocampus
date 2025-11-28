@@ -1,0 +1,83 @@
+# Model configurations with stop sequences and prompt formats
+
+# ========== Gemma Configuration ==========
+[models."gemma-3-4b-it-Q4_K_M.gguf"]
+n_parallel = 4
+n_batch = 2048
+n_ubatch = 512
+stop_sequences = ["<end_of_turn>", "<start_of_turn>"]
+
+[models."gemma-3-4b-it-Q4_K_M.gguf".prompt_format]
+user_prefix = "<start_of_turn>user\n"
+user_suffix = "<end_of_turn>"
+assistant_prefix = "<start_of_turn>model\n"
+assistant_suffix = "<end_of_turn>"
+system_prefix = "<start_of_turn>system\n"
+system_suffix = "<end_of_turn>"
+add_generation_prompt = "<start_of_turn>model\n"
+
+# ========== Llama-2-chat Configuration ==========
+[models."llama-2-7b-chat.Q4_0.gguf"]
+n_parallel = 8
+n_ctx = 4096
+n_batch = 512
+stop_sequences = ["[INST]", "[/INST]"]
+
+[models."llama-2-7b-chat.Q4_0.gguf".prompt_format]
+user_prefix = "[INST] "
+user_suffix = " [/INST]"
+assistant_prefix = " "
+assistant_suffix = " "
+# Llama-2 doesn't have explicit system role in chat format
+system_prefix = "[INST] <<SYS>>\n"
+system_suffix = "\n<</SYS>>\n\n"
+
+# ========== Mistral-Instruct Configuration ==========
+[models."mistral-7b-instruct-v0.2.Q4_K_M.gguf"]
+n_ctx = 8192
+n_batch = 1024
+stop_sequences = ["</s>", "[INST]", "[/INST]"]
+
+[models."mistral-7b-instruct-v0.2.Q4_K_M.gguf".prompt_format]
+user_prefix = "[INST] "
+user_suffix = " [/INST]"
+assistant_prefix = ""
+assistant_suffix = "</s>"
+
+# ========== ChatML Format (used by many models) ==========
+[models."openchat-3.5.Q4_K_M.gguf"]
+n_parallel = 4
+stop_sequences = ["<|im_end|>", "<|im_start|>"]
+
+[models."openchat-3.5.Q4_K_M.gguf".prompt_format]
+user_prefix = "<|im_start|>user\n"
+user_suffix = "<|im_end|>\n"
+assistant_prefix = "<|im_start|>assistant\n"
+assistant_suffix = "<|im_end|>\n"
+system_prefix = "<|im_start|>system\n"
+system_suffix = "<|im_end|>\n"
+add_generation_prompt = "<|im_start|>assistant\n"
+
+# ========== Alpaca Format ==========
+[models."alpaca-7b.Q4_0.gguf"]
+n_parallel = 2
+stop_sequences = ["### Instruction:", "### Response:"]
+
+[models."alpaca-7b.Q4_0.gguf".prompt_format]
+user_prefix = "### Instruction:\n"
+user_suffix = "\n\n"
+assistant_prefix = "### Response:\n"
+assistant_suffix = "\n\n"
+add_generation_prompt = "### Response:\n"
+
+# ========== Phi-2 (minimal configuration) ==========
+[models."phi-2.Q4_K_M.gguf"]
+n_parallel = 2
+# Phi-2 uses simple format without special tokens
+
+[models."phi-2.Q4_K_M.gguf".prompt_format]
+user_prefix = "User: "
+user_suffix = "\n"
+assistant_prefix = "Assistant: "
+assistant_suffix = "\n"
+add_generation_prompt = "Assistant: "

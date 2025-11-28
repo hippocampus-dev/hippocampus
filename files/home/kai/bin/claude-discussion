@@ -1,0 +1,199 @@
+#!/bin/bash
+
+set -e
+
+if [ -z "$TMUX" ]; then
+  exit 1
+fi
+
+facilitatorPane=$(tmux run "echo #{pane_id}")
+
+MEMBERS=3
+TOPIC=""
+ROUNDS=3
+OUTPUT_FILE=""
+MEMBER_ROLES=""
+DISCUSSION_TYPE="general"
+AUTO_SUMMARIZE=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --members|-m)
+      MEMBERS="$2"
+      shift 2
+      ;;
+    --topic|-t)
+      TOPIC="$2"
+      shift 2
+      ;;
+    --rounds|-r)
+      ROUNDS="$2"
+      shift 2
+      ;;
+    --output|-o)
+      OUTPUT_FILE="$2"
+      shift 2
+      ;;
+    --roles)
+      MEMBER_ROLES="$2"
+      shift 2
+      ;;
+    --type)
+      DISCUSSION_TYPE="$2"
+      shift 2
+      ;;
+    --auto-summarize)
+      AUTO_SUMMARIZE=true
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$TOPIC" ]; then
+  exit 1
+fi
+
+IFS=',' read -ra ROLES_ARRAY <<< "$MEMBER_ROLES"
+
+DISCUSSION_LOG=$(mktemp)
+STRUCTURED_LOG=$(mktemp)
+
+cat <<EOS > $STRUCTURED_LOG
+{
+  "topic": "$TOPIC",
+  "type": "$DISCUSSION_TYPE",
+  "participants": $MEMBERS,
+  "rounds_planned": $ROUNDS,
+  "start_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "members": [],
+  "discussion": []
+}
+EOS
+
+declare -a memberPanes
+for i in $(seq 1 $MEMBERS); do
+  if [ $i -eq 1 ]; then
+    memberPanes[$i]=$(tmux split-window -h -P -F "#{pane_id}")
+  else
+    memberPanes[$i]=$(tmux split-window -v -P -F "#{pane_id}")
+  fi
+
+  if [ ${#ROLES_ARRAY[@]} -ge $i ]; then
+    ROLE="${ROLES_ARRAY[$((i-1))]}"
+  else
+    ROLE="参加者"
+  fi
+
+  jq --arg id "MEMBER$i" --arg role "$ROLE" --arg pane "${memberPanes[$i]}" \
+    '.members += [{"id": $id, "role": $role, "pane": $pane}]' \
+    $STRUCTURED_LOG > $STRUCTURED_LOG.tmp && mv $STRUCTURED_LOG.tmp $STRUCTURED_LOG
+
+  t=$(mktemp)
+  cat <<EOS > $t
+# MOST IMPORTANT RULES
+あなたは議論のメンバー${i}（役割: ${ROLE}）です。
+ファシリテーターから指示されたトピックについて議論してください。
+
+発言が完了したら以下のコマンドでファシリテーターに報告してください。
+- tmux send-keys -t ${facilitatorPane} "${memberPanes[$i]}[${ROLE}]: <発言内容>" && sleep 0.1 && tmux send-keys -t ${facilitatorPane} C-m
+
+他のメンバーのpane id：
+EOS
+
+  for j in $(seq 1 $MEMBERS); do
+    if [ $j -ne $i ]; then
+      if [ ${#ROLES_ARRAY[@]} -ge $j ]; then
+        OTHER_ROLE="${ROLES_ARRAY[$((j-1))]}"
+      else
+        OTHER_ROLE="参加者"
+      fi
+      echo "- メンバー${j} (${OTHER_ROLE}): ${memberPanes[$j]}" >> $t
+    fi
+  done
+
+  cat <<EOS >> $t
+
+他のメンバーに直接コメントや質問をする場合：
+- tmux send-keys -t <pane id> "@MEMBER${i}: <メッセージ>" && sleep 0.1 && tmux send-keys -t <pane id> C-m
+
+他のメンバーから以下のフォーマットでメッセージが来ます：
+@MEMBER${i}: <メッセージ>
+EOS
+
+  tmux send-keys "claude $@ --local-memory-file $t" C-m
+  sleep 1
+done
+
+for i in $(seq 1 $MEMBERS); do
+  tmux select-pane -t ${memberPanes[$i]}
+  tmux resize-pane -y $(( 100 / $MEMBERS ))%
+done
+
+tmux select-pane -t $facilitatorPane
+
+cleanup() {
+  jq --arg end_time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '.end_time = $end_time' \
+    $STRUCTURED_LOG > $STRUCTURED_LOG.tmp && mv $STRUCTURED_LOG.tmp $STRUCTURED_LOG
+
+  if [ -n "$OUTPUT_FILE" ]; then
+    case "${OUTPUT_FILE##*.}" in
+      json)
+        cp $STRUCTURED_LOG "$OUTPUT_FILE"
+        ;;
+      *)
+        cp $DISCUSSION_LOG "$OUTPUT_FILE"
+        ;;
+    esac
+  fi
+
+  for i in $(seq 1 $MEMBERS); do
+    tmux kill-pane -t ${memberPanes[$i]} 2>/dev/null || true
+  done
+
+  rm -f $DISCUSSION_LOG $STRUCTURED_LOG
+}
+
+trap cleanup EXIT
+
+t=$(mktemp)
+cat <<EOS > $t
+# MOST IMPORTANT RULES
+あなたは議論のファシリテーターです。
+${MEMBERS}人のメンバーと共に「${TOPIC}」について議論を進行させてください。
+議論タイプ: ${DISCUSSION_TYPE}
+
+以下のtmuxのpane idでメンバーが動いています。
+EOS
+
+for i in $(seq 1 $MEMBERS); do
+  if [ ${#ROLES_ARRAY[@]} -ge $i ]; then
+    ROLE="${ROLES_ARRAY[$((i-1))]}"
+  else
+    ROLE="参加者"
+  fi
+  echo "- ${memberPanes[$i]} (${ROLE})" >> $t
+done
+
+cat <<EOS >> $t
+
+以下のコマンドでメンバーに指示できます。
+- tmux send-keys -t <pane id> "<指示内容>" && sleep 0.1 && tmux send-keys -t <pane id> C-m
+
+メンバーから以下のフォーマットで報告されます。
+<pane id>[役割]: <発言内容>
+
+メンバー間の直接会話も可能です。メンバーは相互に以下の形式でコミュニケーションできます：
+@MEMBER<番号>: <メッセージ>
+
+議論は${ROUNDS}ラウンド行い、最終的に要約と結論をまとめてください。
+メンバー間の対話も促進し、活発な議論を実現してください。
+議論ログ: $DISCUSSION_LOG
+構造化ログ: $STRUCTURED_LOG
+自動要約: $AUTO_SUMMARIZE
+EOS
+
+claude $@ --local-memory-file $t

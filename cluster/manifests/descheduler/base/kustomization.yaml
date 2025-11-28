@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://raw.githubusercontent.com/kubernetes-sigs/descheduler/release-1.32/kubernetes/base/rbac.yaml
+- cron_job.yaml
+images:
+- digest: sha256:036acdb38e7d3e616176a8126bbf35c409a4b96a01f3d95c51167f94ae01a28d
+  name: registry.k8s.io/descheduler/descheduler
+  newName: ghcr.io/kaidotio/hippocampus/mirror/registry.k8s.io/descheduler/descheduler

@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: grafana
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: grafana
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/grafana
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH
+              value: /var/lib/grafana/dashboards/other/zz_generated.overview.json
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Editor
+            - name: GF_ANALYTICS_ENABLED
+              value: "false"
+            - name: GF_ANALYTICS_REPORTING_ENABLED
+              value: "false"
+            - name: GF_ANALYTICS_CHECK_FOR_UPDATES
+              value: "false"
+            - name: GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES
+              value: "false"
+            - name: GF_PLUGINS_PUBLIC_KEY_RETRIEVAL_DISABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/grafana
+            - name: dashboards
+              mountPath: /etc/grafana/provisioning/dashboards
+              readOnly: true
+            - name: kubernetes-dashboards
+              mountPath: /var/lib/grafana/dashboards/kubernetes
+              readOnly: true
+            - name: other-dashboards
+              mountPath: /var/lib/grafana/dashboards/other
+              readOnly: true
+        - name: mcp
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: mcp/grafana
+          imagePullPolicy: IfNotPresent
+          args:
+            - --enabled-tools
+            - prometheus,loki,alerting
+            - --transport
+            - sse
+            - --sse-address
+            - 0.0.0.0:8000
+          env:
+            - name: GRAFANA_URL
+              value: http://127.0.0.1:3000
+          ports:
+            - name: http-mcp
+              containerPort: 8000
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http-mcp
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+      volumes:
+        - name: data
+          emptyDir:
+            medium: Memory
+        - name: dashboards
+          configMap:
+            name: dashboards
+        - name: kubernetes-dashboards
+          projected:
+            sources:
+              - configMap:
+                  name: kubernetes-cluster.json
+              - configMap:
+                  name: kubernetes-cronjob.json
+              - configMap:
+                  name: kubernetes-node.json
+              - configMap:
+                  name: kubernetes-namespace.json
+              - configMap:
+                  name: kubernetes-workload.json
+              - configMap:
+                  name: kubernetes-pod.json
+              - configMap:
+                  name: kubernetes-volume.json
+        - name: other-dashboards
+          projected:
+            sources:
+              - configMap:
+                  name: other-overview.json
+              - configMap:
+                  name: other-lighthouse.json

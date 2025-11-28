@@ -1,0 +1,47 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: huggingface.co
+spec:
+  exportTo:
+    - .
+  hosts:
+    - huggingface.co
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: wildcard.huggingface.co
+spec:
+  exportTo:
+    - .
+  hosts:
+    - "*.huggingface.co"
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: wildcard.huggingface.cloud
+spec:
+  exportTo:
+    - .
+  hosts:
+    - "*.huggingface.cloud"
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: NONE

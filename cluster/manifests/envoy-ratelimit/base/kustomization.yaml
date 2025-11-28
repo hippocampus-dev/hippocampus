@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:7f39e3e00ba6251bba2cfa805dbcefab304b335573de98feab008f1f2b139029
+  name: envoyproxy/ratelimit
+  newName: ghcr.io/kaidotio/hippocampus/mirror/envoyproxy/ratelimit
+- digest: sha256:d9b3d309933001d1d4c847d117674d81fd6530247ce16c0e2863812e5b152ff4
+  name: ghcr.io/kaidotio/hippocampus/envoy-ratelimit
+  newName: ghcr.io/kaidotio/hippocampus/envoy-ratelimit
