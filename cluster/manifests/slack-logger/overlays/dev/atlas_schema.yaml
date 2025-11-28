@@ -1,0 +1,23 @@
+apiVersion: db.atlasgo.io/v1alpha1
+kind: AtlasSchema
+metadata:
+  name: slack-logger
+spec:
+  credentials:
+    scheme: mysql
+    host: slack-logger-tidb.slack-logger.svc.cluster.local
+    user: slack_user
+    passwordFrom:
+      secretKeyRef:
+        key: slack_user
+        name: slack-logger
+    database: slack_logger
+    port: 4000
+  schema:
+    configMapKeyRef:
+      key: schema.hcl
+      name: slack-logger-atlas
+  policy:
+    diff:
+      skip:
+        modify_schema: true

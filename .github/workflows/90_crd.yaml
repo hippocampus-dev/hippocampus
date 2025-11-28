@@ -1,0 +1,48 @@
+name: crd
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - .github/workflows/90_jsonnet.yaml
+      - .idea/crd/kustomization.yaml
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  deploy:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    env:
+      GOPATH: /tmp/go
+      GOBIN: /tmp/build-tools/bin
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          go install sigs.k8s.io/kustomize/kustomize/v5@latest
+      - run: |
+          git config --global user.name "kaidotio"
+          git config --global user.email "kaidotio@gmail.com"
+          git checkout -b ${{ github.head_ref }}
+          
+          ${GOBIN}/kustomize build . > crd.yaml
+          git add crd.yaml
+          
+          if git commit -m "kustomize build"; then
+            git fetch origin ${{ github.base_ref }}
+            git rebase origin/${{ github.base_ref }}
+            git push origin ${{ github.head_ref }}
+          fi
+        working-directory: .idea/crd

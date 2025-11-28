@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: embedding-retrieval
+
+resources:
+- ../../base
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+- qdrant
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+generators:
+- secrets_from_vault.yaml
+images:
+- digest: sha256:f8ccf826af4fcd35274570f2e17f8b850c37415531e8d7f229b4e78a3257cbbe
+  name: ghcr.io/kaidotio/hippocampus/tcp-proxy
+  newName: ghcr.io/kaidotio/hippocampus/tcp-proxy
+- digest: sha256:2149a23902d01a13e1fa5bda87fc3c4e3594d2731f5ded047e4dbfe90b32e002
+  name: quay.io/rebuy/exporter-merger
+  newName: ghcr.io/kaidotio/hippocampus/mirror/quay.io/rebuy/exporter-merger

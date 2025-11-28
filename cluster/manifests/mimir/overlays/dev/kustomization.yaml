@@ -1,0 +1,46 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mimir
+
+resources:
+- ../../base
+- job.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- etcd
+- memcached
+- minio
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+- path: patches/stateful_set.yaml
+
+replacements:
+- source:
+    fieldPath: spec.replicas
+    kind: StatefulSet
+    name: mimir-alertmanager
+  targets:
+  - fieldPaths:
+    - spec.template.spec.containers.[name=alertmanager].env.[name=REPLICATION_FACTOR].value
+    select:
+      kind: StatefulSet
+      name: mimir-alertmanager
+
+configMapGenerator:
+- files:
+  - files/mimir.yaml
+  name: mimir
+  options:
+    immutable: true
+images:
+- digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+  name: minio/mc
+  newName: ghcr.io/kaidotio/hippocampus/mirror/minio/mc

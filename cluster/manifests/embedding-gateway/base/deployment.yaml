@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-gateway
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: embedding-gateway
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: embedding-gateway
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/embedding-gateway
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+            - name: LOG_LEVEL
+              value: warning
+            - name: WEB_CONCURRENCY
+              value: "1" # opentelemetry does not support multiprocessing
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:4317
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "1.0"
+            - name: OTEL_BSP_SCHEDULE_DELAY
+              value: "5000"
+            - name: OTEL_BSP_EXPORT_TIMEOUT
+              value: "30000"
+            - name: OTEL_BSP_MAX_QUEUE_SIZE
+              value: "2048"
+            - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+              value: "512"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

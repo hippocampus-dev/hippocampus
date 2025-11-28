@@ -1,0 +1,183 @@
+groups:
+  - name: node-problem-detector
+    rules:
+      - alert: ProblemDetected
+        annotations:
+          message: |
+            {{ $labels.reason }} has been detected at {{ $labels.node }} with {{ $value }} times / 1m.
+        expr: |
+          sum(increase(problem_counter[1m]) * on (namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (reason,node) > 0
+        for: 1m
+        labels:
+          severity: critical
+  - name: metrics
+    rules:
+      - alert: MetricsStateDown
+        annotations:
+          message: "Failed to scrape from {{ $labels.job }}."
+        expr: |
+          sum_over_time(up[1m]) * on(namespace,pod) group_left(phase) sum(kube_pod_status_phase{phase="Running"}) by (namespace,pod) != count_over_time(up[1m]) * on(namespace,pod) group_left(phase) sum(kube_pod_status_phase{phase="Running"}) by (namespace,pod)
+        for: 30m
+        labels:
+          severity: warning
+  - name: resources
+    rules:
+      - alert: ResourceQuotaIsSaturated
+        annotations:
+          message: |
+            {{ $labels.resource }} has saturated {{ $value | humanizePercentage }}% in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(kube_resourcequota{type="used"}) by (resource,namespace) / sum(kube_resourcequota{type="hard"}) by (resource,namespace) > 0.8
+        for: 5m
+        labels:
+          severity: critical
+  - name: cgroups
+    rules:
+      - alert: ExceedsCPUSystemReserved
+        annotations:
+          message: |
+            system.slice exceeds cpu system reserved at {{ $labels.instance }}.
+        expr: |
+          # 20m / Cores
+          sum(kube_node_status_capacity{resource="cpu",unit="core"}) by (node) - sum(label_replace(rate(container_cpu_usage_seconds_total{container!="",image!=""}[1m]),"node","$1","instance","(.*)")) by (node) < count(sum(node_cpu_seconds_total * on(namespace,pod) group_left(node) group(kube_pod_status_ready{condition="true"} * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (namespace,pod,node)) by (node,cpu)) by (node) * 20 / 1000
+        for: 30m
+        labels:
+          severity: warning
+      - alert: ExceedsMemorySystemReserved
+        annotations:
+          message: |
+            system.slice exceeds memory system reserved at {{ $labels.instance }}.
+        expr: |
+          # 8Mi / GB
+          sum(kube_node_status_capacity{resource="memory",unit="byte"}) by (node) - sum(label_replace(rate(container_memory_rss{container!=""}[1m]),"node","$1","instance","(.*)")) by (node) / 1024 / 1024 / 1024 < sum(node_memory_MemTotal_bytes * on(namespace,pod) group_left(node) group(kube_pod_status_ready{condition="true"} * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (namespace,pod,node)) by (node) / 1024 / 1024 / 1024 * 12 / 1024
+        for: 30m
+        labels:
+          severity: warning
+  - name: node
+    rules:
+      - alert: NodeNotReady
+        annotations:
+          message: |
+            {{ $labels.node }} is now Ready={{ $labels.status }}.
+        expr: |
+          sum(kube_node_status_condition{condition="Ready",status!="true"}) by (node) > 0
+        for: 0m
+        labels:
+          severity: warning
+      - alert: NodeInsufficientCPU
+        annotations:
+          message: |
+            Insufficient CPU {{ $value | humanizePercentage }} for {{ $labels.node }}.
+        expr: |
+          1 - avg(rate(node_cpu_seconds_total{mode="idle"}[1m]) * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+      - alert: NodeInsufficientMemory
+        annotations:
+          message: |
+            Insufficient Memory {{ $value | humanizePercentage }} for {{ $labels.node }}.
+        expr: |
+          1 - sum((node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) * on (namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) / sum(node_memory_MemTotal_bytes * on (namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+      - alert: NodeInsufficientDisk
+        annotations:
+          message: |
+            Insufficient Disk {{ $value | humanizePercentage }}({{ $labels.mountpoint}}) for {{ $labels.node }}.
+        expr: |
+          1 - sum(node_filesystem_avail_bytes * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node,mountpoint) / sum(node_filesystem_size_bytes * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node,mountpoint) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+      - alert: NodeInsufficientInode
+        annotations:
+          message: |
+            Insufficient inode {{ $value | humanizePercentage }}({{ $labels.mountpoint}}) for {{ $labels.node }}.
+        expr: |
+          1 - sum(node_filesystem_files_free * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node,mountpoint) / sum(node_filesystem_files * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node,mountpoint) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+      - alert: NodeInsufficientConntrack
+        annotations:
+          message: |
+            Insufficient conntrack {{ $value | humanizePercentage }} for {{ $labels.node }}.
+        expr: |
+          1 - sum(node_nf_conntrack_entries_free * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) / sum(node_nf_conntrack_entries * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+      - alert: TooManyPods
+        annotations:
+          message: |
+            {{ $labels.node }} is running at {{ $value | humanizePercentage }} of its Pod capacity.
+        expr: |
+          sum(label_replace(kubelet_running_pods,"node","$1","instance","(.*)")) by (node) / sum(kube_node_status_capacity_pods) by (node) > 0.95
+        for: 10m
+        labels:
+          severity: warning
+      - alert: NodeCPUStalled
+        annotations:
+          message: |
+            {{ $labels.node }} CPU is stalled {{ $value }} seconds / 1m.
+        expr: |
+          sum(increase(node_pressure_cpu_waiting_seconds_total[1m]) * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+      - alert: NodeMemoryStalled
+        annotations:
+          message: |
+            {{ $labels.node }} Memory is stalled {{ $value }} seconds / 1m.
+        expr: |
+          sum(increase(node_pressure_memory_waiting_seconds_total[1m]) * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0
+        for: 10m
+        labels:
+          severity: warning
+      - alert: NodeMemoryFullStalled
+        annotations:
+          message: |
+            {{ $labels.node }} Memory is full stalled {{ $value }} seconds / 1m.
+        expr: |
+          sum(increase(node_pressure_memory_stalled_seconds_total[1m]) * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0
+        for: 10m
+        labels:
+          severity: warning
+      - alert: NodeIOStalled
+        annotations:
+          message: |
+            {{ $labels.node }} IO is stalled {{ $value }} seconds / 1m.
+        expr: |
+          sum(increase(node_pressure_io_waiting_seconds_total[1m]) * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+      - alert: NodeIOFullStalled
+        annotations:
+          message: |
+            {{ $labels.node }} IO is full stalled {{ $value }} seconds / 1m.
+        expr: |
+          sum(increase(node_pressure_io_stalled_seconds_total[1m]) * on(namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+      - alert: NodeNetworkReceiveDropped
+        annotations:
+          message: |
+            Network receive packet of {{ $labels.node }} dropped {{ printf "%.2f" $value }} times / 1m.
+        expr: |
+          sum(increase(node_network_receive_drop_total[1m]) * on (namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0
+        for: 1m
+        labels:
+          severity: warning
+      - alert: NodeNetworkTransmitDropped
+        annotations:
+          message: |
+            Network transmit packet of {{ $labels.node }} dropped {{ printf "%.2f" $value }} times / 1m.
+        expr: |
+          sum(increase(node_network_transmit_drop_total[1m]) * on (namespace,pod) group_left(node) group(kube_pod_info{node!=""}) by (node,namespace,pod)) by (node) > 0
+        for: 1m
+        labels:
+          severity: warning

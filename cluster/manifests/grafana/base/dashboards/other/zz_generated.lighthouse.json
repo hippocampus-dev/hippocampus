@@ -1,0 +1,531 @@
+{
+   "annotations": {
+      "list": [
+         {
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "expr": "ALERTS{alertstate=\"firing\",severity=\"critical\"}",
+            "iconColor": "rgba(255, 96, 96, 1)",
+            "name": "Critical Alerts"
+         }
+      ]
+   },
+   "graphTooltip": 1,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 1,
+         "title": "Score",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": true
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "namespace"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Namespace"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "pod"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Pod"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "form_factor"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "FormFactor"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "url"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "URI"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "category"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Category"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.cellOptions",
+                        "value": {
+                           "type": "color-background"
+                        }
+                     },
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Score"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22avg%28lighthouse%5Fscore%7Bnamespace%3D%7E%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%7E%5C%22${__data.fields[\"pod\"]}%5C%22%2Cform%5Ffactor%3D%7E%5C%22${__data.fields[\"form_factor\"]}%5C%22%2Curl%3D%7E%5C%22${__data.fields[\"url\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%2Cform%5Ffactor%2Curl%2Ccategory%29%20%2A%20on%28namespace%2Cpod%2Cform%5Ffactor%2Curl%2Ccategory%29%20group%5Fleft%20group%28lighthouse%5Fscore%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%2Cform%5Ffactor%3D%5C%22${__data.fields[\"form_factor\"]}%5C%22%2Curl%3D%5C%22${__data.fields[\"url\"]}%5C%22%2Ccategory%3D%5C%22${__data.fields[\"category\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%2Cform%5Ffactor%2Curl%2Ccategory%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "max",
+                        "value": 100
+                     },
+                     {
+                        "id": "min",
+                        "value": 0
+                     },
+                     {
+                        "id": "thresholds",
+                        "value": {
+                           "mode": "absolute",
+                           "steps": [
+                              {
+                                 "color": "red",
+                                 "value": null
+                              },
+                              {
+                                 "color": "yellow",
+                                 "value": 30
+                              },
+                              {
+                                 "color": "green",
+                                 "value": 60
+                              }
+                           ]
+                        }
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24
+         },
+         "id": 2,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "avg(lighthouse_score{namespace=~\"${namespace}\",pod=~\"${pod}\",form_factor=~\"${form_factor}\",url=~\"${url}\"}) by (namespace,pod,form_factor,url,category)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "lighthouse_score{namespace=~\"$namespace\",pod=~\"$pod\",form_factor=~\"$form_factor\",url=~\"$url\"}",
+         "transformations": [
+            {
+               "id": "joinByField"
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 3,
+         "title": "Core Web Vitals",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 24
+         },
+         "id": 4,
+         "options": {
+            "content": "<div style=\"text-align: center\"><p><img src=\"https://web.dev/static/articles/lcp/image/good-lcp-values.svg?hl=ja\" style=\"height: 150px\" /></p><p>読み込みのパフォーマンスを測定するための指標です。<br>優れたユーザー エクスペリエンスを提供するためには、ページの読み込みが開始されてからの LCP を 2.5 秒以内にする必要があります。</p></div>",
+            "mode": "html"
+         },
+         "pluginVersion": "v10.4.0",
+         "title": "Largest Contentful Paint",
+         "transparent": true,
+         "type": "text"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "thresholdsStyle": {
+                     "mode": "area"
+                  }
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": null
+                     },
+                     {
+                        "color": "yellow",
+                        "value": 2500
+                     },
+                     {
+                        "color": "red",
+                        "value": 4000
+                     }
+                  ]
+               },
+               "unit": "ms"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24
+         },
+         "id": 5,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "avg(lighthouse_audit{namespace=~\"${namespace}\",pod=~\"${pod}\",form_factor=~\"${form_factor}\",url=~\"${url}\",id=\"largest-contentful-paint\"}) by (form_factor,url)",
+               "legendFormat": "LCP - {{ form_factor }}"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "avg(lighthouse_audit{namespace=~\"${namespace}\",pod=~\"${pod}\",form_factor=~\"${form_factor}\",url=~\"${url}\",id=\"server-response-time\"}) by (form_factor,url)",
+               "legendFormat": "SRT - {{ form_factor }}"
+            }
+         ],
+         "title": "Largest Contentful Paint / Server Response Time",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 24
+         },
+         "id": 6,
+         "options": {
+            "content": "<div style=\"text-align: center\"><p><img src=\"https://web.dev/static/articles/fid/image/good-fid-values-25.svg?hl=ja\" style=\"height: 150px\" /></p><p>インタラクティブ性を測定するための指標です。<br>優れたユーザー エクスペリエンスを提供するためには、ページの FID を 100 ミリ秒以下にする必要があります。</p></div>",
+            "mode": "html"
+         },
+         "pluginVersion": "v10.4.0",
+         "title": "First Input Delay",
+         "transparent": true,
+         "type": "text"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "thresholdsStyle": {
+                     "mode": "area"
+                  }
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": null
+                     },
+                     {
+                        "color": "yellow",
+                        "value": 100
+                     },
+                     {
+                        "color": "red",
+                        "value": 300
+                     }
+                  ]
+               },
+               "unit": "ms"
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24
+         },
+         "id": 7,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "avg(lighthouse_audit{namespace=~\"${namespace}\",pod=~\"${pod}\",form_factor=~\"${form_factor}\",url=~\"${url}\",id=\"max-potential-fid\"}) by (form_factor,url)",
+               "legendFormat": "FID - {{ form_factor }}"
+            }
+         ],
+         "title": "First Input Delay",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 24
+         },
+         "id": 8,
+         "options": {
+            "content": "<div style=\"text-align: center\"><p><img src=\"https://web.dev/static/articles/cls/image/good-cls-values.svg?hl=ja\" style=\"height: 150px\" /></p><p>視覚的な安定性を測定するための指標です。<br>優れたユーザー エクスペリエンスを提供するためには、ページの CLS を 0.1 以下に維持する必要があります。</p></div>",
+            "mode": "html"
+         },
+         "pluginVersion": "v10.4.0",
+         "title": "Cumulative Layout Shift",
+         "transparent": true,
+         "type": "text"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "thresholdsStyle": {
+                     "mode": "area"
+                  }
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": null
+                     },
+                     {
+                        "color": "yellow",
+                        "value": 0.10000000000000001
+                     },
+                     {
+                        "color": "red",
+                        "value": 0.25
+                     }
+                  ]
+               }
+            }
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24
+         },
+         "id": 9,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "avg(lighthouse_audit{namespace=~\"${namespace}\",pod=~\"${pod}\",form_factor=~\"${form_factor}\",url=~\"${url}\",id=\"cumulative-layout-shift\"}) by (form_factor,url)",
+               "legendFormat": "CLS - {{ form_factor }}"
+            }
+         ],
+         "title": "Cumulative Layout Shift",
+         "type": "timeseries"
+      }
+   ],
+   "schemaVersion": 36,
+   "templating": {
+      "list": [
+         {
+            "current": {
+               "selected": false,
+               "text": [
+                  "All"
+               ],
+               "value": [
+                  "All"
+               ]
+            },
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "namespace",
+            "query": "label_values(lighthouse_score, namespace)",
+            "type": "query"
+         },
+         {
+            "current": {
+               "selected": false,
+               "text": [
+                  "All"
+               ],
+               "value": [
+                  "All"
+               ]
+            },
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "pod",
+            "query": "label_values(lighthouse_score{namespace=\"$namespace\"}, pod)",
+            "type": "query"
+         },
+         {
+            "current": {
+               "selected": false,
+               "text": [
+                  "All"
+               ],
+               "value": [
+                  "All"
+               ]
+            },
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "form_factor",
+            "query": "label_values(lighthouse_score{namespace=\"$namespace\",pod=\"$pod\"}, form_factor)",
+            "type": "query"
+         },
+         {
+            "current": {
+               "selected": false,
+               "text": [
+                  "All"
+               ],
+               "value": [
+                  "All"
+               ]
+            },
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "url",
+            "query": "label_values(lighthouse_score{namespace=\"$namespace\",pod=\"$pod\",form_factor=~\"$form_factor\"}, url)",
+            "type": "query"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-1h",
+      "to": "now"
+   },
+   "timezone": "browser",
+   "title": "Lighthouse",
+   "uid": "lighthouse"
+}

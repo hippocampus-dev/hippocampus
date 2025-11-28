@@ -1,0 +1,63 @@
+name: Release/taurin
+on:
+  release:
+    types:
+      - created
+permissions:
+  contents: write
+jobs:
+  release:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: "--target aarch64-apple-darwin"
+          - platform: ubuntu-24.04
+            args: ""
+          - platform: windows-latest
+            args: ""
+    runs-on: ${{ matrix.platform }}
+    environment: deployment
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-taurin-${{ hashFiles('taurin/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-taurin-
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-taurin-packages-${{ hashFiles('taurin/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-taurin-packages-
+      - uses: actions/cache@v4
+        with:
+          path: taurin/src-tauri/target
+          key: ${{ runner.os }}-taurin-${{ hashFiles('taurin/src-tauri/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-taurin-
+      - uses: dtolnay/rust-toolchain@stable
+      - if: matrix.platform == 'ubuntu-24.04'
+        run: |
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: actions/checkout@v5
+      - run: |
+          npm ci
+        working-directory: taurin
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          releaseId: ${{ github.event.release.id }}
+          args: ${{ matrix.args }}
+          projectPath: taurin

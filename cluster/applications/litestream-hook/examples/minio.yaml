@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+spec:
+  serviceName: minio
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/component: minio
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: minio
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/kaidotio/hippocampus/mirror/minio/minio@sha256:1d3590f71cba0043aaadcec60eaa1055fa7c05aee51ec7039a0553ed4399f050
+          imagePullPolicy: IfNotPresent
+          args:
+            - server
+            - /var/minio
+          env:
+            - name: MINIO_ROOT_USER
+              value: minio
+            - name: MINIO_ROOT_PASSWORD
+              value: miniominio
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /var/minio
+      volumes:
+        - name: data
+          emptyDir:
+            medium: Memory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  selector:
+    app.kubernetes.io/component: minio
+  ports:
+    - name: http
+      port: 9000
+      protocol: TCP
+      targetPort: http
