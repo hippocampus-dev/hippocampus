@@ -1,0 +1,136 @@
+#!/bin/bash
+
+set -e
+
+if [ -z "$TMUX" ]; then
+  exit 1
+fi
+
+controlPlane=$(tmux run "echo #{pane_id}")
+
+DATA_PLANES=3
+
+ALLOWED_TOOLS="Task,Glob,Grep,LS,Read,Edit,MultiEdit,Write,TodoRead,TodoWrite,Bash(find:*),Bash(ls:*),Bash(grep:*),Bash(git:*)"
+
+PARENT_WORKTREE_NAME=claude-parent-$$
+PARENT_WORKTREE_PATH=$(pwd)/${PARENT_WORKTREE_NAME}
+WORKING_CONTEXT=$(git rev-parse --show-prefix)
+PARENT_WORKING_DIRECTORY=${PARENT_WORKTREE_PATH}/${WORKING_CONTEXT}
+
+git worktree add -b $PARENT_WORKTREE_NAME $PARENT_WORKTREE_PATH
+
+export CLAUDE_PARENT_WORKTREE_NAME=$PARENT_WORKTREE_NAME
+cd $PARENT_WORKING_DIRECTORY
+
+declare -a dataPlanes
+for i in $(seq 1 $DATA_PLANES); do
+  if [ $i -eq 1 ]; then
+    dataPlanes[$i]=$(tmux split-window -h -P -F "#{pane_id}")
+  else
+    dataPlanes[$i]=$(tmux split-window -v -P -F "#{pane_id}")
+  fi
+
+  t=$(mktemp)
+  cat <<EOS > $t
+# MOST IMPORTANT RULES
+あなたは複数のエージェントを司るコントロールプレーンから実行される子のエージェントです。
+コントロールプレーンから指示されたタスクを実施してください。
+
+タスクが完了したりエラーが発生したら以下のコマンドでコントロールプレーンに報告してください。
+- tmux send-keys -t ${controlPlane} "${dataPlanes[$i]}: <報告内容>" && sleep 0.1 && tmux send-keys -t ${controlPlane} C-m
+EOS
+
+  tmux send-keys "claude-with-worktree $@ --local-memory-file $t --disable-diff-view" C-m
+  sleep 1
+done
+
+for i in $(seq 1 $DATA_PLANES); do
+  tmux select-pane -t ${dataPlanes[$i]}
+  tmux resize-pane -y $(( 100 / $DATA_PLANES ))%
+done
+
+tmux select-pane -L
+
+cleanup() {
+  declare -a worktree_names
+  for i in $(seq 1 $DATA_PLANES); do
+    worktree_names[$i]="claude-worktree-$(tmux display-message -t ${dataPlanes[$i]} -p '#{pane_pid}')"
+  done
+
+  for i in $(seq 1 $DATA_PLANES); do
+    tmux send-keys -t ${dataPlanes[$i]} C-c
+    sleep 0.1
+    tmux send-keys -t ${dataPlanes[$i]} C-c
+    sleep 0.1
+    tmux send-keys -t ${dataPlanes[$i]} "N"
+    sleep 0.1
+    tmux send-keys -t ${dataPlanes[$i]} C-m
+    sleep 0.1
+    tmux send-keys -t ${dataPlanes[$i]} "N"
+    sleep 0.1
+    tmux send-keys -t ${dataPlanes[$i]} C-m
+    sleep 0.1
+    tmux kill-pane -t ${dataPlanes[$i]} 2>/dev/null || true
+  done
+
+  if [ -n "$PARENT_WORKTREE_NAME" ]; then
+    (
+      cd $PARENT_WORKTREE_PATH
+      STASHED=false
+      if ! git diff --quiet || ! git diff --staged --quiet; then
+        git stash
+        STASHED=true
+      fi
+
+      for i in $(seq 1 $DATA_PLANES); do
+        if git rev-parse --verify "${worktree_names[$i]}" >/dev/null 2>&1; then
+          if ! git merge "${worktree_names[$i]}"; then
+            claude "Git merge failed. Check the error message above and fix the issue. Common causes: conflicts (resolve and 'git add'), uncommitted changes ('git stash' or commit), untracked files (move/remove them). After fixing, run 'git merge --continue' or 'git merge --abort' to cancel." --allowedTools $ALLOWED_TOOLS --print < /dev/null
+          fi
+
+          (
+            cd $(git rev-parse --show-toplevel)
+            git worktree remove $(pwd)/${worktree_names[$i]} --force 2>/dev/null || true
+            git branch -D "${worktree_names[$i]}" 2>/dev/null || true
+          )
+        fi
+      done
+
+      if [ "$STASHED" == true ]; then
+        git stash pop
+      fi
+
+      cd $(git rev-parse --show-toplevel)
+      git worktree remove $PARENT_WORKTREE_PATH --force 2>/dev/null || true
+      git branch -D $PARENT_WORKTREE_NAME 2>/dev/null || true
+    )
+  fi
+}
+
+trap cleanup EXIT
+
+t=$(mktemp)
+cat <<EOS > $t
+# MOST IMPORTANT RULES
+あなたは複数のエージェントを司るコントロールプレーンです。
+必要に応じてタスクをいくつかの並列実行可能なサブタスクに分割し、それぞれのエージェントを協調させながらタスクを実施してください。
+あなたが直接的にタスクを実行することは禁止されています。
+
+以下のtmuxのpane idで子となるエージェントが動いています。
+EOS
+
+for i in $(seq 1 $DATA_PLANES); do
+  echo "- ${dataPlanes[$i]}" >> $t
+done
+
+cat <<EOS >> $t
+
+以下のコマンドで子のエージェントに指示できます。
+- tmux send-keys -t <pane id> "<指示内容>" && sleep 0.1 && tmux send-keys -t <pane id> C-m
+
+子のエージェントから以下のフォーマットで結果やエラーが報告されます。
+<pane id>: <報告内容>
+その際は、結果に応じて再度指示するか処理を完了するかを決定してください。
+EOS
+
+claude-with-worktree --local-memory-file $t --disable-diff-view $@

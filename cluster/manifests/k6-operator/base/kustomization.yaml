@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- custom_resource_definition.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+images:
+- digest: sha256:59cca9ba0b59e533de82facb39931afd04eb1bd12e5c55b49789dfc0770dc912
+  name: ghcr.io/grafana/k6-operator
+  newName: ghcr.io/kaidotio/hippocampus/mirror/ghcr.io/grafana/k6-operator

@@ -1,0 +1,27 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: nodeport-controller
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: nodeport-controller
+        path: /mutate
+        port: 9443
+    name: nodeport-controller.kaidotio.github.io
+    failurePolicy: Ignore
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        resources:
+          - nodes
+        scope: "*"
+        operations:
+          - CREATE
+          - DELETE

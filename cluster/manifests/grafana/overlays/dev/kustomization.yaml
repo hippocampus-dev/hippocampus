@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: grafana
+
+resources:
+- ../../base
+- cron_job.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+
+configMapGenerator:
+- files:
+  - files/datasource.yaml
+  name: datasources
+  options:
+    immutable: true
+images:
+- digest: sha256:4f2d2abd1fcec5b1a98d810b6d5262bd6e228088d2e3f255f93a8c665e6f54d8
+- digest: sha256:be9f7813b0bc8f6e1448c7ba6d285bdc26d7ae45c1ee14706560c230f8235cec
+  name: ghcr.io/kaidotio/hippocampus/headless-page-renderer
+  newName: ghcr.io/kaidotio/hippocampus/headless-page-renderer
+- digest: sha256:1478b27f75d22dfbec1f71ec555bebd07c51027966e9171a88fd6cd7682e1bd1
+  name: ghcr.io/kaidotio/hippocampus/realtime-search-exporter
+  newName: ghcr.io/kaidotio/hippocampus/realtime-search-exporter

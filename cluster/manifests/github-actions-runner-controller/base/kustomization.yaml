@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../../applications/github-actions-runner-controller/manifests
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/stateful_set.yaml
+
+images:
+- digest: sha256:d9abaa749d86ef59cc575ed09b720a28799898905ee7746d341abd1d8f84b051
+  name: bitnami/kubectl
+  newName: ghcr.io/kaidotio/hippocampus/mirror/bitnami/kubectl
+- digest: sha256:33c69a810cc314b55c9e1e218ab9eb1b39034b28b023234854f093a207a87154
+  name: registry
+  newName: ghcr.io/kaidotio/hippocampus/mirror/registry

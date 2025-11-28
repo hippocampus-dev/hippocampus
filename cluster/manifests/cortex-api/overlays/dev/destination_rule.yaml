@@ -1,0 +1,60 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cortex-api-redis
+spec:
+  exportTo:
+    - .
+  host: cortex-api-redis
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cortex-api-redis-haproxy
+spec:
+  exportTo:
+    - .
+  host: cortex-api-redis-haproxy
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: embedding-retrieval.embedding-retrieval.svc.cluster.local
+spec:
+  exportTo:
+    - .
+  host: embedding-retrieval.embedding-retrieval.svc.cluster.local
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 1s
+      baseEjectionTime: 1m
+      maxEjectionPercent: 100
+      minHealthPercent: 0
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname

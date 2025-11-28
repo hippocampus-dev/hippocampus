@@ -1,0 +1,112 @@
+name: Auto Fix CI Failures
+on:
+  workflow_run:
+    workflows:
+      - "*"
+    types:
+      - completed
+jobs:
+  auto-fix:
+    if: |
+      github.repository_owner == 'kaidotio' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      !startsWith(github.event.workflow_run.head_branch, 'claude/auto-fix-ci-')
+    timeout-minutes: 10
+    runs-on: [self-hosted, local]
+    env:
+      GIT_CONFIG_GLOBAL: /tmp/gitconfig
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    steps:
+      - id: check-previous
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const workflow_id = context.payload.workflow_run.workflow_id;
+            const current_run_id = context.payload.workflow_run.id;
+            const branch = context.payload.workflow_run.head_branch;
+
+            const { data: branchData } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow_id,
+              branch: branch,
+              per_page: 5,
+            });
+
+            const previous_branch_run = branchData.workflow_runs.find(run => run.id !== current_run_id && run.conclusion !== null);
+
+            if (previous_branch_run) {
+              core.setOutput("should_run", previous_branch_run.conclusion === "success" ? "true" : "false");
+              return;
+            }
+
+            const { data: allData } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow_id,
+              per_page: 5,
+            });
+
+            const previous_all_run = allData.workflow_runs.find(run => run.id !== current_run_id && run.conclusion !== null);
+
+            if (!previous_all_run) {
+              core.setOutput("should_run", "true");
+              return;
+            }
+
+            core.setOutput("should_run", previous_all_run.conclusion === "success" ? "true" : "false");
+      - if: steps.check-previous.outputs.should_run == 'true'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - if: steps.check-previous.outputs.should_run == 'true'
+        id: branch
+        run: |
+          git fetch origin ${{ github.event.workflow_run.head_branch }}
+
+          BRANCH_NAME=claude/auto-fix-ci-${{ github.event.workflow_run.head_branch }}-${{ github.run_id }}
+
+          git config --global user.name "kaidotio"
+          git config --global user.email "kaidotio@gmail.com"
+
+          git checkout -b $BRANCH_NAME
+
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      - if: steps.check-previous.outputs.should_run == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          additional_permissions: |
+            actions: read
+          prompt: |
+            # Task
+
+            Fix CI failures for workflow ${{ github.event.workflow_run.id }} on branch ${{ github.event.workflow_run.head_branch }}.
+
+            ## Objectives
+
+            1. Identify the root cause of CI failures
+            2. Implement minimal fixes to resolve the failures
+            3. Ensure changes are safe and do not introduce new issues
+
+            ## Process
+
+            - Use `gh run view ${{ github.event.workflow_run.id }} --log-failed` to get failure details
+            - Analyze error messages and identify affected files
+            - Make targeted fixes to resolve the specific failures
+            - Verify the fix addresses the root cause
+            - Commit changes and push to the current branch
+            - Create a pull request targeting ${{ github.event.workflow_run.head_branch }}
+
+            ## Important
+
+            - Make minimal changes necessary to fix the CI
+            - Do not refactor or improve unrelated code
+            - Ensure all changes are safe and reversible
+            - Always create a PR with a descriptive title and summary of fixes
+          claude_args: |
+            --allowedTools "Task,Glob,Grep,LS,Read,Edit,MultiEdit,Write,Bash(find:*),Bash(ls:*),Bash(grep:*),Bash(git:*),Bash(gh:*)"

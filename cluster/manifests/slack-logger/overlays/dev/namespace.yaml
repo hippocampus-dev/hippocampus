@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: slack-logger
+  labels:
+    name: slack-logger
+    pod-security.kubernetes.io/enforce: baseline

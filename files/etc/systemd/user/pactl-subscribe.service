@@ -1,0 +1,11 @@
+[Unit]
+Requires=pulseaudio.service
+After=pulseaudio.service
+
+[Service]
+Restart=always
+
+ExecStart=/usr/local/bin/pactl-subscribe.sh
+
+[Install]
+WantedBy=default.target

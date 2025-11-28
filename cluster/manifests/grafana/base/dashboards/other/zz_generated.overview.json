@@ -1,0 +1,718 @@
+{
+   "annotations": {
+      "list": [
+         {
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "expr": "ALERTS{alertstate=\"firing\",severity=\"critical\"}",
+            "iconColor": "rgba(255, 96, 96, 1)",
+            "name": "Critical Alerts"
+         }
+      ]
+   },
+   "graphTooltip": 1,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 1,
+         "title": "Summary",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "alertname"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Name"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28ALERTS%7Balertstate%3D%5C%22firing%5C%22%7D%29%20by%20%28alertname%29%20%2A%20on%28alertname%29%20group%5Fleft%20group%28ALERTS%7Balertname%3D%5C%22${__data.fields[\"alertname\"]}%5C%22%7D%29%20by%20%28alertname%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 4,
+            "w": 24
+         },
+         "id": 2,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(ALERTS{alertstate=\"firing\"}) by (alertname)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Alerts",
+         "transformations": [
+            {
+               "id": "joinByField"
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "cluster_name"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Cluster Name"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28envoy%5Fcluster%5Foutlier%5Fdetection%5Fejections%5Factive%20%3E%200%29%20by%20%28cluster%5Fname%29%20%2A%20on%28cluster%5Fname%29%20group%5Fleft%20group%28envoy%5Fcluster%5Foutlier%5Fdetection%5Fejections%5Factive%7Bcluster%5Fname%3D%5C%22${__data.fields[\"cluster_name\"]}%5C%22%7D%29%20by%20%28cluster%5Fname%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 4,
+            "w": 24
+         },
+         "id": 3,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(envoy_cluster_outlier_detection_ejections_active > 0) by (cluster_name)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Circuit Breaker",
+         "transformations": [
+            {
+               "id": "joinByField"
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "w"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Workload"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Drill down",
+                              "tooltip": "Drill down",
+                              "type": "link",
+                              "url": "/d/workload/workload?var-namespace=${__data.fields[\"destination_workload_namespace\"]}&var-workload=${__data.fields[\"destination_workload\"]}&from=${__from}&to=${__to}"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "destination_workload_namespace"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "destination_workload"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #A"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "RPS"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28istio%5Frequests%5Ftotal%5B%24%5F%5Frange%5D%29%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20%2A%20on%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20group%5Fleft%20group%28istio%5Frequests%5Ftotal%7Bdestination%5Fworkload%5Fnamespace%3D%5C%22${__data.fields[\"destination_workload_namespace\"]}%5C%22%2Cdestination%5Fworkload%3D%5C%22${__data.fields[\"destination_workload\"]}%5C%22%7D%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "reqps"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #B"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Errors"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28istio%5Frequests%5Ftotal%7Bresponse%5Fcode%3D%7E%5C%22%28500%7C502%7C503%7C504%29%5C%22%7D%5B%24%5F%5Frange%5D%29%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20%2A%20on%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20group%5Fleft%20group%28istio%5Frequests%5Ftotal%7Bdestination%5Fworkload%5Fnamespace%3D%5C%22${__data.fields[\"destination_workload_namespace\"]}%5C%22%2Cdestination%5Fworkload%3D%5C%22${__data.fields[\"destination_workload\"]}%5C%22%7D%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "reqps"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #C"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "P50 Latency"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28histogram%5Fquantile%280%2E5%2C%20rate%28istio%5Frequest%5Fduration%5Fmilliseconds%5Fbucket%5B%24%5F%5Frange%5D%29%29%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20%2A%20on%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20group%5Fleft%20group%28istio%5Frequests%5Ftotal%7Bdestination%5Fworkload%5Fnamespace%3D%5C%22${__data.fields[\"destination_workload_namespace\"]}%5C%22%2Cdestination%5Fworkload%3D%5C%22${__data.fields[\"destination_workload\"]}%5C%22%7D%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "ms"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #D"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "P90 Latency"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28histogram%5Fquantile%280%2E5%2C%20rate%28istio%5Frequest%5Fduration%5Fmilliseconds%5Fbucket%5B%24%5F%5Frange%5D%29%29%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20%2A%20on%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%20group%5Fleft%20group%28istio%5Frequests%5Ftotal%7Bdestination%5Fworkload%5Fnamespace%3D%5C%22${__data.fields[\"destination_workload_namespace\"]}%5C%22%2Cdestination%5Fworkload%3D%5C%22${__data.fields[\"destination_workload\"]}%5C%22%7D%29%20by%20%28destination%5Fworkload%5Fnamespace%2Cdestination%5Fworkload%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "ms"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 12,
+            "w": 24
+         },
+         "id": 4,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(istio_requests_total[$__range])) by (destination_workload_namespace,destination_workload) * on(destination_workload_namespace,destination_workload) group_left(w) group(label_join(istio_requests_total, \"w\", \"/\", \"destination_workload_namespace\", \"destination_workload\")) by (destination_workload_namespace,destination_workload,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(istio_requests_total{response_code=~\"(500|502|503|504)\"}[$__range])) by (destination_workload_namespace,destination_workload) * on(destination_workload_namespace,destination_workload) group_left(w) group(label_join(istio_requests_total, \"w\", \"/\", \"destination_workload_namespace\", \"destination_workload\")) by (destination_workload_namespace,destination_workload,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(histogram_quantile(0.5, rate(istio_request_duration_milliseconds_bucket[$__range]))) by (destination_workload_namespace,destination_workload) * on(destination_workload_namespace,destination_workload) group_left(w) group(label_join(istio_requests_total, \"w\", \"/\", \"destination_workload_namespace\", \"destination_workload\")) by (destination_workload_namespace,destination_workload,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(histogram_quantile(0.5, rate(istio_request_duration_milliseconds_bucket[$__range]))) by (destination_workload_namespace,destination_workload) * on(destination_workload_namespace,destination_workload) group_left(w) group(label_join(istio_requests_total, \"w\", \"/\", \"destination_workload_namespace\", \"destination_workload\")) by (destination_workload_namespace,destination_workload,w)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Requests",
+         "transformations": [
+            {
+               "id": "joinByField",
+               "options": {
+                  "byField": "w",
+                  "mode": "outer"
+               }
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "w"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Workload"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Drill down",
+                              "tooltip": "Drill down",
+                              "type": "link",
+                              "url": "/d/workload/workload?var-namespace=${__data.fields[\"source_workload_namespace\"]}&var-workload=${__data.fields[\"source_workload\"]}&from=${__from}&to=${__to}"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "source_workload_namespace"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "source_workload"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "RPS"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28istio%5Frequests%5Ftotal%7Bdestination%5Fservice%5Fname%3D%5C%22BlackHoleCluster%5C%22%7D%5B%24%5F%5Frange%5D%29%29%20by%20%28source%5Fworkload%5Fnamespace%2Csource%5Fworkload%2Cdestination%5Fservice%29%20%2A%20on%28source%5Fworkload%5Fnamespace%2Csource%5Fworkload%29%20group%5Fleft%20group%28istio%5Frequests%5Ftotal%7Bsource%5Fworkload%5Fnamespace%3D%5C%22${__data.fields[\"source_workload_namespace\"]}%5C%22%2Csource%5Fworkload%3D%5C%22${__data.fields[\"source_workload\"]}%5C%22%7D%29%20by%20%28source%5Fworkload%5Fnamespace%2Csource%5Fworkload%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "reqps"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 6,
+            "w": 24
+         },
+         "id": 5,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(istio_requests_total{destination_service_name=\"BlackHoleCluster\"}[$__range])) by (source_workload_namespace,source_workload) * on(source_workload_namespace,source_workload) group_left(w) group(label_join(istio_requests_total, \"w\", \"/\", \"source_workload_namespace\", \"source_workload\")) by (source_workload_namespace,source_workload,w)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Blackhole Requests",
+         "transformations": [
+            {
+               "id": "joinByField",
+               "options": {
+                  "byField": "w",
+                  "mode": "outer"
+               }
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+         },
+         "id": 6,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_node_labels) by (node)",
+               "legendFormat": "{{ node }}"
+            }
+         ],
+         "title": "Nodes",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+         },
+         "id": 7,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(increase(kube_events_total{reason=\"Preempted\"}[$__interval])) by (reason)",
+               "legendFormat": "{{ reason }}"
+            }
+         ],
+         "title": "Preempted Pods",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 8
+         },
+         "id": 8,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(loc{type!=\"Total\"}) by (repository,type)",
+               "legendFormat": "{{ repository }} {{ type }}"
+            }
+         ],
+         "title": "LOC",
+         "type": "timeseries"
+      }
+   ],
+   "schemaVersion": 36,
+   "time": {
+      "from": "now-1d",
+      "to": "now"
+   },
+   "timezone": "browser",
+   "title": "Overview",
+   "uid": "overview"
+}

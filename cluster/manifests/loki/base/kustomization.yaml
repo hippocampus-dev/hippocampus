@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/nginx.conf
+  name: loki-proxy
+  options:
+    immutable: true
+
+images:
+- digest: sha256:2cbddd6e199a2ddeee13573d91f11e54d9c8fa432f44c578d3c55b9a93278c9f
+  name: grafana/loki
+  newName: ghcr.io/kaidotio/hippocampus/mirror/grafana/loki
+- digest: sha256:c20cc0fb2627491f6d0c6eb08eb3a0f892c26effd559607742128b65f11436e1
+  name: nginx
+  newName: ghcr.io/kaidotio/hippocampus/mirror/nginx

@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: tauri-releases
+spec:
+  gateways:
+    - tauri-releases
+  hosts:
+    - tauri-releases.minikube.127.0.0.1.nip.io
+    - tauri-releases.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: tauri-releases
+            port:
+              number: 8080

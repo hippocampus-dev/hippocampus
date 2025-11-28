@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-eventing
+  labels:
+    name: knative-eventing
+    pod-security.kubernetes.io/enforce: baseline
