@@ -7,6 +7,9 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
+- digest: sha256:680f5b7dc18721ffe2808447bcf28ae99354e50511c481583b9bababed06af68
+  name: ghcr.io/hippocampus-dev/hippocampus/url-shortener
+  newName: ghcr.io/hippocampus-dev/hippocampus/url-shortener
 - digest: sha256:9ad1c339888d67ebdde42b06c9186b190fa528ff03f22bf9606a501af7757c7b
   name: ghcr.io/kaidotio/hippocampus/url-shortener
   newName: ghcr.io/kaidotio/hippocampus/url-shortener
