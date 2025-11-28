@@ -8,6 +8,9 @@ resources:
 - service.yaml
 images:
 - digest: sha256:566cbe1e561949376e8e698443d2596e7a05d46ce5fc6ea32a61946827971e39
+- digest: sha256:881ad336ae7b7dfe83c474b5a1c9e31f45df523895d116d0d8f3cd4fdc803346
+  name: ghcr.io/hippocampus-dev/hippocampus/reporting-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/reporting-server
 - digest: sha256:11aa4a930410b75267acd321e54cfff11fbbf82e54570277cbf2e9270c651a84
   name: ghcr.io/kaidotio/hippocampus/reporting-server
   newName: ghcr.io/kaidotio/hippocampus/reporting-server
