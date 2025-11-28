@@ -29,6 +29,9 @@ patches:
 generators:
 - secrets_from_vault.yaml
 images:
+- digest: sha256:0ffa36590bf87d4a0368ab8f1349d990bf6c6e1ccf7ed71eac93bfd3b67a25db
+  name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
 - digest: sha256:7362f854386499bc066b4bdc9b527612d8ef79a63bff6fa716ea806eb738a35e
   name: ghcr.io/kaidotio/hippocampus/chrome-devtools-protocol-server
   newName: ghcr.io/kaidotio/hippocampus/chrome-devtools-protocol-server
