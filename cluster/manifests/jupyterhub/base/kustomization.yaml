@@ -18,6 +18,9 @@ configMapGenerator:
   options:
     immutable: true
 images:
+- digest: sha256:f66260a3e38447b20a72c14f8868ed5cb3f934480b55b475544e490264b09939
+  name: ghcr.io/hippocampus-dev/hippocampus/configurable-http-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/configurable-http-proxy
 - digest: sha256:82ef4352f56b35398f04d9dd2fd918175b980529056c61d25436c7a1755c7104
   name: ghcr.io/kaidotio/hippocampus/configurable-http-proxy
   newName: ghcr.io/kaidotio/hippocampus/configurable-http-proxy
