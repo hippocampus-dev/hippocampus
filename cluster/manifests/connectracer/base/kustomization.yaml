@@ -5,6 +5,9 @@ resources:
 - daemon_set.yaml
 - pod_disruption_budget.yaml
 images:
+- digest: sha256:fd215d83949c1c0cd0e85e9a4c8b35783ed50e111a8168f09b0b6aba021d2992
+  name: ghcr.io/hippocampus-dev/hippocampus/connectracer
+  newName: ghcr.io/hippocampus-dev/hippocampus/connectracer
 - digest: sha256:b4f131f39937113886bc41cc9daa7107695554d8bb04b0e7642223f1affd0ace
   name: ghcr.io/kaidotio/hippocampus/connectracer
   newName: ghcr.io/kaidotio/hippocampus/connectracer
