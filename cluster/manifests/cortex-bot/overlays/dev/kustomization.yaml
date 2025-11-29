@@ -26,6 +26,9 @@ patches:
 generators:
 - secrets_from_vault.yaml
 images:
+- digest: sha256:aa5835f73ac81e10c8306622edde8c45fb77e02340e2f4988cca2f10ae365632
+  name: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
+  newName: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
 - digest: sha256:7362f854386499bc066b4bdc9b527612d8ef79a63bff6fa716ea806eb738a35e
   name: ghcr.io/kaidotio/hippocampus/chrome-devtools-protocol-server
   newName: ghcr.io/kaidotio/hippocampus/chrome-devtools-protocol-server
