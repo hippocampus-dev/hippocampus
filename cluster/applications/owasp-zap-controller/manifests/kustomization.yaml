@@ -13,6 +13,6 @@ resources:
 - service.yaml
 
 images:
-- digest: sha256:fc6bc11a01d6f4225625bdb3451d51f27f096131f4166caf39c3fb7148486016
+- digest: sha256:75bbf99f90acf671c7d6c05471b9fb2392671c3e6f540f7ead230dad6c2fc118
   name: ghcr.io/hippocampus-dev/hippocampus/owasp-zap-controller
   newName: ghcr.io/hippocampus-dev/hippocampus/owasp-zap-controller
