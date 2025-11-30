@@ -5,6 +5,6 @@ resources:
 - deployment.yaml
 - service.yaml
 images:
-- digest: sha256:e1bf603dcd285960a730b742e3d7c7375c22e4d30b32f43450120adc08395d99
+- digest: sha256:15d994435fb0730777736a405b72d59d5a113ff0f491315786bf831e43068f05
   name: ghcr.io/hippocampus-dev/hippocampus/realtime-search-exporter
   newName: ghcr.io/hippocampus-dev/hippocampus/realtime-search-exporter
