@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:d5bbaa5679635df1746fca5d63cf966ee2031d3b475e5d7ac3b80a702cdd5a4f
+- digest: sha256:303110a8a01b759c42b602a7f5b29ef4a29f1755454001a0a94c105c6d41b9af
   name: ghcr.io/hippocampus-dev/hippocampus/libsodium-encryptor
   newName: ghcr.io/hippocampus-dev/hippocampus/libsodium-encryptor
