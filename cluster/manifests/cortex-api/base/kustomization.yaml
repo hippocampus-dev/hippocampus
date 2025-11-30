@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:df7afba423372292d56404b1d6f55dc4cad3b7ee45e4c516b73bb491cd6a831e
+- digest: sha256:c4272074d03ba7f7d73fd36cfcede38c6b0f9db32181b47bfac98d0b8a9a75d1
   name: ghcr.io/hippocampus-dev/hippocampus/cortex-api
   newName: ghcr.io/hippocampus-dev/hippocampus/cortex-api
