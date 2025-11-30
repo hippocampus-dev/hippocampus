@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:5f7e162db90aacc6f3ca08ec2f8d87ae4ea857eba5fe5aa531b2e297101c4506
+- digest: sha256:55158f6218a854e1a1a4062ada2920339b4fcb2eb7e080d37c8c0b64eb17412b
   name: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy
