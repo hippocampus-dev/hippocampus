@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:8cb29f068823ed0b699e3aea5b9f8ee35504ada83779eb26d99ed34fb58ad23b
+- digest: sha256:71655a00b3a89bfc77727c0cfa77d77bffbd706ba2e91e48fa5d1d17e747cbaf
   name: ghcr.io/hippocampus-dev/hippocampus/github-token-server
   newName: ghcr.io/hippocampus-dev/hippocampus/github-token-server
