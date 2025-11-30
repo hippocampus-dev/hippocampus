@@ -10,6 +10,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:256a3fd026f9753f8acc741cd1a20aadd9eee7885914bf940b4c9e51580ef8fc
+- digest: sha256:f2cc9b043910563968fa584223165abcb6e33e2632641e0a978f784991326899
   name: ghcr.io/hippocampus-dev/hippocampus/litestream-hook
   newName: ghcr.io/hippocampus-dev/hippocampus/litestream-hook
