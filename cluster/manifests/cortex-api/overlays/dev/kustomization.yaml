@@ -32,7 +32,7 @@ images:
 - digest: sha256:7362f854386499bc066b4bdc9b527612d8ef79a63bff6fa716ea806eb738a35e
   name: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
   newName: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
-- digest: sha256:40e002bc472b1ee84d7398bb59396f165ca77cff65189142e6f51183920a0c4b
+- digest: sha256:a90e195d24f120daa8f22a451202d022ee3f740176c9028cb2e391e9e83dd25b
   name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
 - digest: sha256:2149a23902d01a13e1fa5bda87fc3c4e3594d2731f5ded047e4dbfe90b32e002
