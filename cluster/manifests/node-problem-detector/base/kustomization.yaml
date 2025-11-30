@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- daemon_set.yaml
+- pod_disruption_budget.yaml
+
+configMapGenerator:
+- files:
+  - files/kernel-monitor.json
+  name: node-problem-detector
+images:
+- digest: sha256:0ce71ef6d759425d22b10e65b439749fe5d13377a188e2fc060b731cdb4e6901
+  name: registry.k8s.io/node-problem-detector/node-problem-detector
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/registry.k8s.io/node-problem-detector/node-problem-detector

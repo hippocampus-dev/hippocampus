@@ -1,0 +1,118 @@
+name: jsonnet
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - .github/workflows/90_jsonnet.yaml
+      - cluster/manifests/grafana/jsonnetfile.json
+      - cluster/manifests/grafana/jsonnetfile.lock.json
+      - cluster/manifests/grafana/jsonnet/**
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  pull-requests: write
+env:
+  SHARDS: 5
+jobs:
+  map:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: true
+      matrix:
+        shards: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          git fetch origin ${{ github.base_ref }}
+          tasks=()
+          makeAll=0
+          git diff origin/${{ github.base_ref }} --name-only --diff-filter=d | while IFS= read -r file; do
+            if [[ $file == .github/workflows/90_jsonnet.yaml ]] || [[ $file == cluster/manifests/grafana/jsonnetfile.json ]] || [[ $file == cluster/manifests/grafana/jsonnetfile.lock.json ]]; then
+              makeAll=1
+              break
+            elif [[ $file == cluster/manifests/grafana/jsonnet/**/*.libsonnet ]]; then
+              grep -l -E "import \".*$(basename $file)\"" -r jsonnet | while IFS= read -r importedFile; do
+                tasks+=($(echo $importedFile | sed -r 's|jsonnet/||' | sed -r 's|([^/]+).jsonnet|zz_generated.\1.json|'))
+              done
+            elif [[ $file == cluster/manifests/grafana/jsonnet/**/*.jsonnet ]]; then
+              relativePath=${file#cluster/manifests/grafana/}
+              tasks+=($(echo $relativePath | sed -r 's|jsonnet/||' | sed -r 's|([^/]+).jsonnet|zz_generated.\1.json|'))
+            fi
+          done
+
+          if [ $makeAll -eq 1 ]; then
+            find jsonnet -type f -name '*.jsonnet' | sed -r 's|jsonnet/||' | sed -r 's|([^/]+).jsonnet|zz_generated.\1.json|' | while IFS= read -r jsonnetFile; do
+              tasks+=($jsonnetFile)
+            done
+          fi
+
+          if [ ${#tasks[@]} -eq 0 ]; then
+            exit 0
+          fi
+
+          t=$(mktemp)
+          i=0
+          echo "${tasks[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | while IFS= read -r task; do
+            if [ $((i % SHARDS)) -eq ${{ matrix.shards }} ]; then
+              echo $task >> $t
+            fi
+            i=$((i + 1))
+          done
+
+          if [ $(wc -l < $t) -eq 0 ]; then
+            exit 0
+          fi
+
+          make install
+          make -j4 $(cat $t)
+
+          git config --global user.email "kaidotio@gmail.com"
+          git config --global user.name "kaidotio"
+          branch=${{ github.head_ref }}-jsonnet-${{ matrix.shards }}
+          git fetch origin ${{ github.head_ref }}
+          git checkout -b ${branch} origin/${{ github.head_ref }}
+
+          git add .
+          if git commit -m "Map ${{ matrix.shards }}"; then
+            git push -f origin ${branch}
+          fi
+        working-directory: cluster/manifests/grafana
+  reduce:
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    needs: map
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          git config --global user.name "kaidotio"
+          git config --global user.email "kaidotio@gmail.com"
+          git fetch origin ${{ github.head_ref }}
+          git checkout ${{ github.head_ref }}
+
+          for ((i=0; i<SHARDS; i++)); do
+            branch=${{ github.head_ref }}-jsonnet-$i
+            if git fetch origin ${branch}; then
+              git merge --squash --no-commit origin/${branch}
+              git push origin :${branch}
+            fi
+          done
+
+          echo ${{ github.base_ref }}
+          if git commit -m "Make all"; then
+            git fetch origin ${{ github.base_ref }}
+            git rebase origin/${{ github.base_ref }}
+            git push origin ${{ github.head_ref }}
+          fi

@@ -1,0 +1,95 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: pyroscope-distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: distributor
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: pyroscope-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: querier
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: pyroscope-query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-frontend
+  mtls:
+      mode: STRICT
+  portLevelMtls:
+    "4040":
+      mode: PERMISSIVE # querier
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: pyroscope-query-scheduler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-scheduler
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "4040":
+      mode: PERMISSIVE # querier,query-frontend
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: pyroscope-compactor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: compactor
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: pyroscope-index-gateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: index-gateway
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "4040":
+      mode: PERMISSIVE # querier
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: pyroscope-ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: ingester
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "4040":
+      mode: PERMISSIVE # distributor,querier

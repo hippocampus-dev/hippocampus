@@ -1,0 +1,25 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: github-token-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: github-token-server
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - runner
+      when:
+        - key: request.auth.claims[iss]
+          values:
+            - https://token.actions.githubusercontent.com
+        - key: request.auth.claims[job_workflow_ref]
+          values:
+            - hippocampus-dev/hippocampus/.github/workflows/reusable_issue-github-token.yaml@refs/heads/mai
+      to:
+        - operation:
+            paths:
+              - /repos/hippocampus-dev/hippocampus/access_tokens?profile=reader

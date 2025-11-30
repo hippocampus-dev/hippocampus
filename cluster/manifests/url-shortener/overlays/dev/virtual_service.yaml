@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: url-shortener
+spec:
+  gateways:
+    - url-shortener
+  hosts:
+    - url-shortener.minikube.127.0.0.1.nip.io
+    - url-shortener.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: url-shortener
+            port:
+              number: 8080

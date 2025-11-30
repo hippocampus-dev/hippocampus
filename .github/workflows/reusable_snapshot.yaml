@@ -1,0 +1,168 @@
+name: Snapshot
+permissions:
+  contents: read
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        required: false
+        type: string
+        default: '["ubuntu-24.04"]'
+      baseline:
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+      screenshot-format:
+        required: false
+        type: string
+        default: jpeg
+      baseline-mask-selectors:
+        required: false
+        type: string
+        default: ""
+      target-mask-selectors:
+        required: false
+        type: string
+        default: ""
+      baseline-headers:
+        required: false
+        type: string
+        default: "{}"
+      target-headers:
+        required: false
+        type: string
+        default: "{}"
+      screenshot-diff-format:
+        required: false
+        type: string
+        default: pixel
+      html-diff-format:
+        required: false
+        type: string
+        default: line
+      viewport-width:
+        required: false
+        type: number
+        default: 1920
+      viewport-height:
+        required: false
+        type: number
+        default: 1080
+      retention-days:
+        required: false
+        type: number
+        default: 7
+      artifact-name:
+        required: false
+        type: string
+        default: ""
+    outputs:
+      baselineScreenshotPath:
+        value: ${{ jobs.snapshot.outputs.baselineScreenshotPath }}
+      targetScreenshotPath:
+        value: ${{ jobs.snapshot.outputs.targetScreenshotPath }}
+      screenshotDiffPath:
+        value: ${{ jobs.snapshot.outputs.screenshotDiffPath }}
+      screenshotDiffAmount:
+        value: ${{ jobs.snapshot.outputs.screenshotDiffAmount }}
+      baselineHtmlPath:
+        value: ${{ jobs.snapshot.outputs.baselineHtmlPath }}
+      targetHtmlPath:
+        value: ${{ jobs.snapshot.outputs.targetHtmlPath }}
+      htmlDiffPath:
+        value: ${{ jobs.snapshot.outputs.htmlDiffPath }}
+      htmlDiffAmount:
+        value: ${{ jobs.snapshot.outputs.htmlDiffAmount }}
+      artifactName:
+        value: ${{ jobs.snapshot.outputs.artifactName }}
+jobs:
+  snapshot:
+    timeout-minutes: 10
+    runs-on: ${{ fromJson(inputs.runs-on) }}
+    outputs:
+      baselineScreenshotPath: ${{ steps.capture-baseline.outputs.screenshotPath }}
+      targetScreenshotPath: ${{ steps.capture-target.outputs.screenshotPath }}
+      screenshotDiffPath: ${{ steps.diff-screenshot.outputs.diffPath }}
+      screenshotDiffAmount: ${{ steps.diff-screenshot.outputs.diffAmount }}
+      baselineHTMLPath: ${{ steps.capture-baseline.outputs.htmlPath }}
+      targetHTMLPath: ${{ steps.capture-target.outputs.htmlPath }}
+      htmlDiffPath: ${{ steps.diff-html.outputs.diffPath }}
+      htmlDiffAmount: ${{ steps.diff-html.outputs.diffAmount }}
+      artifactName: ${{ steps.artifact.outputs.name }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - id: encode
+        run: |
+          ENCODED=$(echo -n "${{ inputs.baseline }}-${{ inputs.target }}_${{ inputs.viewport-width }}x${{ inputs.viewport-height }}" | sha256sum | awk '{print $1}')
+          echo "encoded=${ENCODED}" >> $GITHUB_OUTPUT
+      - id: artifact
+        run: |
+          if [ "${{ inputs.artifact-name }}" == "" ]; then
+            echo "name=result-${{ steps.encode.outputs.encoded }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=${{ inputs.artifact-name }}" >> $GITHUB_OUTPUT
+          fi
+      - id: capture-baseline
+        uses: ./cluster/applications/snapshot-controller/.github/actions/capture
+        env:
+          DIRECTORY: .snapshot
+          FORMAT: ${{ inputs.screenshot-format }}
+          MASK_SELECTORS: ${{ inputs.baseline-mask-selectors }}
+          HEADERS: ${{ inputs.baseline-headers }}
+          VIEWPORT_WIDTH: ${{ inputs.viewport-width }}
+          VIEWPORT_HEIGHT: ${{ inputs.viewport-height }}
+        with:
+          url: ${{ inputs.baseline }}
+      - id: capture-target
+        uses: ./cluster/applications/snapshot-controller/.github/actions/capture
+        env:
+          DIRECTORY: .snapshot
+          FORMAT: ${{ inputs.screenshot-format }}
+          MASK_SELECTORS: ${{ inputs.target-mask-selectors }}
+          HEADERS: ${{ inputs.target-headers }}
+          VIEWPORT_WIDTH: ${{ inputs.viewport-width }}
+          VIEWPORT_HEIGHT: ${{ inputs.viewport-height }}
+        with:
+          url: ${{ inputs.target }}
+      - id: diff-screenshot
+        uses: ./cluster/applications/snapshot-controller/.github/actions/diff
+        env:
+          DIRECTORY: .snapshot
+          FORMAT: ${{ inputs.screenshot-diff-format }}
+        with:
+          baseline: ${{ steps.capture-baseline.outputs.screenshotPath }}
+          target: ${{ steps.capture-target.outputs.screenshotPath }}
+      - id: diff-html
+        uses: ./cluster/applications/snapshot-controller/.github/actions/diff
+        env:
+          DIRECTORY: .snapshot
+          FORMAT: ${{ inputs.html-diff-format }}
+        with:
+          baseline: ${{ steps.capture-baseline.outputs.htmlPath }}
+          target: ${{ steps.capture-target.outputs.htmlPath }}
+      - run: |
+          # https://github.com/orgs/community/discussions/17245
+          cat <<EOS > .snapshot/output.json
+          {
+            "baselineScreenshotPath": "${{ steps.capture-baseline.outputs.screenshotPath }}",
+            "targetScreenshotPath": "${{ steps.capture-target.outputs.screenshotPath }}",
+            "screenshotDiffPath": "${{ steps.diff-screenshot.outputs.diffPath }}",
+            "screenshotDiffAmount": "${{ steps.diff-screenshot.outputs.diffAmount }}",
+            "baselineHtmlPath": "${{ steps.capture-baseline.outputs.htmlPath }}",
+            "targetHtmlPath": "${{ steps.capture-target.outputs.htmlPath }}",
+            "htmlDiffPath": "${{ steps.diff-html.outputs.diffPath }}",
+            "htmlDiffAmount": "${{ steps.diff-html.outputs.diffAmount }}"
+          }
+          EOS
+      - uses: actions/upload-artifact@v5
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: |
+            .snapshot
+          retention-days: ${{ inputs.retention-days }}
+          include-hidden-files: true
