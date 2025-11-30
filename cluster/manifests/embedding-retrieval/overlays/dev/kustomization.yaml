@@ -24,7 +24,7 @@ patches:
 generators:
 - secrets_from_vault.yaml
 images:
-- digest: sha256:f8ccf826af4fcd35274570f2e17f8b850c37415531e8d7f229b4e78a3257cbbe
+- digest: sha256:e42e7f5751d6bd2ddba4aba22143fead1a018c5e4d8a12d597afc9da3b78a83a
   name: ghcr.io/hippocampus-dev/hippocampus/tcp-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/tcp-proxy
 - digest: sha256:2149a23902d01a13e1fa5bda87fc3c4e3594d2731f5ded047e4dbfe90b32e002
