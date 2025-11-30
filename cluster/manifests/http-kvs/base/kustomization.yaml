@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:2612beed8db7b47545902de474cbaa45bfed85ebbd276826f22e95f3995992ce
+  name: ghcr.io/hippocampus-dev/hippocampus/http-kvs
+  newName: ghcr.io/hippocampus-dev/hippocampus/http-kvs

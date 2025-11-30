@@ -1,0 +1,69 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: cortex-bot-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: cortex-bot
+
+resources:
+  - ../../../../utilities/redis
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  - path: patches/horizontal_pod_autoscaler.yaml
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/service.yaml
+  - path: patches/stateful_set.yaml
+
+replacements:
+  - source:
+      kind: Service
+      name: redis
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: StatefulSet
+          name: redis
+        fieldPaths:
+          - spec.template.spec.containers.[name=redis].env.[name=SERVICE_NAME].value
+          - spec.template.spec.containers.[name=sentinel].env.[name=SERVICE_NAME].value
+      - select:
+          kind: Deployment
+          name: redis-haproxy
+        fieldPaths:
+          - spec.template.spec.initContainers.[name=config-init].env.[name=SERVICE_NAME].value
+  - source:
+      kind: StatefulSet
+      name: redis
+      fieldPath: metadata.annotations.QUORUM
+    targets:
+      - select:
+          kind: StatefulSet
+          name: redis
+        fieldPaths:
+          - spec.template.spec.containers.[name=redis].env.[name=QUORUM].value
+          - spec.template.spec.containers.[name=sentinel].env.[name=QUORUM].value
+      - select:
+          kind: Deployment
+          name: redis-haproxy
+        fieldPaths:
+          - spec.template.spec.initContainers.[name=config-init].env.[name=QUORUM].value
+  - source:
+      kind: StatefulSet
+      name: redis
+      fieldPath: spec.replicas
+    targets:
+      - select:
+          kind: Deployment
+          name: redis-haproxy
+        fieldPaths:
+          - spec.template.spec.initContainers.[name=config-init].env.[name=REDIS_REPLICAS].value
+
+configurations:
+  - kustomizeconfig.yaml

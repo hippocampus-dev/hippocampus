@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+set -e
+
+mkdir -p ${ASDF_DOWNLOAD_PATH}
+
+function get_arch() {
+  uname | tr "[:upper:]" "[:lower:]"
+}
+
+function get_cpu() {
+  local machine_hardware_name="${ASDF_HIPPOCAMPUS_OVERWRITE_ARCH:-$(uname -m)}"
+
+  case "${machine_hardware_name}" in
+    x86_64)
+      local cpu_type="amd64"
+      ;;
+    powerpc64le | ppc64le)
+      local cpu_type="ppc64le"
+      ;;
+    aarch64)
+      local cpu_type="arm64"
+      ;;
+    armv7l)
+      local cpu_type="arm"
+      ;;
+    *)
+      local cpu_type="${machine_hardware_name}"
+      ;;
+  esac
+
+  echo "$cpu_type"
+}
+
+function get_download_url() {
+  local version=${1}
+  local binary=${2}
+  local platform=$(get_arch)
+  local cpu=$(get_cpu)
+
+  local asset="${binary}_${version}_${platform}_${cpu}"
+  echo "https://github.com/hippocampus-dev/hippocampus/releases/download/v${version}/${asset}"
+}
+
+function get_asset_url() {
+  local version=${1}
+  local binary=${2}
+  local platform=$(get_arch)
+  local cpu=$(get_cpu)
+
+  local asset="${binary}_${version}_${platform}_${cpu}"
+  local assetId=$(curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/hippocampus-dev/hippocampus/releases/tags/v${version}" | asset=$asset perl -MJSON::PP -le 'my $input = do { local $/; <STDIN> }; my $json = decode_json($input); foreach my $asset (@{$json->{assets}}) { print $asset->{id} if $asset->{name} eq $ENV{asset} }')
+  echo "https://api.github.com/repos/hippocampus-dev/hippocampus/releases/assets/${assetId}"
+}
+
+opts=("-fsSL")
+if [ -n "$GITHUB_TOKEN" ]; then
+  opts+=("-H" "Authorization: token ${GITHUB_TOKEN}")
+fi
+
+private=false
+if curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hippocampus-dev/hippocampus | grep -q '"visibility": "private"'; then
+  private=true
+fi
+
+binaries=("armyknife" "kubectl-patchstring")
+linux_binaries=("insight" "l7sniff" "runner")
+if [ "$(get_arch)" == "linux" ]; then
+  binaries+=("${linux_binaries[@]}")
+fi
+
+for binary in "${binaries[@]}"; do
+  if [ "${private}" == "true" ]; then
+    url=$(get_asset_url ${ASDF_INSTALL_VERSION} ${binary})
+    if curl "${opts[@]}" -H "Accept: application/octet-stream" $url -C - -o ${ASDF_DOWNLOAD_PATH}/${binary}; then
+      chmod +x ${ASDF_DOWNLOAD_PATH}/${binary}
+    else
+      echo -e "asdf-hippocampus: Could not download $url" >&2
+      exit 1
+    fi
+  else
+    url=$(get_download_url ${ASDF_INSTALL_VERSION} ${binary})
+    if curl "${opts[@]}" $url -C - -o ${ASDF_DOWNLOAD_PATH}/${binary}; then
+      chmod +x ${ASDF_DOWNLOAD_PATH}/${binary}
+    else
+      echo -e "asdf-hippocampus: Could not download $url" >&2
+      exit 1
+    fi
+  fi
+done

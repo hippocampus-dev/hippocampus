@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+
+images:
+- digest: sha256:13c74898a4298568d0fe1bd80d3a366360a3815683a4774532114a4afb90012c
+  name: ghcr.io/hippocampus-dev/hippocampus/whisper-worker
+  newName: ghcr.io/hippocampus-dev/hippocampus/whisper-worker

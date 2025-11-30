@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:4fda2ecd5fc12d6c3289a1c95a30c534c6c73b39458b4244ebf03af84f49a724
+  name: ghcr.io/hippocampus-dev/hippocampus/proxy-wasm
+  newName: ghcr.io/hippocampus-dev/hippocampus/proxy-wasm

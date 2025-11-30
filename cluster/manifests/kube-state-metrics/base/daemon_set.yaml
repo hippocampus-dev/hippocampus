@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-state-metrics-pods
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: kube-state-metrics
+      app.kubernetes.io/component: pods
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      serviceAccountName: kube-state-metrics
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: kube-state-metrics
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry.k8s.io/kube-state-metrics/kube-state-metrics
+          imagePullPolicy: IfNotPresent
+          args:
+            - --metric-annotations-allowlist=pods=[revision]
+            - --resources=pods
+            - --node=$(NODE_NAME)
+            - --use-apiserver-cache
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5

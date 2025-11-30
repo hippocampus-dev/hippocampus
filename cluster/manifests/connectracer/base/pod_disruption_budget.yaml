@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: connectracer
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: connectracer
+      app.kubernetes.io/component: ""

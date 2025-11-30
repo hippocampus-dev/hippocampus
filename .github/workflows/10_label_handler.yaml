@@ -1,0 +1,78 @@
+name: Label handler
+on:
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
+  issues:
+    types:
+      - labeled
+      - unlabeled
+permissions:
+  contents: write
+jobs:
+  label:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const m = {
+              "translate": "[Label handler] Enable `translate` feature",
+            };
+            
+            if (!(context.payload.action === "labeled" || context.payload.action === "unlabeled")) {
+              return;
+            }
+            
+            if (m[context.payload.label.name] === undefined) {
+              return;
+            }
+            
+            let issue_number;
+            if (context.payload.pull_request) {
+              issue_number = context.payload.pull_request.number;
+            } else if (context.payload.issue) {
+              issue_number = context.payload.issue.number;
+            }
+            
+            if (issue_number === undefined) {
+              return;
+            }
+          
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+            });
+          
+            if (context.payload.action === "unlabeled") {
+              for (const comment of comments.data) {
+                if (comment.user.login !== "github-actions[bot]") {
+                  continue;
+                }
+            
+                if (comment.body.startsWith(m[context.payload.label.name])) {
+                  await github.rest.issues.deleteComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: comment.id,
+                  });
+                }
+              }
+            }
+          
+            if (context.payload.action === "labeled") {
+              if (m[context.payload.label.name] !== undefined) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue_number,
+                  body: m[context.payload.label.name],
+                });
+              }
+            }
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

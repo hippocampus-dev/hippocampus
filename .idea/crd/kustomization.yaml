@@ -1,0 +1,69 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Istio
+  - https://raw.githubusercontent.com/istio/api/1.26.3/kubernetes/customresourcedefinitions.gen.yaml
+  # ArgoCD
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.12/manifests/crds/application-crd.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.12/manifests/crds/applicationset-crd.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.12/manifests/crds/appproject-crd.yaml
+  # Knative
+  - https://github.com/knative/serving/releases/download/knative-v1.16.0/serving-crds.yaml
+  - https://github.com/knative/eventing/releases/download/knative-v1.16.0/eventing-crds.yaml
+  # cert-manager
+  - https://raw.githubusercontent.com/cert-manager/cert-manager/v1.15.3/deploy/crds/crd-certificaterequests.yaml
+  - https://raw.githubusercontent.com/cert-manager/cert-manager/v1.15.3/deploy/crds/crd-certificates.yaml
+  - https://raw.githubusercontent.com/cert-manager/cert-manager/v1.15.3/deploy/crds/crd-challenges.yaml
+  - https://raw.githubusercontent.com/cert-manager/cert-manager/v1.15.3/deploy/crds/crd-clusterissuers.yaml
+  - https://raw.githubusercontent.com/cert-manager/cert-manager/v1.15.3/deploy/crds/crd-issuers.yaml
+  - https://raw.githubusercontent.com/cert-manager/cert-manager/v1.15.3/deploy/crds/crd-orders.yaml
+  # Gateway API
+  - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/standard/gateway.networking.k8s.io_gateways.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/standard/gateway.networking.k8s.io_grpcroutes.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml
+  - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.3.0/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml
+  # VPA
+  - https://raw.githubusercontent.com/kubernetes/autoscaler/vertical-pod-autoscaler-1.4.1/vertical-pod-autoscaler/deploy/vpa-v1-crd-gen.yaml
+  # strimzi
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/040-Crd-kafka.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/041-Crd-kafkaconnect.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/042-Crd-strimzipodset.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/043-Crd-kafkatopic.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/044-Crd-kafkauser.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/045-Crd-kafkamirrormaker.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/046-Crd-kafkabridge.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/047-Crd-kafkaconnector.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/048-Crd-kafkamirrormaker2.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/049-Crd-kafkarebalance.yaml
+  - https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.40.0/install/cluster-operator/04A-Crd-kafkanodepool.yaml
+  # cilium
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwideenvoyconfigs.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumegressgatewaypolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumendpoints.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumenvoyconfigs.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumexternalworkloads.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumidentities.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumlocalredirectpolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnodeconfigs.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.0/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnodes.yaml
+  # k6
+  - https://raw.githubusercontent.com/grafana/k6-operator/v0.0.15/config/crd/bases/k6.io_k6s.yaml
+  - https://raw.githubusercontent.com/grafana/k6-operator/v0.0.15/config/crd/bases/k6.io_privateloadzones.yaml
+  - https://raw.githubusercontent.com/grafana/k6-operator/v0.0.15/config/crd/bases/k6.io_testruns.yaml
+  # TiDB
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_backups.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_backupschedules.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_compactbackups.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_dmclusters.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_restores.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_tidbclusters.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_tidbdashboards.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_tidbinitializers.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_tidbmonitors.yaml
+  - https://raw.githubusercontent.com/pingcap/tidb-operator/v1.6.3/manifests/crd/v1/pingcap.com_tidbngmonitorings.yaml
+  # Own CRDs
+  - ../../cluster/applications/github-actions-runner-controller/manifests/crd

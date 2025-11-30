@@ -1,0 +1,193 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch-master
+  annotations:
+    NUMBER_OF_MASTERS: "3"
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: "http"
+        prometheus.io/port: "9114"
+        prometheus.io/path: "/metrics"
+        traffic.sidecar.istio.io/excludeOutboundPorts: "9300"
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: elasticsearch
+              role: master
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: elasticsearch
+              role: master
+      #initContainers:
+      #  - name: sysctl
+      #    securityContext:
+      #      privileged: true
+      #    image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+      #    imagePullPolicy: Always
+      #    command:
+      #      - sudo
+      #      - sysctl
+      #    args:
+      #      - -w
+      #      - vm.max_map_count=262144
+      containers:
+        - name: elasticsearch
+          env:
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: node.roles
+              value: master
+            - name: NUMBER_OF_MASTERS
+              value: $(NUMBER_OF_MASTERS)
+            - name: NUMBER_OF_DATAS
+              value: $(NUMBER_OF_DATAS)
+            - name: ES_JAVA_OPTS
+              value: "-Xms384m -Xmx384m"
+          volumeMounts:
+            - name: elasticsearch
+              mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+              subPath: elasticsearch.yml
+              readOnly: true
+      volumes:
+        - name: elasticsearch
+          configMap:
+            name: elasticsearch
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch-data
+  annotations:
+    NUMBER_OF_DATAS: "1"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: "http"
+        prometheus.io/port: "9114"
+        prometheus.io/path: "/metrics"
+        traffic.sidecar.istio.io/excludeOutboundPorts: "9300"
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: elasticsearch
+              role: data
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: elasticsearch
+              role: data
+      #initContainers:
+      #  - name: sysctl
+      #    securityContext:
+      #      privileged: true
+      #    image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+      #    imagePullPolicy: Always
+      #    command:
+      #      - sudo
+      #      - sysctl
+      #    args:
+      #      - -w
+      #      - vm.max_map_count=262144
+      containers:
+        - name: elasticsearch
+          env:
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: node.roles
+              value: data
+            - name: NUMBER_OF_MASTERS
+              value: $(NUMBER_OF_MASTERS)
+            - name: NUMBER_OF_DATAS
+              value: $(NUMBER_OF_DATAS)
+            - name: ES_JAVA_OPTS
+              value: "-Xms256m -Xmx256m"
+          volumeMounts:
+            - name: elasticsearch
+              mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+              subPath: elasticsearch.yml
+              readOnly: true
+      volumes:
+        - name: elasticsearch
+          configMap:
+            name: elasticsearch
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
