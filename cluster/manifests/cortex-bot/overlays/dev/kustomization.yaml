@@ -26,7 +26,7 @@ patches:
 generators:
 - secrets_from_vault.yaml
 images:
-- digest: sha256:7362f854386499bc066b4bdc9b527612d8ef79a63bff6fa716ea806eb738a35e
+- digest: sha256:7b36caf1e560c47c2bacb785f355b3cb3095628be4cf91452d87fa9db6bb09ee
   name: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
   newName: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
 - digest: sha256:db1b736bdaa1289ce2d13a16b4954256e1350a839319c19ff065ab5771ec3127
