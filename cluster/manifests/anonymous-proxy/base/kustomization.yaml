@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
 - ../../../applications/anonymous-proxy/manifests
 images:
-- digest: sha256:a5fb7244df7496451b6bf8e97d802bf77f3aac4905c658fc59c10f68f57eea31
+- digest: sha256:6c54c27eabdddbc8f77956548fbe281bd2d93a8c390589d6304faafe04f0d272
   name: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy
