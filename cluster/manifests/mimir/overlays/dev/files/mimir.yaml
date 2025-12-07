@@ -1,0 +1,221 @@
+multitenancy_enabled: false
+
+activity_tracker:
+  filepath: ""
+
+compactor:
+  data_dir: /var/mimir/compactor
+  max_closing_blocks_concurrency: 1
+  max_opening_blocks_concurrency: 1
+  symbols_flushers_concurrency: 1
+  max_block_upload_validation_concurrency: 1
+  sharding_ring:
+    kvstore:
+      store: memberlist
+
+distributor:
+  ha_tracker:
+    enable_ha_tracker: true
+    kvstore:
+      store: etcd
+      etcd:
+        endpoints:
+          - mimir-etcd-0.mimir-etcd.mimir.svc.cluster.local:2379
+          - mimir-etcd-1.mimir-etcd.mimir.svc.cluster.local:2379
+          - mimir-etcd-2.mimir-etcd.mimir.svc.cluster.local:2379
+  ring:
+    kvstore:
+      store: memberlist
+
+ingester_client:
+  grpc_client_config:
+    max_recv_msg_size: &max_recv_msg_size 419430400
+    max_send_msg_size: &max_send_msg_size 419430400
+
+ingester:
+  ring:
+    kvstore:
+      store: memberlist
+    replication_factor: 1
+    num_tokens: 512
+    tokens_file_path: /var/mimir/tokens
+
+memberlist:
+  abort_if_cluster_join_fails: false
+  cluster_label: mimir
+  join_members:
+    - mimir-gossip-ring.mimir.svc.cluster.local.
+
+store_gateway:
+  sharding_ring:
+    kvstore:
+      store: memberlist
+    num_tokens: 512
+    replication_factor: 1
+    tokens_file_path: /var/mimir/tokens
+
+frontend:
+  query_stats_enabled: true
+  parallelize_shardable_queries: true
+  split_queries_by_interval: 6h
+  cache_results: true
+  results_cache:
+    backend: memcached
+    memcached:
+      addresses: mimir-mcrouter.mimir.svc.cluster.local.:5000
+      timeout: 100ms
+      max_item_size: 1048576
+  scheduler_address: mimir-query-scheduler-discovery.mimir.svc.cluster.local.:9095
+  scheduler_worker_concurrency: 5
+  grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+frontend_worker:
+  scheduler_address: mimir-query-scheduler-discovery.mimir.svc.cluster.local.:9095
+  query_scheduler_grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+querier:
+  query_store_after: &query_store_after 3h
+  max_concurrent: 10
+  timeout: &timeout 2m
+
+query_scheduler:
+  service_discovery_mode: dns
+  max_outstanding_requests_per_tenant: 2000
+  grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+alertmanager:
+  retention: 48h
+  sharding_ring:
+    kvstore:
+      store: memberlist
+  data_dir: /var/mimir
+
+alertmanager_storage:
+  backend: s3
+  s3:
+    endpoint: mimir-minio.mimir.svc.cluster.local:9000
+    bucket_name: mimir-alertmanager
+    access_key_id: minio
+    secret_access_key: miniominio
+    insecure: true
+
+ruler:
+  query_stats_enabled: true
+  ring:
+    kvstore:
+      store: memberlist
+    num_tokens: 512
+  rule_path: /var/mimir
+  alertmanager_url: http://mimir-alertmanager.mimir.svc.cluster.local:3100/alertmanager
+  query_frontend:
+    address: mimir-query-frontend.mimir.svc.cluster.local.:9095
+    grpc_client_config:
+      max_recv_msg_size: *max_recv_msg_size
+      max_send_msg_size: *max_send_msg_size
+
+ruler_storage:
+  backend: local
+  local:
+    directory: /etc/mimir/rules
+  cache:
+    backend: memcached
+    memcached:
+      addresses: mimir-mcrouter.mimir.svc.cluster.local.:5000
+      timeout: 100ms
+      max_item_size: 1048576
+
+limits:
+  accept_ha_samples: true
+  request_rate: 0
+  request_burst_size: 0
+  ingestion_rate: 50000
+  ingestion_burst_size: 200000
+  max_label_name_length: 1024
+  max_label_value_length: 2048
+  max_label_names_per_series: 128
+  max_metadata_length: 1024
+  max_fetched_chunks_per_query: 0
+  max_fetched_series_per_query: 0
+  max_global_series_per_user: 0
+  max_global_series_per_metric: 0
+  max_global_metadata_per_user: 0
+  max_global_metadata_per_metric: 0
+  max_global_exemplars_per_user: 65536
+  max_query_parallelism: 32
+  max_total_query_length: 365d
+  query_sharding_total_shards: 16
+  query_sharding_max_sharded_queries: 128 # split_queries_by_interval * query_sharding_total_shards
+  split_instant_queries_by_interval: 6h
+  query_ingesters_within: &query_ingesters_within 4h # *query_store_after + 1
+  compactor_blocks_retention_period: 3d
+  results_cache_ttl: 1w
+  cardinality_analysis_enabled: true
+
+server:
+  grpc_server_max_recv_msg_size: *max_send_msg_size
+  grpc_server_max_send_msg_size: *max_recv_msg_size
+  http_server_read_timeout: *timeout
+  http_server_write_timeout: *timeout
+  http_listen_port: 3100
+
+blocks_storage:
+  backend: s3
+  bucket_store:
+    sync_dir: /var/mimir/tsdb-sync
+    sync_interval: 15m
+    max_concurrent: 200
+    ignore_blocks_within: 2h # *query_store_after - 1
+    index_cache:
+      backend: memcached
+      memcached:
+        addresses: mimir-mcrouter.mimir.svc.cluster.local.:5000
+        timeout: 100ms
+        max_item_size: 1048576
+    chunks_cache:
+      backend: memcached
+      attributes_ttl: 168h
+      attributes_in_memory_max_items: 50000
+      subrange_ttl: 24h
+      memcached:
+        addresses: mimir-mcrouter.mimir.svc.cluster.local.:5000
+        timeout: 100ms
+        max_item_size: 1048576
+    metadata_cache:
+      backend: memcached
+      tenants_list_ttl: 24h
+      tenant_blocks_list_ttl: 5m
+      chunks_list_ttl: 24h
+      metafile_exists_ttl: 2h
+      metafile_doesnt_exist_ttl: 5m
+      metafile_content_ttl: 24h
+      metafile_max_size_bytes: 1048576
+      metafile_attributes_ttl: 168h
+      block_index_attributes_ttl: 168h
+      bucket_index_content_ttl: 5m
+      bucket_index_max_size_bytes: 1048576
+      memcached:
+        addresses: mimir-mcrouter.mimir.svc.cluster.local.:5000
+        timeout: 100ms
+        max_item_size: 1048576
+  s3:
+    endpoint: mimir-minio.mimir.svc.cluster.local:9000
+    bucket_name: mimir
+    access_key_id: minio
+    secret_access_key: miniominio
+    insecure: true
+  tsdb:
+    dir: /var/mimir/tsdb
+    retention_period: *query_ingesters_within
+    ship_concurrency: 10
+    head_compaction_concurrency: 1
+    wal_replay_concurrency: 0
+    flush_blocks_on_shutdown: true
+
+usage_stats:
+  enabled: false

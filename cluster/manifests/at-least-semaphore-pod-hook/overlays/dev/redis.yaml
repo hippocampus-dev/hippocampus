@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: at-least-semaphore-pod-hook-redis
+spec:
+  replicas: 3
+  serviceName: at-least-semaphore-pod-hook-redis
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: at-least-semaphore-pod-hook
+      app.kubernetes.io/component: redis
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: at-least-semaphore-pod-hook
+              app.kubernetes.io/component: redis
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: at-least-semaphore-pod-hook
+              app.kubernetes.io/component: redis
+      containers:
+        - name: redis
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: redis
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          resources:
+            requests:
+              memory: 128Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 256Mi
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: at-least-semaphore-pod-hook-redis
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: at-least-semaphore-pod-hook
+      app.kubernetes.io/component: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: at-least-semaphore-pod-hook-redis
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: at-least-semaphore-pod-hook
+    app.kubernetes.io/component: redis
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: at-least-semaphore-pod-hook-redis
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: at-least-semaphore-pod-hook
+      app.kubernetes.io/component: redis
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: redis
+spec:
+  hosts:
+    - at-least-semaphore-pod-hook-redis-0.at-least-semaphore-pod-hook-redis.at-least-semaphore-pod-hook.svc.cluster.local
+    - at-least-semaphore-pod-hook-redis-1.at-least-semaphore-pod-hook-redis.at-least-semaphore-pod-hook.svc.cluster.local
+    - at-least-semaphore-pod-hook-redis-2.at-least-semaphore-pod-hook-redis.at-least-semaphore-pod-hook.svc.cluster.local
+  location: MESH_INTERNAL
+  ports:
+    - name: tcp
+      number: 6379
+      protocol: TCP
+  resolution: NONE

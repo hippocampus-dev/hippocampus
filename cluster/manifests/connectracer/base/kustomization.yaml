@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- daemon_set.yaml
+- pod_disruption_budget.yaml
+images:
+- digest: sha256:3ade761b89e900bb92ab78e7866a069197a9151a6773f22c82e1a5f58d7aecef
+  name: ghcr.io/hippocampus-dev/hippocampus/connectracer
+  newName: ghcr.io/hippocampus-dev/hippocampus/connectracer

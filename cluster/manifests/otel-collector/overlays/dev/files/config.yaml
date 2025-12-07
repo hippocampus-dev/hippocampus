@@ -1,0 +1,33 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {}
+
+processors:
+  attributes/sensitive:
+    actions:
+      - key: db.statement
+        action: hash
+  batch:
+    send_batch_size: 8192
+    timeout: 200ms
+
+exporters:
+  otlp:
+    endpoint: tempo-distributor.tempo.svc.cluster.local:4317
+    balancer_name: round_robin
+    tls:
+      insecure: true
+    retry_on_failure:
+      enabled: true
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Python" name="Python">
+      <configuration sdkName="Python 3.11 (hippocampus)" />
+    </facet>
+  </component>
+  <component name="Go" enabled="true" />
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/packages/elapsed/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/elapsed_macro/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/elf/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/elf/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/enum_derive/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/enum_derive/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/error/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/gcs/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/gcs/examples/http2-server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/gcs/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hedged/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-client/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/benches/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/examples/cassandra/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/examples/simple/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/examples/sqlite/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-standalone/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-web/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampusql/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/husky/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/jwt/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/jwt/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/jwt_derive/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/opentelemetry-tracing/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/retry/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/serde_binary/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/playgpt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/embedding-gateway" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/embedding-retrieval" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/bot" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/playground" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/embedding-retrieval-loader" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/packages/cortex" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/api" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/slack-bolt-proxy" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/whisper-worker" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/manifests/jupyterhub/base/files" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/insight/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/connectracer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/header-setter/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/metrics-exporter/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/metrics/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/header-getter/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/envoy-trusted-header/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/envoy-xauthrequest/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/fallback-filter/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/taurin/src-tauri/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/cookie-manipulator/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/serdex/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/benches/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/fluentd-delayed-unlink/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/docker-compose/envoy/packages/header-debugger/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/taurin/src-tauri/crates/ipc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/taurin/src-tauri/crates/ipc_macro/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/taurin/src-tauri/crates/tauri-ipc-macro/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/taurin/src-tauri/crates/ipc_build/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/taurin/src-tauri/crates/types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/taurin/src-tauri/crates/virtual_sink/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/bakery/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/openai/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/audio/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/notebooks/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/rust_de_llama/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/rust_de_llama/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/elapsed/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/mysql-protocol-parser/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/bloom-filter/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/request-finalizer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/packages/finalizer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-core/examples/wasm_tokenizer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-wasm-tokenizer-example/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/hippocampus-configuration/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/insight/target" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/connectracer/target" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/proxy-wasm/target" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/fluentd-delayed-unlink/target" />
+      <excludeFolder url="file://$MODULE_DIR$/taurin/src-tauri/target" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/playgpt/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/api/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/bot/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/embedding-retrieval/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/embedding-retrieval-loader/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/embedding-gateway/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/slack-bolt-proxy/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/whisper-worker/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/headless-page-renderer/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/packages/cortex/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/docker-compose/envoy/target" />
+      <excludeFolder url="file://$MODULE_DIR$/docker-compose/envoy/target" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/rust_de_llama/target" />
+      <excludeFolder url="file://$MODULE_DIR$/cluster/applications/rust_de_llama/llama.cpp" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="preact" level="application" />
+    <orderEntry type="library" name="Python 3.11 (hippocampus) interpreter library" level="application" />
+  </component>
+</module>

@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-source-dispatcher
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "9090"
+        prometheus.io/path: /metrics
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: knative-eventing
+            app.kubernetes.io/component: kafka-source-dispatcher
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        #whenUnsatisfiable: DoNotSchedule
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: knative-eventing
+            app.kubernetes.io/component: kafka-source-dispatcher
+      containers:
+      - name: kafka-source-dispatcher
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 10m
+            memory: 512Mi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-broker-dispatcher
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "9090"
+        prometheus.io/path: /metrics
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: knative-eventing
+            app.kubernetes.io/component: kafka-channel-dispatcher
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        #whenUnsatisfiable: DoNotSchedule
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: knative-eventing
+            app.kubernetes.io/component: kafka-channel-dispatcher
+      containers:
+      - name: kafka-broker-dispatcher
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 10m
+            memory: 512Mi

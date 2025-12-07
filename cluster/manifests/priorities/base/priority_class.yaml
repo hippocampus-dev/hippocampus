@@ -1,0 +1,44 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: low
+value: -65535
+globalDefault: false
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: medium
+value: 0
+globalDefault: true
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high
+value: 65535
+globalDefault: false
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: low-nonpreempting
+value: -65535
+preemptionPolicy: Never
+globalDefault: false
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: medium-nonpreempting
+value: 0
+preemptionPolicy: Never
+globalDefault: false
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-nonpreempting
+value: 65535
+preemptionPolicy: Never
+globalDefault: false

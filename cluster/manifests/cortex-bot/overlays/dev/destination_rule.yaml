@@ -1,0 +1,110 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cortex-bot
+spec:
+  exportTo:
+    - .
+  host: cortex-bot
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 1s
+      baseEjectionTime: 1m
+      maxEjectionPercent: 100
+      minHealthPercent: 0
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cortex-bot-redis
+spec:
+  exportTo:
+    - .
+  host: cortex-bot-redis
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: cortex-bot-redis-haproxy
+spec:
+  exportTo:
+    - .
+  host: cortex-bot-redis-haproxy
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: embedding-retrieval.embedding-retrieval.svc.cluster.local
+spec:
+  exportTo:
+    - .
+  host: embedding-retrieval.embedding-retrieval.svc.cluster.local
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 1s
+      baseEjectionTime: 1m
+      maxEjectionPercent: 100
+      minHealthPercent: 0
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: grafana.grafana.svc.cluster.local
+spec:
+  exportTo:
+    - .
+  host: grafana.grafana.svc.cluster.local
+  subsets:
+    - name: default
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+          localityLbSetting:
+            enabled: true
+            failoverPriority:
+              - kubernetes.io/hostname
+    - name: sticky-session
+      trafficPolicy:
+        loadBalancer:
+          consistentHash:
+            useSourceIp: true
+          localityLbSetting:
+            enabled: false

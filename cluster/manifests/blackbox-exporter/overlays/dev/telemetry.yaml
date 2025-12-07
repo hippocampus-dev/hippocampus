@@ -1,0 +1,24 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: blackbox-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: blackbox-exporter
+      app.kubernetes.io/component: ""
+  tracing:
+    - providers:
+        - name: blackbox-exporter
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

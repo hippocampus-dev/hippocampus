@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+
+<menu id="root-menu" label="Openbox 3">
+  <separator label="Development" />
+  <item label="Google Chrome">
+    <action name="Execute">
+      <command>/usr/bin/google-chrome-stable --remote-debugging-port=59222 --user-data-dir=/var/google-chrome</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <item label="IntelliJ">
+    <action name="Execute">
+      <command>/usr/bin/intellij-idea-ultimate-edition</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <item label="xterm">
+    <action name="Execute">
+      <command>/usr/bin/xterm</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <item label="Virt Manager">
+    <action name="Execute">
+      <command>/usr/bin/virt-manager</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <item label="Wireshark">
+    <action name="Execute">
+      <command>/usr/bin/wireshark</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <item label="Steam">
+    <action name="Execute">
+      <command>/usr/bin/steam</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <separator label="Settings" />
+  <item label="PulseAudio Volume Control">
+    <action name="Execute">
+      <command>/usr/bin/pavucontrol</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <item label="Keymapp">
+    <action name="Execute">
+      <command>/usr/bin/keymapp</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <item label="Piper">
+    <action name="Execute">
+      <command>/usr/bin/piper</command>
+      <startupnotify>
+        <enabled>yes</enabled>
+      </startupnotify>
+    </action>
+  </item>
+  <separator />
+  <item label="Log Out">
+    <action name="Exit">
+      <prompt>yes</prompt>
+    </action>
+  </item>
+  <item label="Suspend">
+    <action name="Execute">
+      <prompt>yes</prompt>
+      <command>systemctl hybrid-sleep</command>
+    </action>
+  </item>
+  <item label="Reboot">
+    <action name="Execute">
+      <prompt>yes</prompt>
+      <command>systemctl reboot</command>
+    </action>
+  </item>
+  <item label="Reboot Into Windows">
+    <action name="Execute">
+      <prompt>yes</prompt>
+      <command>systemctl reboot --boot-loader-entry=auto-windows</command>
+    </action>
+  </item>
+  <item label="Reboot Into Firmware">
+    <action name="Execute">
+      <prompt>yes</prompt>
+      <command>systemctl reboot --boot-loader-entry=auto-reboot-to-firmware-setup</command>
+    </action>
+  </item>
+  <item label="Poweroff">
+    <action name="Execute">
+      <prompt>yes</prompt>
+      <command>systemctl poweroff</command>
+    </action>
+  </item>
+</menu>
+
+</openbox_menu>

@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+spec:
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: "http"
+        prometheus.io/port: "9100"
+        prometheus.io/path: "/metrics"
