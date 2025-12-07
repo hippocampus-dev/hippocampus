@@ -14,6 +14,6 @@ resources:
 - stateful_set.yaml
 
 images:
-- digest: sha256:868a9ac887b99546cacb040ef66989ef3c5f1aa259da416dc086ac83edf1fac9
+- digest: sha256:9067ff54f0fe938db74db52e847f5725e4139de92429d89ccf45869fdc10fd64
   name: ghcr.io/hippocampus-dev/hippocampus/github-actions-runner-controller
   newName: ghcr.io/hippocampus-dev/hippocampus/github-actions-runner-controller
