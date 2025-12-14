@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: envoy-ratelimit
+
+resources:
+- ../../base
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- memcached
+- statsd-exporter
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+images:
+- digest: sha256:7d2a2167cf1564ceb37a05db75318b0578443ad5324689a5957a15e8908e12d3
+  name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+
+configMapGenerator:
+- files:
+  - files/general.yaml
+  name: general.yaml
+- files:
+  - files/reporting-server.yaml
+  name: reporting-server.yaml

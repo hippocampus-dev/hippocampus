@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: github-actions-runner-controller-registry
+spec:
+  replicas: 1
+  serviceName: github-actions-runner-controller-registry
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: github-actions-runner-controller
+      app.kubernetes.io/component: registry
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: registry
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REGISTRY_STORAGE_DELETE_ENABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/registry
+        - name: gc
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              while true; do
+                registry garbage-collect /etc/docker/registry/config.yml --delete-untagged=true
+                sleep 3600
+              done
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/registry
+        - name: delete-old-cache
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+            - -c
+          args:
+            - |
+              REGISTRY_HOST=${REGISTRY_HOST:=http://127.0.0.1:5000}
+              TTL=${TTL:=1209600}
+              while true; do
+                now=$(date +%s)
+                curl -fsSL ${REGISTRY_HOST}/v2/_catalog | jq -r .repositories[] | while IFS= read -r repository; do
+                  if [[ ! "$repository" =~ /cache$ ]]; then
+                    continue
+                  fi
+                  #registry garbage-collect /etc/docker/registry/config.yml --delete-untagged=true
+                  tags=$(curl -fsSL ${REGISTRY_HOST}/v2/${repository}/tags/list | jq -r 'try .tags[]')
+                  for tag in "${tags[@]}"; do
+                    created=$(curl -fsSL -I ${REGISTRY_HOST}/v2/${repository}/manifests/${tag} | jq -r .history[].v1Compatibility | jq -r .created)
+                    timestamp=$(date --date="$created" +%s)
+                    if [ $(( now - timestamp )) -ge $TTL ]; then
+                      digest=$(curl -fsSLI -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -I ${REGISTRY_HOST}/v2/${repository}/manifests/${tag} | grep -i '^docker-content-digest:' | cut -d' ' -f2 | tr -d $'\r')
+                      curl -fsSL -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -X DELETE ${REGISTRY_HOST}/v2/${repository}/manifests/$digest
+                    fi
+                  done
+                done
+                sleep 3600
+              done
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi

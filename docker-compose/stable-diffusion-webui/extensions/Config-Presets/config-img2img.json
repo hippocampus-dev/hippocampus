@@ -1,0 +1,18 @@
+{
+    "None": {},
+    "Low denoising ------- denoising: 0.25, steps: 20, DPM++ 2M Karras": {
+        "img2img_sampling": "DPM++ 2M Karras",
+        "img2img_steps": 20,
+        "img2img_denoising_strength": 0.25
+    },
+    "Medium denoising -- denoising: 0.40, steps: 20, DPM++ 2M Karras": {
+        "img2img_sampling": "DPM++ 2M Karras",
+        "img2img_steps": 20,
+        "img2img_denoising_strength": 0.4
+    },
+    "High denoising ------- denoising: 0.75, steps: 30, DPM++ 2M Karras": {
+        "img2img_sampling": "DPM++ 2M Karras",
+        "img2img_steps": 30,
+        "img2img_denoising_strength": 0.75
+    }
+}

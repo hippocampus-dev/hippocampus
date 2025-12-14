@@ -1,0 +1,19 @@
+{
+  "targets": [
+    {
+      "url": "https://example.com"
+    },
+    {
+      "url": "https://httpbin.org",
+      "mask_selectors": "pre.version"
+    },
+    {
+      "url": "https://example.com",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      }
+    }
+  ]
+}
+

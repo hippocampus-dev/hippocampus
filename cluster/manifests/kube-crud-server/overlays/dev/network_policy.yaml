@@ -1,0 +1,75 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kube-crud-server
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-crud-server
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kube-crud-server-minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-crud-server
+      app.kubernetes.io/component: minio
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-crud-server
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kube-crud-server
+              app.kubernetes.io/component: ""
+        - namespaceSelector:
+            matchLabels:
+              name: kube-crud-server
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kube-crud-server
+              app.kubernetes.io/component: mc
+      ports:
+        - protocol: TCP
+          port: 9000

@@ -1,0 +1,98 @@
+services:
+  stable-diffusion-webui-forge:
+    profiles:
+      - stable-diffusion-webui-forge
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: stable-diffusion-webui-forge
+    develop:
+      watch:
+        - action: rebuild
+          path: stable-diffusion-webui-forge/Dockerfile
+    runtime: nvidia
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
+    command:
+      - --allow-code
+      - --medvram
+      - --enable-insecure-extension-access
+      - --api
+      - --listen
+      - --ckpt=models/Stable-diffusion/sd_xl_base_1.0.safetensors
+    environment:
+      - SD_WEBUI_CACHE_FILE=/home/nonroot/stable-diffusion-webui-forge/models/.cache/cache.json
+      - HUGGINGFACE_HUB_CACHE=/home/nonroot/stable-diffusion-webui-forge/models/.cache/huggingface
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/tmp/.Xauthority
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ${XAUTHORITY:-~/.Xauthority}
+        target: /tmp/.Xauthority
+      - type: bind
+        bind:
+          create_host_path: false
+        source: stable-diffusion-webui-forge/styles.csv
+        target: /home/nonroot/stable-diffusion-webui-forge/styles.csv
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: stable-diffusion-webui-forge/extensions/Config-Presets/config-img2img.json
+        target: /home/nonroot/stable-diffusion-webui-forge/extensions/Config-Presets/config-img2img.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: stable-diffusion-webui-forge/extensions/Config-Presets/config-txt2img.json
+        target: /home/nonroot/stable-diffusion-webui-forge/extensions/Config-Presets/config-txt2img.json
+        read_only: true
+      - type: volume
+        source: stable-diffusion-forge-models
+        target: /home/nonroot/stable-diffusion-webui-forge/models
+    networks:
+      - default
+  stable-diffusion-webui-forge-downloader:
+    profiles:
+      - stable-diffusion-webui-forge
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: stable-diffusion-webui-forge/downloader
+    develop:
+      watch:
+        - action: rebuild
+          path: stable-diffusion-webui-forge/downloader/Dockerfile
+        - action: rebuild
+          path: stable-diffusion-webui-forge/downloader/links.txt
+    command:
+      - -j
+      - "5"
+      - -x
+      - "8"
+      - -s
+      - "8"
+      - -k
+      - "100M"
+      - --header
+      - "Authorization: Bearer ${HF_HUB_TOKEN}"
+    environment:
+      - HF_HUB_TOKEN=${HF_HUB_TOKEN}
+    volumes:
+      - type: volume
+        source: stable-diffusion-forge-models
+        target: /home/nonroot/models
+    networks:
+      - default

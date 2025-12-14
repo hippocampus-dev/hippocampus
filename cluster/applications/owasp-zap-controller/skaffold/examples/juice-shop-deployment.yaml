@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: juice-shop
+  labels:
+    app.kubernetes.io/name: juice-shop
+spec:
+  containers:
+  - name: juice-shop
+    image: bkimminich/juice-shop:latest
+    ports:
+      - name: http
+        containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: juice-shop
+spec:
+  selector:
+    app.kubernetes.io/name: juice-shop
+  ports:
+    - name: http
+      port: 3000
+      protocol: TCP
+      targetPort: http

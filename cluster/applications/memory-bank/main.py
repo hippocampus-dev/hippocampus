@@ -1,0 +1,196 @@
+import contextlib
+import datetime
+import http
+import logging
+import typing
+
+import fastapi
+import fastapi_mcp
+import opentelemetry.exporter.otlp.proto.grpc.trace_exporter
+import opentelemetry.exporter.prometheus
+import opentelemetry.instrumentation.fastapi
+import opentelemetry.instrumentation.httpx
+import opentelemetry.metrics
+import opentelemetry.sdk.metrics
+import opentelemetry.sdk.resources
+import opentelemetry.sdk.trace.export
+import opentelemetry.trace
+import prometheus_client
+import pythonjsonlogger.jsonlogger
+import tiktoken
+
+import memory_bank.datastore
+import memory_bank.exceptions
+import memory_bank.model
+import memory_bank.settings
+import memory_bank.telemetry
+
+s = memory_bank.settings.Settings()
+
+
+async def startup():
+    class JsonFormatter(pythonjsonlogger.jsonlogger.JsonFormatter):
+        def __init__(self, *args, **kwargs):
+            # https://opentelemetry.io/docs/specs/otel/logs/data-model/
+            super().__init__(*args, **kwargs, rename_fields={"message": "body"})
+
+        def add_fields(
+            self,
+            log_record: dict[str, typing.Any],
+            record: logging.LogRecord,
+            message_dict: dict[str, typing.Any],
+        ):
+            now = datetime.datetime.now()
+            log_record["name"] = record.name
+            log_record["time"] = now.isoformat()
+            log_record["severitytext"] = record.levelname
+
+            super().add_fields(log_record, record, message_dict)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(JsonFormatter())
+    if s.is_debug():
+        handler.setFormatter(
+            logging.Formatter(
+                "time=%(asctime)s name=%(name)s severitytext=%(levelname)s body=%(message)s traceid=%(traceid)s spanid=%(spanid)s",
+                defaults={"traceid": "", "spanid": ""},
+            )
+        )
+    logging.basicConfig(level=s.convert_log_level(), handlers=[handler])
+    provider = opentelemetry.sdk.trace.TracerProvider(
+        resource=opentelemetry.sdk.resources.OTELResourceDetector().detect(),
+    )
+    processor = opentelemetry.sdk.trace.export.BatchSpanProcessor(
+        opentelemetry.exporter.otlp.proto.grpc.trace_exporter.OTLPSpanExporter(),
+    )
+    provider.add_span_processor(processor)
+    opentelemetry.trace.set_tracer_provider(provider)
+
+    opentelemetry.instrumentation.httpx.HTTPXClientInstrumentor().instrument()
+
+    opentelemetry.metrics.set_meter_provider(
+        opentelemetry.sdk.metrics.MeterProvider(
+            metric_readers=[opentelemetry.exporter.prometheus.PrometheusMetricReader()],
+        )
+    )
+
+
+@contextlib.asynccontextmanager
+async def lifespan(_app: fastapi.FastAPI):
+    await startup()
+    yield
+
+
+app = fastapi.FastAPI(lifespan=lifespan)
+opentelemetry.instrumentation.fastapi.FastAPIInstrumentor.instrument_app(app)
+
+
+@app.middleware("http")
+async def override_server_error_middleware(request: fastapi.Request, call_next):
+    try:
+        return await call_next(request)
+    except memory_bank.exceptions.RetryableError as e:
+        memory_bank.telemetry.logger.error(e)
+        return fastapi.responses.PlainTextResponse(
+            http.HTTPStatus.SERVICE_UNAVAILABLE.phrase,
+            status_code=http.HTTPStatus.SERVICE_UNAVAILABLE,
+        )
+    except Exception as e:
+        memory_bank.telemetry.logger.error(e, exc_info=True)
+        return fastapi.responses.PlainTextResponse(
+            http.HTTPStatus.INTERNAL_SERVER_ERROR.phrase,
+            status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
+
+
+global_datastore: memory_bank.datastore.DataStore | None = None
+
+
+async def get_datastore() -> memory_bank.datastore.DataStore:
+    global global_datastore
+
+    if not global_datastore:
+        e = s.datastore
+        match e:
+            case memory_bank.settings.DataStore.Qdrant:
+                from memory_bank.datastore.qdrant import QdrantDataStore
+
+                global_datastore = QdrantDataStore(
+                    s.default_chunk_size,
+                    s.embedding_batch_size,
+                    s.embedding_model,
+                    tiktoken.get_encoding("cl100k_base"),
+                    s.qdrant_host,
+                    s.qdrant_port,
+                    s.qdrant_timeout,
+                    s.qdrant_collection_name,
+                    s.qdrant_replication_factor,
+                    s.qdrant_shard_number,
+                )
+            case _:
+                raise ValueError(f"Unsupported vector database: {e}")
+    await global_datastore.init()
+    return global_datastore
+
+
+@app.post("/upsert", operation_id="upsert_memories")
+async def upsert(
+    body: memory_bank.model.UpsertRequest,
+    d: memory_bank.datastore.DataStore = fastapi.Depends(get_datastore),
+) -> memory_bank.model.UpsertResponse:
+    ids = await d.upsert(body.documents, body.categories)
+    return memory_bank.model.UpsertResponse(ids=ids)
+
+
+@app.post("/query", operation_id="query_memories")
+async def query(
+    body: memory_bank.model.QueryRequest,
+    d: memory_bank.datastore.DataStore = fastapi.Depends(get_datastore),
+) -> memory_bank.model.QueryResponse:
+    results = await d.query(body.queries)
+    return memory_bank.model.QueryResponse(results=results)
+
+
+@app.delete("/delete", operation_id="delete_memories")
+async def delete(
+    body: memory_bank.model.DeleteRequest,
+    d: memory_bank.datastore.DataStore = fastapi.Depends(get_datastore),
+) -> memory_bank.model.DeleteResponse:
+    success = await d.delete(body.filter)
+    return memory_bank.model.DeleteResponse(success=success)
+
+
+mcp = fastapi_mcp.FastApiMCP(app)
+mcp.mount(mount_path="/sse")
+
+
+@app.get("/healthz")
+def health() -> str:
+    return "OK"
+
+
+@app.get("/metrics")
+def metrics():
+    return fastapi.Response(
+        prometheus_client.generate_latest(),
+        media_type=prometheus_client.CONTENT_TYPE_LATEST,
+    )
+
+
+if __name__ == "__main__":
+    if s.is_debug():
+        import dotenv
+
+        dotenv.load_dotenv(override=True)
+
+    import uvicorn
+
+    uvicorn.run(
+        app,
+        host=s.host,
+        port=s.port,
+        log_level=s.convert_log_level(),
+        timeout_keep_alive=s.idle_timeout,
+        timeout_graceful_shutdown=s.termination_grace_period_seconds,
+        access_log=False,
+    )

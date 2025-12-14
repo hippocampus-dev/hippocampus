@@ -1,0 +1,11 @@
+[Unit]
+Requires=network-online.target
+After=network-oneline.target
+
+[Service]
+Type=oneshot
+Restart=on-failure
+
+User=kai
+Environment=CLOUDSDK_CONFIG=/home/kai/.config/gcloud
+ExecStart=/usr/local/bin/sync.sh

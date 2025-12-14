@@ -1,0 +1,65 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-alertmanager-webhook
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alerthandler
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mimir
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: alertmanager
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-knative-serving
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alerthandler
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app: activator
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020

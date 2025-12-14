@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- network_policy.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/init-mcrouter.sh
+  name: mcrouter
+  options:
+    immutable: true
+- files:
+  - files/liveness-probe.sh
+  name: mcrouter-probe
+  options:
+    immutable: true
+images:
+- digest: sha256:c798950a36389f9ee2190790f38e18818510b6cd827dec9d34aab108d6fed09e
+  name: memcached
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/memcached
+- digest: sha256:2af1db677a47bc816ed1a7ae7a831bc65436fc9b24a93946117703d352469725
+  name: quay.io/dev25/mcrouter_exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/dev25/mcrouter_exporter
+- digest: sha256:a2d3a4c67b0ff0d923ab368a9ff471e224b94afe396121e12527b83476ecc5ca
+  name: quay.io/evryfs/docker-mcrouter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/evryfs/docker-mcrouter
+- digest: sha256:3cc259dff5590c50c36d6773b1799b074efb5df5d50f7928bbac7782dd3a1109
+  name: quay.io/prometheus/memcached-exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/prometheus/memcached-exporter
