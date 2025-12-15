@@ -141,7 +141,7 @@ jobs:
         with:
           baseline: ${{ steps.download.outputs.htmlPath }}
           target: ${{ steps.capture.outputs.htmlPath }}
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: capture-${{ steps.artifact.outputs.name }}
           path: |
@@ -163,7 +163,7 @@ jobs:
             "artifactName": "${{ steps.artifact.outputs.name }}"
           }
           EOS
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: |
