@@ -32,13 +32,13 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-hippocampus-packages-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-hippocampus-packages-
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: target
           key: ${{ runner.os }}-hippocampus-${{ hashFiles('packages/**/*.rs') }}

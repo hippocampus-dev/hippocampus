@@ -25,7 +25,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cortex-bot/overlays/dev
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-playwright-mcp-docker-${{ hashFiles('cluster/applications/playwright-mcp/Dockerfile') }}

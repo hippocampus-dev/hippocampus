@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: |
             ~/.npm
@@ -32,13 +32,13 @@ jobs:
           key: ${{ runner.os }}-taurin-${{ hashFiles('taurin/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-taurin-
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-taurin-packages-${{ hashFiles('taurin/src-tauri/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-taurin-packages-
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: taurin/src-tauri/target
           key: ${{ runner.os }}-taurin-${{ hashFiles('taurin/src-tauri/**/*.rs') }}

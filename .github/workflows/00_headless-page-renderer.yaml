@@ -25,7 +25,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/grafana/overlays/dev
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-headless-page-renderer-docker-${{ hashFiles('cluster/applications/headless-page-renderer/Dockerfile') }}

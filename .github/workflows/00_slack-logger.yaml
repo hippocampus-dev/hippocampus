@@ -25,7 +25,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/slack-logger/base
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-slack-logger-docker-${{ hashFiles('cluster/applications/slack-logger/Dockerfile') }}

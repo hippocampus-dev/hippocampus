@@ -27,7 +27,7 @@ jobs:
       KUSTOMIZATION: cluster/applications/lifecycle-job-hook/manifests
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-lifecycle-job-hook-docker-${{ hashFiles('cluster/applications/lifecycle-job-hook/Dockerfile') }}

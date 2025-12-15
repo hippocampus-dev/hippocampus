@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: bash .github/workflows/bin/cleanup.sh
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-translator-docker-${{ hashFiles('cluster/applications/translator/Dockerfile') }}

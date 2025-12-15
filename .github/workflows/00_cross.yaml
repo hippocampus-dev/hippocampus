@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: bash .github/workflows/bin/cleanup.sh
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-x86_64-unknown-linux-gnu-docker-${{ hashFiles('cross/x86_64-unknown-linux-gnu.Dockerfile') }}
@@ -88,7 +88,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-x86_64-unknown-linux-musl-docker-${{ hashFiles('cross/x86_64-unknown-linux-musl.Dockerfile') }}

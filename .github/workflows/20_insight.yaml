@@ -15,13 +15,13 @@ jobs:
     steps:
       - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-insight-packages-${{ hashFiles('insight/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-insight-packages-
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: insight/target
           key: ${{ runner.os }}-insight-${{ hashFiles('insight/**/*.rs') }}

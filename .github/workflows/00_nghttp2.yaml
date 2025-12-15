@@ -25,7 +25,7 @@ jobs:
       KUSTOMIZATION: ""
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-nghttp2-docker-${{ hashFiles('cluster/applications/nghttp2/Dockerfile') }}

@@ -25,7 +25,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/connectracer/base
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-connectracer-docker-${{ hashFiles('cluster/applications/connectracer/Dockerfile') }}

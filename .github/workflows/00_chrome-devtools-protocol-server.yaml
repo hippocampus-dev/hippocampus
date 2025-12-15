@@ -25,7 +25,7 @@ jobs:
       KUSTOMIZATION: cluster/manifests/cortex-api/overlays/dev,cluster/manifests/cortex-bot/overlays/dev
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-chrome-devtools-protocol-server-docker-${{ hashFiles('cluster/applications/chrome-devtools-protocol-server/Dockerfile') }}

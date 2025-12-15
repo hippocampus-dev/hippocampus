@@ -27,7 +27,7 @@ jobs:
       KUSTOMIZATION: cluster/applications/owasp-zap-controller/manifests
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: /home/runner/.cache/docker-build
           key: ${{ runner.os }}-owasp-zap-controller-docker-${{ hashFiles('cluster/applications/owasp-zap-controller/Dockerfile') }}
