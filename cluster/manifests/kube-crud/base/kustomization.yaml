@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:9fd00400b27df58ef42aa8ebf10f75f68bbdb02da5c55019b0955002c78d8d34
+- digest: sha256:ec6c38a371f4ad2d28a6859fe83b66ec7c1a7bd58f7a908d6607d6da244998d4
   name: ghcr.io/hippocampus-dev/hippocampus/kube-crud
   newName: ghcr.io/hippocampus-dev/hippocampus/kube-crud
