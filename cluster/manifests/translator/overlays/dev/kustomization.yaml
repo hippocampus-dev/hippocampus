@@ -25,12 +25,12 @@ patches:
 generators:
 - secrets_from_vault.yaml
 images:
+- digest: sha256:80d4a7dfbc712199c9e77b750e97afe17562b6e3b1d6a2914d4ca0898d68c8c3
+  name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+  newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
 - digest: sha256:ba139da58371522e665e23e3a1f15f2645256746b4e64bf5757f83a58994f29d
   name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
 - digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
   name: minio/mc
   newName: ghcr.io/hippocampus-dev/hippocampus/mirror/minio/mc
-- digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
-  name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
-  newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
