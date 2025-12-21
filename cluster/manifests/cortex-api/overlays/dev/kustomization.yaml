@@ -29,12 +29,12 @@ patches:
 generators:
 - secrets_from_vault.yaml
 images:
-- digest: sha256:630a2eda09267ee0e42540e5efa12f59ebd8e1879f1ae80039faaef070d7ebd3
+- digest: sha256:84c23ce5546bafe4e9cc4287dc365c082b4718989e50de09d0856c3e873c8ea1
   name: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
   newName: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
-- digest: sha256:ba139da58371522e665e23e3a1f15f2645256746b4e64bf5757f83a58994f29d
-  name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
-  newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
 - digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
   name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
   newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+- digest: sha256:ba139da58371522e665e23e3a1f15f2645256746b4e64bf5757f83a58994f29d
+  name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
