@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:d8798bb126fa2c4353386dca5c4b4e251d285122b8d690d151abc64e40dbaa6c
+- digest: sha256:d0046257de99cf815012ed918eed4274f6c71b9e7d6a763426d8d3b183bda197
   name: ghcr.io/hippocampus-dev/hippocampus/embedding-gateway
   newName: ghcr.io/hippocampus-dev/hippocampus/embedding-gateway
