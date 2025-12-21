@@ -1,0 +1,361 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: cortex-api-proxy-wasm
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: ""
+  configPatches:
+    - applyTo: EXTENSION_CONFIG
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: kaidotio.envoy-xauthrequest
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+            config:
+              vm_config:
+                runtime: envoy.wasm.runtime.v8
+                allow_precompiled: true
+                code:
+                  remote:
+                    http_uri:
+                      uri: http://proxy-wasm.proxy-wasm.svc.cluster.local:8080/envoy_xauthrequest.wasm
+                      cluster: outbound|8080||proxy-wasm.proxy-wasm.svc.cluster.local
+    - applyTo: EXTENSION_CONFIG
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: kaidotio.envoy-trusted-header
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+            config:
+              vm_config:
+                runtime: envoy.wasm.runtime.v8
+                allow_precompiled: true
+                code:
+                  remote:
+                    http_uri:
+                      uri: http://proxy-wasm.proxy-wasm.svc.cluster.local:8080/envoy_trusted_header.wasm
+                      cluster: outbound|8080||proxy-wasm.proxy-wasm.svc.cluster.local
+                configuration:
+                  "@type": type.googleapis.com/google.protobuf.StringValue
+                  value: |
+                    {
+                      "mappings": [
+                        {
+                          "header_name": "x-auth-request-user",
+                          "trusted_certs": [
+                            {
+                              "uri": "spiffe://cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+    - applyTo: EXTENSION_CONFIG
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: kaidotio.header-getter
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+            config:
+              vm_config:
+                runtime: envoy.wasm.runtime.v8
+                allow_precompiled: true
+                code:
+                  remote:
+                    http_uri:
+                      uri: http://proxy-wasm.proxy-wasm.svc.cluster.local:8080/header_getter.wasm
+                      cluster: outbound|8080||proxy-wasm.proxy-wasm.svc.cluster.local
+                configuration:
+                  "@type": type.googleapis.com/google.protobuf.StringValue
+                  value: |
+                    {
+                      "mappings": [
+                        {
+                          "key": "x-auth-request-user-original",
+                          "header_name": "x-auth-request-user"
+                        }
+                      ]
+                    }
+    - applyTo: EXTENSION_CONFIG
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: kaidotio.header-setter
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+            config:
+              vm_config:
+                runtime: envoy.wasm.runtime.v8
+                allow_precompiled: true
+                code:
+                  remote:
+                    http_uri:
+                      uri: http://proxy-wasm.proxy-wasm.svc.cluster.local:8080/header_setter.wasm
+                      cluster: outbound|8080||proxy-wasm.proxy-wasm.svc.cluster.local
+                configuration:
+                  "@type": type.googleapis.com/google.protobuf.StringValue
+                  value: |
+                    {
+                      "mappings": [
+                        {
+                          "key": "x-auth-request-user",
+                          "header_name": "x-auth-request-user",
+                          "override": false
+                        },
+                        {
+                          "key": "x-auth-request-user-original",
+                          "header_name": "x-auth-request-user",
+                          "override": true
+                        }
+                      ]
+                    }
+    - applyTo: EXTENSION_CONFIG
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: kaidotio.fallback-filter
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+            config:
+              vm_config:
+                vm_id: kaidotio
+                runtime: envoy.wasm.runtime.v8
+                allow_precompiled: true
+                code:
+                  remote:
+                    http_uri:
+                      uri: http://proxy-wasm.proxy-wasm.svc.cluster.local:8080/fallback_filter.wasm
+                      cluster: outbound|8080||proxy-wasm.proxy-wasm.svc.cluster.local
+                configuration:
+                  "@type": type.googleapis.com/google.protobuf.StringValue
+                  value: |
+                    {
+                      "fallback": {
+                        "cluster": "outbound|9000||assets-minio.assets.svc.cluster.local",
+                        "headers": [
+                          [":method", "GET"],
+                          [":path", "/public/sorry.html"],
+                          [":authority", "assets-minio.assets.svc.cluster.local"]
+                        ],
+                        "timeout": "1s"
+                      },
+                      "queue_name": "fallback-filter",
+                      "response_code_label": "rq"
+                    }
+    - applyTo: EXTENSION_CONFIG
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: kaidotio.metrics-exporter
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+            config:
+              vm_config:
+                vm_id: kaidotio
+                runtime: envoy.wasm.runtime.v8
+                allow_precompiled: true
+                code:
+                  remote:
+                    http_uri:
+                      uri: http://proxy-wasm.proxy-wasm.svc.cluster.local:8080/metrics_exporter.wasm
+                      cluster: outbound|8080||proxy-wasm.proxy-wasm.svc.cluster.local
+                configuration:
+                  "@type": type.googleapis.com/google.protobuf.StringValue
+                  value: |
+                    {
+                      "field_separator": "_",
+                      "value_separator": "_",
+                      "vm_id": "kaidotio",
+                      "queue_name": "fallback-filter"
+                    }
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: istio.metadata_exchange
+      patch:
+        # istio.metadata_exchange deletes x-envoy-peer-metadata header
+        operation: INSERT_BEFORE # WasmPlugin does not support INSERT_BEFORE to istio.metadata_exchange
+        value:
+          name: kaidotio.envoy-xauthrequest
+          # https://github.com/envoyproxy/envoy/issues/33212#issuecomment-2052062339
+          config_discovery:
+            config_source:
+              ads: {}
+              initial_fetch_timeout: 0s
+            type_urls:
+              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: istio.metadata_exchange
+      patch:
+        operation: INSERT_BEFORE # WasmPlugin does not support INSERT_BEFORE to istio.metadata_exchange
+        value:
+          name: kaidotio.envoy-trusted-header
+          # https://github.com/envoyproxy/envoy/issues/33212#issuecomment-2052062339
+          config_discovery:
+            config_source:
+              ads: {}
+              initial_fetch_timeout: 0s
+            type_urls:
+              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.jwt_authn
+      patch:
+        # envoy.filters.http.jwt_authn(RequestAuthentication) deletes x-auth-request-user header
+        operation: INSERT_BEFORE # spec.phase: AUTHN
+        value:
+          name: kaidotio.header-getter
+          # https://github.com/envoyproxy/envoy/issues/33212#issuecomment-2052062339
+          config_discovery:
+            config_source:
+              ads: {}
+              initial_fetch_timeout: 0s
+            type_urls:
+              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.jwt_authn
+      patch:
+        operation: INSERT_AFTER # spec.phase: AUTHZ
+        value:
+          name: kaidotio.header-setter
+          # https://github.com/envoyproxy/envoy/issues/33212#issuecomment-2052062339
+          config_discovery:
+            config_source:
+              ads: {}
+              initial_fetch_timeout: 0s
+            type_urls:
+              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: kaidotio.fallback-filter
+          # https://github.com/envoyproxy/envoy/issues/33212#issuecomment-2052062339
+          config_discovery:
+            config_source:
+              ads: {}
+              initial_fetch_timeout: 0s
+            type_urls:
+              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: kaidotio.fallback-filter
+      patch:
+        operation: INSERT_AFTER
+        value:
+          name: kaidotio.metrics-exporter
+          # https://github.com/envoyproxy/envoy/issues/33212#issuecomment-2052062339
+          config_discovery:
+            config_source:
+              ads: {}
+              initial_fetch_timeout: 0s
+            type_urls:
+              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: cortex-api-access-log
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: ""
+  configPatches:
+    - applyTo: NETWORK_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            access_log:
+              - name: envoy.access_loggers.file
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                  path: /dev/stdout
+                  log_format:
+                    json_format:
+                      # http://ltsv.org/
+                      time: "%START_TIME%"
+                      host: "%DOWNSTREAM_REMOTE_ADDRESS_WITHOUT_PORT%"
+                      forwardedfor: "%REQ(X-FORWARDED-FOR)%"
+                      method: "%REQ(:METHOD)%"
+                      uri: "%REQ(:PATH)%"
+                      protocol: "%PROTOCOL%"
+                      status: "%RESPONSE_CODE%"
+                      size: "%BYTES_SENT%"
+                      reqsize: "%BYTES_RECEIVED%"
+                      referer: "%REQ(REFERER)%"
+                      ua: "%REQ(USER-AGENT)%"
+                      vhost: "%REQ(:AUTHORITY)%"
+                      reqtime: "%DURATION%"
+                      # Envoy specific fields
+                      respflag: "%RESPONSE_FLAGS%"
+                      # Additional fields
+                      scheme: "%REQ(:SCHEME)%"
+                      traceparent: "%REQ(TRACEPARENT)%"
+                      "x-client-ip": "%REQ(X-CLIENT-IP)%"
+                      xauthrequestuser: "%REQ(x-auth-request-user)%"

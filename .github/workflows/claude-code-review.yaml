@@ -1,0 +1,60 @@
+name: Claude Code Review
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+  claude:
+    if: github.repository_owner == 'kaidotio' && github.event.pull_request.user.login == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, local]
+    env:
+      GIT_CONFIG_GLOBAL: /tmp/gitconfig
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: claude
+          additional_permissions: |
+            actions: read
+          track_progress: true
+          prompt: |
+            # Task
+
+            Perform a security-focused code review to identify HIGH-CONFIDENCE security vulnerabilities in this pull request. All interactions should be in Japanese.
+
+            ## Objectives
+
+            1. Identify security vulnerabilities with >80% confidence of actual exploitability
+            2. Focus ONLY on security implications newly added by this PR
+            3. Provide actionable feedback for identified issues
+
+            ## Process
+
+            - Phase 1: Research repository context - identify existing security frameworks and patterns
+            - Phase 2: Compare new code against established secure practices
+            - Phase 3: Examine modified files, trace data flow, identify injection points
+
+            ## Security Categories
+
+            - Input Validation: SQL/Command/XXE/Template/NoSQL injection, Path traversal
+            - Authentication & Authorization: Bypass logic, Privilege escalation, Session flaws, JWT vulnerabilities
+            - Crypto & Secrets: Hardcoded credentials, Weak algorithms, Key management issues
+            - Injection & Code Execution: Deserialization RCE, Pickle/YAML injection, Eval injection, XSS
+            - Data Exposure: Sensitive data logging, PII violations, API leakage, Debug info exposure
+
+            ## Important
+
+            - MINIMIZE FALSE POSITIVES: Only flag issues with >80% confidence
+            - AVOID NOISE: Skip theoretical issues, style concerns, or low-impact findings
+            - FOCUS ON IMPACT: Prioritize unauthorized access, data breaches, system compromise
+            - EXCLUSIONS: Do NOT report DoS vulnerabilities, secrets on disk, rate limiting issues
+            - Local network exploitability can still be HIGH severity
+          claude_args: |
+            --allowedTools "Task,Glob,Grep,LS,Read,TodoRead,TodoWrite,WebSearch,WebFetch,Bash(find:*),Bash(ls:*),Bash(grep:*),Bash(git diff:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),mcp__github_inline_comment__create_inline_comment"

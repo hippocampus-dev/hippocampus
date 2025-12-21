@@ -1,0 +1,24 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: fluentd-delayed-unlink
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-delayed-unlink
+      app.kubernetes.io/component: ""
+  tracing:
+    - providers:
+        - name: fluentd-delayed-unlink
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

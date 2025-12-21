@@ -1,0 +1,91 @@
+services:
+  llama.cpp:
+    profiles:
+      - llama.cpp
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: llama.cpp
+    develop:
+      watch:
+        - action: rebuild
+          path: llama.cpp/Dockerfile
+    runtime: nvidia
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
+    ports:
+      - "8080:8080"
+    command:
+      - -ngl
+      - "32"
+      - -m
+      - models/Phi-3-mini-4k-instruct-q4.gguf
+      - --chat-template
+      - phi3
+      - --host
+      - 0.0.0.0
+    volumes:
+      - type: volume
+        source: llama.cpp-models
+        target: /home/nonroot/llama.cpp/models
+    depends_on:
+      llama.cpp-downloader:
+        condition: service_completed_successfully
+    networks:
+      - default
+  llama.cpp-chown:
+    profiles:
+      - llama.cpp
+      - full
+    image: debian:bookworm-slim
+    entrypoint:
+      - chown
+      - -R
+      - 65532:65532
+      - /home/nonroot/models
+    volumes:
+      - type: volume
+        source: llama.cpp-models
+        target: /home/nonroot/models
+    networks:
+      - default
+  llama.cpp-downloader:
+    profiles:
+      - llama.cpp
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: llama.cpp/downloader
+    develop:
+      watch:
+        - action: rebuild
+          path: llama.cpp/downloader/Dockerfile
+        - action: rebuild
+          path: llama.cpp/downloader/links.txt
+    command:
+      - -j
+      - "5"
+      - -x
+      - "8"
+      - -s
+      - "8"
+      - -k
+      - "100M"
+      - --header
+      - "Authorization: Bearer ${HF_HUB_TOKEN}"
+    environment:
+      - HF_HUB_TOKEN=${HF_HUB_TOKEN}
+    volumes:
+      - type: volume
+        source: llama.cpp-models
+        target: /home/nonroot/models
+    depends_on:
+      llama.cpp-chown:
+        condition: service_completed_successfully
+    networks:
+      - default

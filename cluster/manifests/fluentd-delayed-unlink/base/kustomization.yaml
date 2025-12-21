@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- daemon_set.yaml
+- pod_disruption_budget.yaml
+images:
+- digest: sha256:785b3cd71b5070d9dd27b6c7fce7cead887b7062f6d7b1436152da3923584ff6
+  name: ghcr.io/hippocampus-dev/hippocampus/fluentd-delayed-unlink
+  newName: ghcr.io/hippocampus-dev/hippocampus/fluentd-delayed-unlink

@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cilium-etcd-0
+spec:
+  serviceName: cilium-etcd
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: cilium
+      app.kubernetes.io/component: etcd
+      app.kubernetes.io/instance: cilium-etcd-0
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      hostNetwork: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: etcd
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            # write to /var/lib/cilium/etcd
+            #runAsUser: 65532
+            #runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: quay.io/coreos/etcd
+          imagePullPolicy: IfNotPresent
+          command:
+            - etcd
+          args:
+            - --name=$(POD_NAME)
+            - --listen-client-urls=http://0.0.0.0:12379
+            - --listen-peer-urls=http://0.0.0.0:12380
+            - --listen-metrics-urls=http://0.0.0.0:12381
+            - --advertise-client-urls=http://$(POD_IP):12379
+            - --data-dir=/var/lib/cilium/etcd-0
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/cilium/etcd-0
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/cilium/etcd-0

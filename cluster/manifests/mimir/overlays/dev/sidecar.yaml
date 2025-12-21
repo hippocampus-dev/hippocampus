@@ -1,0 +1,201 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-mc
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: mc
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./mimir-minio.mimir.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-distributor
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: distributor
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-querier
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: querier
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-query-frontend
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: query-frontend
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./mimir-querier.mimir.svc.cluster.local
+        - ./mimir-query-scheduler.mimir.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-query-scheduler
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: query-scheduler
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./mimir-querier.mimir.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-compactor
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: compactor
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-ingester
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: ingester
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-alertmanager
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: alertmanager
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-store-gateway
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: store-gateway
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-ruler
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: ruler
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./*
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: mimir-proxy
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: proxy
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./mimir-query-frontend.mimir.svc.cluster.local
+        - ./mimir-ruler.mimir.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
