@@ -12,6 +12,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:4967d90f030388c28b6564219e84f353cfa81c775f556d6eafe3f04b04ea4c9c
+- digest: sha256:1d3b81779360689d14e2cdb8912c1923ba214fe595235321decf3f1dfd238704
   name: ghcr.io/hippocampus-dev/hippocampus/persistentvolumeclaim-hook
   newName: ghcr.io/hippocampus-dev/hippocampus/persistentvolumeclaim-hook
