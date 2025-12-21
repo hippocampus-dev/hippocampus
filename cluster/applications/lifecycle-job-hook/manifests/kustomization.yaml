@@ -12,6 +12,6 @@ resources:
 - service_account.yaml
 - validating_webhook_configuration.yaml
 images:
-- digest: sha256:de906acde9924cd8af8520abe39fd3aced5e365805e156df5db1705d1a33ffcf
+- digest: sha256:54d6326b0119a1f9b91aa1338376a0a14daae0838d8b4b803434ef83a38103f6
   name: ghcr.io/hippocampus-dev/hippocampus/lifecycle-job-hook
   newName: ghcr.io/hippocampus-dev/hippocampus/lifecycle-job-hook
