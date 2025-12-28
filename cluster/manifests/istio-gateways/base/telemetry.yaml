@@ -1,0 +1,13 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: access-logging-http1.0
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol == "HTTP/1.0"

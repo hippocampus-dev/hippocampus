@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../../applications/anonymous-proxy/manifests
+images:
+- digest: sha256:3306ee048cf6b3dcff41bde6c486033710b29050fafe788e7b95c471d530e01c
+  name: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy

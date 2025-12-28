@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:95173c11b36f53a423ce47f00baee3f913a3e403f202a83c8bc3c7115a2cfdd0
+  name: grafana/grafana
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/grafana/grafana
+- digest: sha256:768e7d87873950b1a1ddf26c1690f626892b0aee981fd3380d4fc20fa4cfdc12
+  name: mcp/grafana
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/mcp/grafana
+
+configMapGenerator:
+- files:
+  - files/dashboardproviders.yaml
+  name: dashboards
+- files:
+  - dashboards/kubernetes/zz_generated.cluster.json
+  name: kubernetes-cluster.json
+- files:
+  - dashboards/kubernetes/zz_generated.cronjob.json
+  name: kubernetes-cronjob.json
+- files:
+  - dashboards/kubernetes/zz_generated.node.json
+  name: kubernetes-node.json
+- files:
+  - dashboards/kubernetes/zz_generated.namespace.json
+  name: kubernetes-namespace.json
+- files:
+  - dashboards/kubernetes/zz_generated.workload.json
+  name: kubernetes-workload.json
+- files:
+  - dashboards/kubernetes/zz_generated.pod.json
+  name: kubernetes-pod.json
+- files:
+  - dashboards/kubernetes/zz_generated.volume.json
+  name: kubernetes-volume.json
+- files:
+  - dashboards/other/zz_generated.overview.json
+  name: other-overview.json
+- files:
+  - dashboards/other/zz_generated.lighthouse.json
+  name: other-lighthouse.json

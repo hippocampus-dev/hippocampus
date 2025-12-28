@@ -1,0 +1,69 @@
+rules:
+  - seriesQuery: '{__name__=~"^container_network_receive_bytes_total|container_network_transmit_bytes_total$",namespace!="",pod!=""}'
+    resources:
+      overrides:
+        namespace:
+          resource: namespace
+        pod:
+          resource: pod
+    name:
+      matches: "^(.*)_total$"
+      as: "${1}_per_second"
+    metricsQuery: 'sum(rate(<<.Series>>{<<.LabelMatchers>>}[5m])) by (<<.GroupBy>>)'
+  - seriesQuery: 'fluentd_output_status_buffer_queue_length'
+    resources:
+      overrides:
+        namespace:
+          resource: namespace
+        pod:
+          resource: pod
+    name:
+      matches: "^(.*)$"
+      as: "${1}_per_2m"
+    metricsQuery: 'sum(max_over_time(<<.Series>>{<<.LabelMatchers>>}[2m])) by (<<.GroupBy>>)'
+# DON'T use aggregator to use matchLabels selector
+externalRules:
+  - seriesQuery: 'prometheus_build_info'
+    resources:
+      namespaced: false
+    # e.g.,
+    # metrics:
+    # - type: External
+    #   external:
+    #     metric:
+    #       name: always_zero
+    #     target:
+    #       averageValue: "1"
+    #       type: AverageValue
+    # CAUTION: https://github.com/kubernetes/website/blob/main/content/en/docs/tasks/run-application/horizontal-pod-autoscale.md#implicit-maintenance-mode-deactivation
+    name:
+      matches: "(.*)"
+      as: "always_zero"
+    metricsQuery: '<<.Series>>*0'
+  - seriesQuery: 'github_actions_runs_total'
+    resources:
+      overrides:
+        namespace:
+          resource: namespace
+    name:
+      matches: "^(.*)_total$"
+      as: "${1}_queued"
+    metricsQuery: '<<.Series>>{<<.LabelMatchers>>,status="queued"}'
+  - seriesQuery: 'redis_script_values'
+    resources:
+      overrides:
+        namespace:
+          resource: namespace
+    name:
+      matches: "^(.*)$"
+      as: "redis_events_value"
+    metricsQuery: '<<.Series>>{<<.LabelMatchers>>,key="events"}'
+  - seriesQuery: 'cortex_query_scheduler_inflight_requests'
+    resources:
+      overrides:
+        namespace:
+          resource: namespace
+    name:
+      matches: "(.*)"
+      as: "${1}_per_2m"
+    metricsQuery: 'max_over_time(<<.Series>>{<<.LabelMatchers>>,quantile="0.75"}[2m])'

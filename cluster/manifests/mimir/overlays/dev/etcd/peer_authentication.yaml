@@ -1,0 +1,13 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: etcd
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: etcd
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    2380:
+      mode: PERMISSIVE # peer

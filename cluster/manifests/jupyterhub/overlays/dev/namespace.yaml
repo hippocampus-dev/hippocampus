@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jupyterhub
+  labels:
+    name: jupyterhub
+    pod-security.kubernetes.io/enforce: privileged
+    # Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+    #istio-injection: disabled

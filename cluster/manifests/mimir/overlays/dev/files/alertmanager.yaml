@@ -1,0 +1,51 @@
+global: null
+receivers:
+  #- name: slack
+  #  slack_configs:
+  #    - api_url: http://mattermost.mattermost.svc.cluster.local./hooks/mattermost/mattermost
+  #      send_resolved: true
+  #      title: |-
+  #        [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity | toUpper }}
+  #      text: >-
+  #        {{ if eq .Status "firing" }}<!here>{{ end }}
+  #
+  #        {{ with index .Alerts 0 }}<{{ .GeneratorURL | reReplaceAll "&g0.tab=1$" "&g0.tab=0" }}{{ if ne .Status "firing" }}&g0.end_input={{ printf "%s" .EndsAt | reReplaceAll " .[0-9]+ UTC" "" }}{{ end }}|Show in graph>{{ end }}{{ if eq .Status "firing" }} | <{{ .ExternalURL }}/#/silences/new?filter=%7B{{ range .CommonLabels.SortedPairs }}{{ if ne .Name "alertname" }}{{ .Name }}%3D"{{ .Value }}"%2C%20{{ end }}{{ end }}alertname%3D"{{ .CommonLabels.alertname }}"%7D|Silence>{{ end }}
+  #
+  #        {{ range .Alerts -}}
+  #        {{ .Annotations.message }}
+  #          {{ range .Labels.SortedPairs }} - {{ .Name }}=`{{ .Value }}`
+  #          {{ end }}
+  #
+  #        {{ end }}
+  - name: alerthandler
+    webhook_configs:
+      - url: 'http://alerthandler.default.svc.cluster.local'
+        send_resolved: true
+route:
+  group_wait: 30s
+  group_interval: 5m
+  group_by: [alertname]
+  receiver: alerthandler
+  routes:
+    - match:
+        severity: critical
+      repeat_interval: 1h
+      receiver: alerthandler
+      continue: true
+    - match:
+        severity: warning
+      repeat_interval: 24h
+      receiver: alerthandler
+      continue: true
+    - match:
+        severity: critical
+      repeat_interval: 1h
+    - match:
+        severity: warning
+      repeat_interval: 24h
+inhibit_rules:
+  - source_match:
+      scope: 'application'
+    target_match:
+      scope: 'uri'
+    equal: ['alertname', 'vhost']

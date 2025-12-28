@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fluentd-delayed-unlink
+  annotations:
+    # https://github.com/argoproj/argo-cd/pull/19826
+    argocd.argoproj.io/ignore-healthcheck: "true"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-delayed-unlink
+      app.kubernetes.io/component: ""

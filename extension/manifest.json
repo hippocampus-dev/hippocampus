@@ -1,0 +1,156 @@
+{
+  "name": "hippocampus",
+  "description": "",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "32": "images/icon32.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "32": "images/icon32.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    },
+    "default_title": "hippocampus",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "permissions": [
+    "management",
+    "webNavigation",
+    "webRequest",
+    "identity",
+    "tabs",
+    "contextMenus",
+    "notifications",
+    "scripting",
+    "declarativeNetRequest",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "styler.js",
+        "lib/dialog.js",
+        "lib/tooltip.js",
+        "lib/menu.js",
+        "lib/dom_processor.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "message_handler.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://github.com/*"
+      ],
+      "js": [
+        "github.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://grafana.minikube.127.0.0.1.nip.io/*"
+      ],
+      "js": [
+        "grafana.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "gmail.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://docs.google.com/forms/*"
+      ],
+      "js": [
+        "google_form.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://meet.google.com/*"
+      ],
+      "js": [
+        "google_meet.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://app.slack.com/*"
+      ],
+      "js": [
+        "slack.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.google.com/search*"
+      ],
+      "js": [
+        "google_search.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "youtube.js",
+        "youtube_secondary.js"
+      ]
+    }
+  ],
+  "devtools_page": "devtools_page.html",
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+      "resources": [
+        "images/icon32.png",
+        "images/clipboard.svg",
+        "images/reroll.svg",
+        "images/close.svg"
+      ]
+    }
+  ],
+  "declarative_net_request" : {
+    "rule_resources": [
+      {
+        "id": "disable-csp",
+        "enabled": false,
+        "path": "rule/disable-csp.json"
+      }
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; connect-src 'self' https://cortex-api.minikube.127.0.0.1.nip.io; img-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';"
+  }
+}

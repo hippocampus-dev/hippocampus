@@ -1,0 +1,69 @@
+#!/bin/bash
+
+set -e
+
+UNIT_NAME="claudex-$$"
+
+tmux setw monitor-silence 3
+trap 'tmux setw monitor-silence 0' EXIT
+trap 'trap "" INT; systemctl --user stop "$UNIT_NAME"' INT
+
+WORKING_DIRECTORY=$(pwd)
+
+systemd-run \
+  --unit="$UNIT_NAME" \
+  --user \
+  --pipe \
+  --wait \
+  --collect \
+  --same-dir \
+  -E CLAUDE_CONFIG_DIR="$HOME/.config/claudex" \
+  -E PATH="$PATH" \
+  -E GOPATH="/tmp" \
+  -E TMUX="$TMUX" \
+  -E TMUX_PANE="$TMUX_PANE" \
+  -p BindPaths="/tmp/tmux-$(id -u)" \
+  `#-p AppArmorProfile=claude` \
+  -p ProtectProc=invisible \
+  -p ProcSubset=pid \
+  -p NoNewPrivileges=yes \
+  -p ProtectSystem=strict \
+  -p ProtectHome=read-only \
+  -p ReadWritePaths="$WORKING_DIRECTORY $HOME/.asdf $HOME/.npm $HOME/.cache $HOME/.local/share $HOME/.local/state $HOME/.config/claudex $HOME/.codex $HOME/.gemini $HOME/.docker/buildx /opt/hippocampus/files/$HOME/.config/claudex/settings.json /opt/hippocampus/target" \
+  -p ReadOnlyDirectories="/opt/hippocampus/.git" \
+  -p InaccessiblePaths="$HOME/.secrets $HOME/.vault $HOME/.ssh $HOME/.gnupg /etc/passwd /etc/shadow /opt/hippocampus/.git" \
+  -p PrivateTmp=yes \
+  -p PrivateDevices=yes \
+  -p PrivateNetwork=no \
+  -p PrivateUsers=yes \
+  -p PrivateMounts=yes \
+  -p ProtectKernelTunables=yes \
+  -p ProtectKernelModules=yes \
+  -p ProtectKernelLogs=yes \
+  -p ProtectControlGroups=yes \
+  -p ProtectHostname=yes \
+  -p ProtectClock=yes \
+  -p DevicePolicy=closed \
+  -p DeviceAllow="/dev/null rw" \
+  -p DeviceAllow="/dev/random r" \
+  -p DeviceAllow="/dev/urandom r" \
+  -p PrivateIPC=yes \
+  -p RestrictNamespaces=yes \
+  -p RestrictRealtime=yes \
+  -p RestrictSUIDSGID=yes \
+  -p LockPersonality=yes \
+  -p MemoryDenyWriteExecute=no \
+  -p SystemCallArchitectures=native \
+  -p SystemCallFilter="@system-service" \
+  -p SystemCallFilter="~@privileged @debug" \
+  -p SystemCallErrorNumber=EPERM \
+  -p RestrictAddressFamilies="AF_UNIX AF_INET AF_INET6 AF_VSOCK" \
+  -p CapabilityBoundingSet="" \
+  -p AmbientCapabilities="" \
+  -p UMask=0077 \
+  -p CoredumpFilter=0 \
+  -p IPAccounting=yes \
+  -p RestrictFileSystems="ext4 tmpfs proc sysfs" \
+  -p KeyringMode=private \
+  -p NotifyAccess=none \
+  claude "$@"

@@ -1,0 +1,52 @@
+[package]
+name = "taurin"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/ipc",
+    "crates/ipc_build",
+    "crates/ipc_macro",
+]
+
+[build-dependencies]
+tauri-build = { version = "2.0.6", features = [] }
+
+ipc_build = { path = "crates/ipc_build" }
+
+[dependencies]
+tauri = { version = "2.3.0", features = [] }
+tokio = { version = "1.45.1", features = ["sync"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+tauri-plugin-store = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-os = "2"
+
+xcap = { version = "0.4.0" }
+image = { version = "0.25.5" }
+base64 = { version = "0.22.1" }
+
+tokio-tungstenite = { version = "0.26.2", features = ["native-tls"] }
+futures-util = "0.3.30"
+
+ipc = { path = "crates/ipc" }
+bakery = { path = "../../packages/bakery" }
+openai = { path = "../../packages/openai" }
+audio = { path = "../../packages/audio" }
+
+[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+tauri-plugin-autostart = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2"
+
+[dev-dependencies]
+tokio = { version = "1.45.1" }
+
+[profile.release]
+strip = "symbols"
+lto = true
+panic = "abort"
