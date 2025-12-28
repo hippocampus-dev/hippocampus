@@ -37,7 +37,7 @@ images:
 - digest: sha256:254e34f34f2bec7f55bf9ac084e6904c15a4c43c0b55b973d92879f0cf12c1c8
   name: fluent/fluentd-kubernetes-daemonset
   newName: ghcr.io/hippocampus-dev/hippocampus/mirror/fluent/fluentd-kubernetes-daemonset
-- digest: sha256:07f204784d8fa57980427cd0acd3d59e76f20c32d77e45032b25a795d369a20e
+- digest: sha256:70b07bc23e1cbc5e0a45f453aa1cd19147d0e6f16312c30af565351614672b7d
   name: ghcr.io/hippocampus-dev/hippocampus/fluentd-aggregator
   newName: ghcr.io/hippocampus-dev/hippocampus/fluentd-aggregator
 - digest: sha256:c20cc0fb2627491f6d0c6eb08eb3a0f892c26effd559607742128b65f11436e1
