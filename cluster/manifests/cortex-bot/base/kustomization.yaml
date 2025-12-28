@@ -6,6 +6,6 @@ resources:
 - pod_disruption_budget.yaml
 
 images:
-- digest: sha256:0d21878d0bbf0ecc9007fd5879e21ba5ef279e00b3707d74b569a15efa8faf48
+- digest: sha256:55e23813825b363c8db0721ba88d3d3455f9826c8449023f54217075a9105958
   name: ghcr.io/hippocampus-dev/hippocampus/cortex-bot
   newName: ghcr.io/hippocampus-dev/hippocampus/cortex-bot
