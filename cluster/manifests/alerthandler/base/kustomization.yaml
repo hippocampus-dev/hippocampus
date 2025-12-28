@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
 - ../../../applications/alerthandler/manifests
 images:
-- digest: sha256:3ce03956e274fc7f5a941b3f954e2693e038861ae84b1e686ba93c49eabdbc8a
+- digest: sha256:407731eb13036ed18785bbc8395fde9e33f9ba34e081fb644236d02352547dd5
   name: ghcr.io/hippocampus-dev/hippocampus/alerthandler
   newName: ghcr.io/hippocampus-dev/hippocampus/alerthandler
