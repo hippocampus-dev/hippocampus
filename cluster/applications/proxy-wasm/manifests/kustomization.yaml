@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:9e1a277ed190cbfcd136d354f90d0dddd409e71d98e9c25cb9de89dcc1301bae
+- digest: sha256:2c4b6645601ad6f7fe70a59d4b21f5fd82dd270d4a00f75800167cd28492e739
   name: ghcr.io/hippocampus-dev/hippocampus/proxy-wasm
   newName: ghcr.io/hippocampus-dev/hippocampus/proxy-wasm
