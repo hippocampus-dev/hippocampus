@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: cortex-api
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY # Some agents request to external
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./api.openai.com
+        - ./openaipublic.blob.core.windows.net
+        - ./cortex-api-redis-haproxy-reader.cortex-api.svc.cluster.local
+        - ./cortex-api-redis-haproxy-writer.cortex-api.svc.cluster.local
+        - embedding-retrieval/embedding-retrieval.embedding-retrieval.svc.cluster.local
+        - anonymous-proxy/anonymous-proxy.anonymous-proxy.svc.cluster.local
+        - assets/assets-minio.assets.svc.cluster.local
+        - proxy-wasm/proxy-wasm.proxy-wasm.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

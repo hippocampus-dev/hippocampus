@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: at-least-semaphore-pod-hook
+spec:
+  issuerRef:
+    name: skaffold-at-least-semaphore-pod-hook-selfsigned
+  dnsNames:
+    - skaffold-at-least-semaphore-pod-hook.skaffold-at-least-semaphore-pod-hook.svc
+    - skaffold-at-least-semaphore-pod-hook.skaffold-at-least-semaphore-pod-hook.svc.cluster.local

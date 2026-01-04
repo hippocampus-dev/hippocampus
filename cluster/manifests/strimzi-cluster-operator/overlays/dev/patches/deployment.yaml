@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strimzi-cluster-operator
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: strimzi-cluster-operator
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        traffic.sidecar.istio.io/excludeOutboundPorts: "2181,9091" # Zookeeper and Kafka ports
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8080"
+        prometheus.io/path: /metrics
+    spec:
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: strimzi-cluster-operator
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: strimzi-cluster-operator
+      containers:
+        - name: strimzi-cluster-operator
+          resources:
+            limits:
+              memory: 1Gi
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

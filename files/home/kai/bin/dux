@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -e
+
+function usage() {
+  cat <<EOS
+Usage:
+   dux [--max-depth DEPTH]
+EOS
+}
+
+args=()
+flags=()
+MAX_DEPTH=0
+while (( $# )); do
+  case "${1}" in
+    --max-depth)
+      MAX_DEPTH=${2}
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*|--*)
+      echo "Unsupported flag ${1}" 1>&2
+      exit 1
+      ;;
+    *)
+      args+=("${1}")
+      shift
+      ;;
+  esac
+done
+
+TOTAL=$(du -sb $args | cut -f1)
+
+du -ab --max-depth=${MAX_DEPTH} $args 2>/dev/null | while IFS=$'\t' read -r SIZE FPATH; do
+  PERCENT=$((SIZE * 100 / TOTAL))
+  if [ "${SIZE}" -ge 1073741824 ]; then
+    FSIZE=$((SIZE / 1073741824)).$((SIZE % 1073741824 * 10 / 1073741824))G
+  elif [ "${SIZE}" -ge 1048576 ]; then
+    FSIZE=$((SIZE / 1048576)).$((SIZE % 1048576 * 10 / 1048576))M
+  else
+    FSIZE=$((SIZE / 1024)).$((SIZE % 1024 * 10 / 1024))K
+  fi
+  printf "%s\t%d%%\t%s\n" $FSIZE $PERCENT $FPATH
+done | sort -t$'\t' -k1 -h -r | column -t

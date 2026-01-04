@@ -1,0 +1,11 @@
+apiVersion: skaffold.github-actions-runner.kaidotio.github.io/v1
+kind: Runner
+metadata:
+  name: example
+spec:
+  image: ubuntu:24.04
+  owner: hippocampus-dev
+  repo: hippocampus
+  tokenSecretKeyRef:
+    name: credentials
+    key: GITHUB_TOKEN

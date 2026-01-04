@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e
+
+unset ANTHROPIC_API_KEY
+exec claude "$@"

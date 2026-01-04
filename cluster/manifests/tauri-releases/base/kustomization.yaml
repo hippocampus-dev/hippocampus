@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:8e180d7365e751ce846b08b93c1a2eda31a6eaa008213cb26e80d16ebeb47d0a
+  name: ghcr.io/hippocampus-dev/hippocampus/tauri-releases
+  newName: ghcr.io/hippocampus-dev/hippocampus/tauri-releases

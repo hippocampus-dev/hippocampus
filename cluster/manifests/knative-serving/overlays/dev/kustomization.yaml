@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: knative-serving
+
+resources:
+  - ../../base
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+  - https://github.com/knative/net-istio/releases/download/knative-v1.20.1/net-istio.yaml
+
+patches:
+  - path: patches/config_map.yaml
+  - path: patches/deployment.yaml
+  - path: patches/horizontal_pod_autoscaler.yaml
+  - path: patches/namespace.yaml
+  # Avoid to duplicate Certificate resource
+  - patch: |-
+      $patch: delete
+      apiVersion: networking.internal.knative.dev/v1alpha1
+      kind: Certificate
+      metadata:
+        name: routing-serving-certs
+        namespace: knative-serving
+  # Use cluster-local-gateway instead
+  - patch: |-
+      $patch: delete
+      apiVersion: networking.istio.io/v1beta1
+      kind: Gateway
+      metadata:
+        name: knative-local-gateway
+        namespace: knative-serving
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: knative-local-gateway
+        namespace: istio-system

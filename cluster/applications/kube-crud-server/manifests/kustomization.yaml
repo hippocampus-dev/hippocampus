@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role_binding.yaml
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:c51e991c7854696dc497050bec0e3acdacaf2a5d072c7f659f1b5aeed9085edb
+  name: ghcr.io/hippocampus-dev/hippocampus/kube-crud-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/kube-crud-server

@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: otel-collector
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: otel
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: otel-agent
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 4317

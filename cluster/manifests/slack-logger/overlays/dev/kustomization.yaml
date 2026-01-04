@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: slack-logger
+
+resources:
+- ../../base
+- atlas_schema.yaml
+- job.yaml
+- kafka.yaml
+- kafka_node_pool.yaml
+- kafka_source.yaml
+- kafka_topic.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- tidb_cluster.yaml
+- tidb_initializer.yaml
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+
+configMapGenerator:
+- files:
+  - files/changefeed.toml
+  name: ticdc-changefeed
+
+generators:
+- secrets_from_vault.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:cb1a7de87efe59323c7ceb2a04ffc24cadd2525a13cce33124264e95605b1a7c
+  name: pingcap/ticdc
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/pingcap/ticdc

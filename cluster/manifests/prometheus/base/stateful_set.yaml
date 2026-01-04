@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus
+spec:
+  replicas: 2
+  serviceName: prometheus
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: prometheus
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: prometheus
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-generator
+          image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          command:
+            - /bin/sh
+            - -c
+            - |
+              export SHARD_ID=$(echo $POD_NAME | sed 's/.*-//')
+              envsubst '$SHARD_ID $SHARD_COUNT' < /tmp/prometheus-template/prometheus.yaml > /tmp/prometheus-generated/prometheus.yaml
+              echo "Generated config for shard $SHARD_ID of $SHARD_COUNT"
+          env:
+            - name: SHARD_COUNT
+              value: $(SHARD_COUNT)
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: prometheus
+              mountPath: /tmp/prometheus-template
+            - name: prometheus-generated
+              mountPath: /tmp/prometheus-generated
+      containers:
+        - name: prometheus
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: prom/prometheus
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config.file=/etc/prometheus/prometheus.yaml
+            - --web.console.libraries=/etc/prometheus/console_libraries
+            - --web.console.templates=/etc/prometheus/consoles
+            - --agent
+            - --storage.agent.wal-truncate-frequency=10m
+            - --storage.agent.retention.min-time=5m
+            - --storage.agent.retention.max-time=30m
+            # Istio does not support protobuf yet
+            #- --enable-feature=expand-external-labels,exemplar-storage,extra-scrape-metrics,created-timestamp-zero-ingestion
+            - --enable-feature=expand-external-labels,exemplar-storage,extra-scrape-metrics
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: http
+              containerPort: 9090
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: prometheus-generated
+              mountPath: /etc/prometheus/prometheus.yaml
+              subPath: prometheus.yaml
+              readOnly: true
+      volumes:
+        - name: prometheus
+          configMap:
+            name: prometheus-template
+        - name: prometheus-generated
+          emptyDir:
+            medium: Memory

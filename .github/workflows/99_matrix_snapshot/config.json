@@ -1,0 +1,33 @@
+{
+  "targets": [
+    {
+      "baseline": {
+        "url": "https://example.com"
+      },
+      "target": {
+        "url": "https://example.com"
+      }
+    },
+    {
+      "baseline": {
+        "url": "https://www.iana.org/help/example-domains"
+      },
+      "target": {
+        "url": "https://www.iana.org/help/example-domains"
+      }
+    },
+    {
+      "baseline": {
+        "url": "https://example.com"
+      },
+      "target": {
+        "url": "https://example.com"
+      },
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  ]
+}
+

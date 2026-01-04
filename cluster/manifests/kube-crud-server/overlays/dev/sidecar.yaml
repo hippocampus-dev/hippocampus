@@ -1,0 +1,40 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kube-crud-server-mc
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: kube-crud-server
+      app.kubernetes.io/component: mc
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./kube-crud-server-minio.kube-crud-server.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: kube-crud-server
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: kube-crud-server
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./kube-crud-server-minio.kube-crud-server.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - pyroscope/pyroscope-distributor.pyroscope.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

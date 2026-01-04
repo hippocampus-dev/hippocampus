@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- broker.yaml
+- service.yaml
+- trigger.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:5beab31810abcdf1e2450226050e79de33f99f98f2924d227b53bf99c7b7287c
+  name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-logger
+  newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-logger

@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cortex-api
+spec:
+  maxUnavailable: 1

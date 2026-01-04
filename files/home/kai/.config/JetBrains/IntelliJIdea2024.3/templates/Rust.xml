@@ -1,0 +1,7 @@
+<templateSet group="Rust">
+  <template name="berr" value="Box&lt;dyn std::error::Error + Send + Sync + 'static&gt;" description="" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="RUST_FILE" value="true" />
+    </context>
+  </template>
+</templateSet>

@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: skaffold-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: skaffold
+
+namespace: skaffold-grafana-manifest-controller
+
+resources:
+  - ../manifests
+  - namespace.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: grafanadashboards.skaffold.grafana-manifest.kaidotio.github.io
+      - op: replace
+        path: /spec/group
+        value: skaffold.grafana-manifest.kaidotio.github.io
+    target:
+      kind: CustomResourceDefinition
+      name: grafanadashboards.grafana-manifest.kaidotio.github.io
+  - patch: |
+      - op: add
+        path: /rules/0
+        value:
+          apiGroups:
+            - skaffold.grafana-manifest.kaidotio.github.io
+          resources:
+            - "*"
+          verbs:
+            - "*"
+    target:
+      kind: ClusterRole
+      name: grafana-manifest-controller

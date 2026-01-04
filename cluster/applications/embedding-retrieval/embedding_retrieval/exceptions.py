@@ -1,0 +1,2 @@
+class RetryableError(Exception):
+    pass

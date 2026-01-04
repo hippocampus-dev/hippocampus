@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: argocd-application-controller
+spec:
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8082"
+        prometheus.io/path: /metrics
+    spec:
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: argocd-application-controller
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: argocd-application-controller
+      containers:
+        - name: argocd-application-controller
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          args:
+            - argocd-application-controller
+            - --status-processors=1
+            - --operation-processors=1
+            - --kubectl-parallelism-limit=20
+            - --self-heal-timeout-seconds=600
+            - --sharding-method=consistent-hashing
+          env:
+            - name: ARGOCD_CONTROLLER_REPLICAS
+              value: $(ARGOCD_CONTROLLER_REPLICAS)
+            - name: ARGOCD_SYNC_WAVE_DELAY
+              value: "10"
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 30m

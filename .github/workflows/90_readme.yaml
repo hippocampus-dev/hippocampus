@@ -1,0 +1,107 @@
+name: Update README
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "cluster/applications/**/Dockerfile"
+      - "packages/**/Cargo.toml"
+      - ".github/workflows/*.yaml"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: check
+        run: |
+          if git diff ${{ github.event.before }}..${{ github.sha }} --name-only --diff-filter=ARD -- 'cluster/applications/*/Dockerfile' 'packages/*/Cargo.toml' '.github/workflows/*.yaml' | grep -q .; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+  update-readme:
+    needs: check
+    if: needs.check.outputs.has_changes == 'true'
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Configure Codex
+        run: |
+          ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_ACTION_PATH}" | jq -r .value)
+          echo "::add-mask::$ID_TOKEN"
+          TOKEN=$(curl -fsSL -XPOST -H "Authorization: Bearer $ID_TOKEN" "http://token-request-server.token-request-server.svc.cluster.local:8080/token" | jq -r .token)
+          echo "::add-mask::$TOKEN"
+
+          mkdir -p ${{ runner.temp }}/codex-home
+          mkdir -p ${{ runner.temp }}/codex-home/.cache
+          mkdir -p ${{ runner.temp }}/codex-home/.cache/gh
+          cat > ${{ runner.temp }}/codex-home/config.toml << EOF
+          model = "gpt-5.1"
+          model_provider = "cortex"
+
+          [sandbox_workspace_write]
+          network_access = true
+          writable_roots = ["${{ runner.temp }}/codex-home/.cache"]
+
+          [shell_environment_policy]
+          ignore_default_excludes = true
+
+          [features]
+          web_search_request = true
+
+          [model_providers.cortex]
+          name = "Cortex API"
+          base_url = "http://cortex-api.cortex-api.svc.cluster.local:8080/v1"
+          http_headers = { "Authorization" = "Bearer ${TOKEN}" }
+          EOF
+
+          echo '{"port":0}' > ${{ runner.temp }}/codex-home/${{ github.run_id }}.json
+      - uses: openai/codex-action@v1
+        with:
+          codex-home: ${{ runner.temp }}/codex-home
+          # https://github.com/openai/codex/issues/7051
+          codex-version: v0.58.0
+          allow-bots: true
+          prompt: |
+            # Task
+
+            Analyze changes in this push and update the repository root README.md if necessary.
+
+            ## Objectives
+
+            1. Check if directories were added, removed, or significantly restructured
+            2. Update repository tree visualization if directory structure changed
+            3. Ensure all GitHub Actions workflow badges are correctly listed
+            4. Maintain existing README.md structure and style
+
+            ## Process
+
+            - Analyze the changes in this push using git diff
+            - Determine if README.md needs to be updated
+            - If updates are needed, create a pull request with descriptive title and body
+            - Do NOT commit directly to the main branch
+
+            ## Important
+
+            - Only update README.md for meaningful changes (new services, directory reorganization)
+            - Do NOT update for minor code changes within existing directories
+            - Keep changes minimal and focused
+        env:
+          XDG_CACHE_HOMES: ${{ runner.temp }}/codex-home/.cache
+          GH_CONFIG_DIR: ${{ runner.temp }}/codex-home/.cache/gh
+          GH_TOKEN: ${{ github.token }}

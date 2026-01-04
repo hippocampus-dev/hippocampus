@@ -1,0 +1,16 @@
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: fallback-filter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: httpbin-istio
+  url: http://proxy-wasm.proxy-wasm.svc.cluster.local:8080/fallback_filter.wasm
+  pluginConfig:
+    fallback:
+      cluster: outbound|9000||assets-minio.assets.svc.cluster.local
+      headers:
+        - [":method", "GET"]
+        - [":path", "/public/sorry.html"]
+        - [":authority", "assets-minio.assets.svc.cluster.local"]

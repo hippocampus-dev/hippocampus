@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+set -e
+
+function usage() {
+  cat <<EOS
+Usage:
+   claudex-with-worktree [--disable-diff-view]
+EOS
+}
+
+ALLOWED_TOOLS="Task,Glob,Grep,LS,Read,Edit,MultiEdit,Write,TodoRead,TodoWrite,WebSearch,WebFetch,Bash(find:*),Bash(ls:*),Bash(grep:*),Bash(git:*)"
+
+args=()
+DISABLE_DIFF_VIEW=false
+while (( $# )); do
+  case "${1}" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --disable-diff-view)
+      DISABLE_DIFF_VIEW=true
+      shift
+      ;;
+    *)
+      args+=("${1}")
+      shift
+      ;;
+  esac
+done
+
+GIT_ROOT=$(git rev-parse --show-toplevel)
+
+WORKTREE_NAME=claude-worktree-$$
+WORKTREE_PATH=$(pwd)/${WORKTREE_NAME}
+WORKING_CONTEXT=$(git rev-parse --show-prefix)
+WORKING_DIRECTORY=${WORKTREE_PATH}/${WORKING_CONTEXT}
+
+git worktree add -b $WORKTREE_NAME $WORKTREE_PATH
+
+if [ -n "$TMUX" ] && [ "$DISABLE_DIFF_VIEW" == false ]; then
+  DIFF_PANE=$(tmux split-window -h -c $WORKING_DIRECTORY -P -F "#{pane_id}")
+  tmux send-keys "git status" C-m
+  tmux select-pane -L
+fi
+
+cleanup() {
+  read -e -p "Merge changes back to original branch? (y/N): " response
+
+  if [[ "$response" =~ ^[Yy]$ ]] && [ $(git status --porcelain | wc -l) -gt 0 ]; then
+    claudex commit --allowedTools $ALLOWED_TOOLS --print < /dev/null
+
+    if [ -n "$CLAUDE_PARENT_WORKTREE_NAME" ]; then
+      (
+        cd $GIT_ROOT
+        STASHED=false
+        if ! git diff --quiet || ! git diff --staged --quiet; then
+          git stash
+          STASHED=true
+        fi
+
+        git checkout $CLAUDE_PARENT_WORKTREE_NAME
+        if ! git merge $WORKTREE_NAME; then
+          claudex "Git merge failed. Check the error message above and fix the issue. Common causes: conflicts (resolve and 'git add'), uncommitted changes ('git stash' or commit), untracked files (move/remove them). After fixing, run 'git merge --continue' or 'git merge --abort' to cancel." --allowedTools $ALLOWED_TOOLS --print < /dev/null
+        fi
+
+        if [ "$STASHED" == true ]; then
+          git stash pop
+        fi
+      )
+    else
+      (
+        cd $GIT_ROOT
+        STASHED=false
+        if ! git diff --quiet || ! git diff --staged --quiet; then
+          git stash
+          STASHED=true
+        fi
+
+        if ! git merge $WORKTREE_NAME; then
+          claudex "Git merge failed. Check the error message above and fix the issue. Common causes: conflicts (resolve and 'git add'), uncommitted changes ('git stash' or commit), untracked files (move/remove them). After fixing, run 'git merge --continue' or 'git merge --abort' to cancel." --allowedTools $ALLOWED_TOOLS --print < /dev/null
+        fi
+
+        if [ "$STASHED" == true ]; then
+          git stash pop
+        fi
+      )
+    fi
+  fi
+
+  if [ -n "$TMUX" ] && [ "$DISABLE_DIFF_VIEW" == false ]; then
+    tmux kill-pane -t $DIFF_PANE 2>/dev/null || true
+  fi
+
+  (
+    read -e -p $'\e[31mAre you sure you want to delete the branch?\e[0m (y/N): ' response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+      cd $GIT_ROOT
+      git worktree remove $WORKTREE_PATH --force
+      git branch -D $WORKTREE_NAME
+    fi
+  )
+}
+
+trap cleanup EXIT
+
+cd $WORKING_DIRECTORY
+
+claudex "${args[@]}"

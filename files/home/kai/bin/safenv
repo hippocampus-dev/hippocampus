@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+output=$(/usr/bin/env)
+
+shopt -s nullglob
+for f in ~/.secrets/*; do
+  output=${output//$(cat $f)/[REDACTED]}
+done
+shopt -u nullglob
+
+echo "$output"

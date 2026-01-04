@@ -1,0 +1,58 @@
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: GrafanaDashboard
+metadata:
+  name: example-dashboard
+  namespace: monitoring
+spec:
+  grafanaRef:
+    secretRef:
+      name: grafana-credentials
+  folder: "Infrastructure"
+  jsonnet: |
+    {
+      title: 'Example Dashboard',
+      uid: 'example-dashboard',
+      editable: false,
+      timezone: 'browser',
+      refresh: '30s',
+      time: {
+        from: 'now-1h',
+        to: 'now',
+      },
+      panels: [
+        {
+          id: 1,
+          title: 'CPU Usage',
+          type: 'timeseries',
+          gridPos: { h: 8, w: 12, x: 0, y: 0 },
+          targets: [
+            {
+              expr: 'rate(node_cpu_seconds_total{mode="user"}[5m])',
+              legendFormat: '{{instance}}',
+              refId: 'A',
+            },
+          ],
+          datasource: {
+            type: 'prometheus',
+            uid: 'prometheus',
+          },
+        },
+        {
+          id: 2,
+          title: 'Memory Usage',
+          type: 'timeseries',
+          gridPos: { h: 8, w: 12, x: 12, y: 0 },
+          targets: [
+            {
+              expr: 'node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes',
+              legendFormat: '{{instance}}',
+              refId: 'A',
+            },
+          ],
+          datasource: {
+            type: 'prometheus',
+            uid: 'prometheus',
+          },
+        },
+      ],
+    }
