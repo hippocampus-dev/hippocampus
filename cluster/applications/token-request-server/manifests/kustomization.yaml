@@ -10,6 +10,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:f0db0e69c0d6c63dca48a0630452a37e98dba6535427b3d4a722b951bc7f0f02
+- digest: sha256:fcd2ef66630b984c79ed9869c5bb6f703be9e6e58bc4b5fac54674a11a767077
   name: ghcr.io/hippocampus-dev/hippocampus/token-request-server
   newName: ghcr.io/hippocampus-dev/hippocampus/token-request-server
