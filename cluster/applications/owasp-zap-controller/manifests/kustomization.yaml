@@ -14,6 +14,6 @@ resources:
 
 images:
 - digest: sha256:c24059047908119b5eb9350b83a4d1305e0a568005c59644ec8a2464c4d2c920
-- digest: sha256:d70da39da6d901c03bef0bd4f44bdf5ce6a97a655ea9b2e071dc6092065c3f58
+- digest: sha256:beeb7b156015ec91bd61b2ec85ea6076038c8e811f5fb78b8f036bb400aa2436
   name: ghcr.io/hippocampus-dev/hippocampus/owasp-zap-controller
   newName: ghcr.io/hippocampus-dev/hippocampus/owasp-zap-controller
