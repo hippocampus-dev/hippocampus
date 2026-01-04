@@ -10,6 +10,6 @@ resources:
 - role_binding.yaml
 - service_account.yaml
 images:
-- digest: sha256:b279902406509979be6f7ee8e037a7d404c04ccd0970fdd237c32dfff9c24662
+- digest: sha256:ca87b789851472e6d20e439e0f6686efb7be21ede8be27fe7e1fa9baf5a536a0
   name: ghcr.io/hippocampus-dev/hippocampus/events-logger
   newName: ghcr.io/hippocampus-dev/hippocampus/events-logger
