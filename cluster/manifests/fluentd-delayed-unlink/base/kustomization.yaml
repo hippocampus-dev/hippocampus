@@ -5,6 +5,6 @@ resources:
 - daemon_set.yaml
 - pod_disruption_budget.yaml
 images:
-- digest: sha256:70561ba2ee57a6b3a8f72ec28df4d6dbd94a5780acc9d9d0dd1295b017f50c7a
+- digest: sha256:04a5fae86e799499649f1955897d4e440e7188e336d73363150bdadc388aff44
   name: ghcr.io/hippocampus-dev/hippocampus/fluentd-delayed-unlink
   newName: ghcr.io/hippocampus-dev/hippocampus/fluentd-delayed-unlink
