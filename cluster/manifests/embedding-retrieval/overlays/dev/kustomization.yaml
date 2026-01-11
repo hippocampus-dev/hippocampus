@@ -24,7 +24,7 @@ patches:
 generators:
 - secrets_from_vault.yaml
 images:
-- digest: sha256:a8f30642f10055cdce1c32cba1689d48041d21a710e92de817f1271456238728
+- digest: sha256:9efcaf8a40e10d29ab2d2a790930c1f6d71db62860cacd1e410dfc7ad06ce0ba
   name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
   newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
 - digest: sha256:77c039de51f00d020df52af4327b0919f70636557f323470157ae80ce4d1d1fe
