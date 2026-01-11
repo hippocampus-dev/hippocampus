@@ -13,6 +13,6 @@ resources:
 - service_account.yaml
 
 images:
-- digest: sha256:6a39ab148e89f308933e4fc3b1dfba227f84a8943a0521771099373bfd536f20
+- digest: sha256:c2de56e888a568d8f81a1c5412f1373cc634d3b2956f9d16ee5063908549a291
   name: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller
   newName: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller
