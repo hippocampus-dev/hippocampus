@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+
+images:
+- digest: sha256:ec59f923c5841b5015578271abcb2cad53a0060cf1fccc47e7df50def88b600c
+  name: ghcr.io/hippocampus-dev/hippocampus/endpoint-broadcaster
+  newName: ghcr.io/hippocampus-dev/hippocampus/endpoint-broadcaster

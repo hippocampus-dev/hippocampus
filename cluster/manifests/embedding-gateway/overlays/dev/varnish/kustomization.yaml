@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: embedding-gateway-
+
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/name: embedding-gateway
+    variant: utilities
+
+commonAnnotations:
+  argocd.argoproj.io/sync-wave: "-2"
+
+resources:
+- ../../../../utilities/varnish
+- authorization_policy.yaml
+- envoy_filter.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+
+configMapGenerator:
+- behavior: replace
+  files:
+  - files/default.vcl
+  name: varnish
+  options:
+    immutable: true
+
+patches:
+- path: patches/stateful_set.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+images:
+- digest: sha256:52eee1e7eb3c34c8c5c3cdf08e41e5949840c2c1c6ba051560255d4e7be69359
+  name: ghcr.io/hippocampus-dev/hippocampus/ext-proc
+  newName: ghcr.io/hippocampus-dev/hippocampus/ext-proc

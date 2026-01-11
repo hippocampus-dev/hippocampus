@@ -1,0 +1,11 @@
+[StreamInputs]
+inputDevice=alsa_input.usb-Dell_U3223QZ_1FJ8322O137L-00.analog-stereo
+
+[StreamOutputs]
+outputDevice=alsa_output.usb-Dell_U3223QZ_1FJ8322O137L-00.analog-stereo
+plugins=compressor#0,autogain#0,limiter#0
+visiblePage=pluginsPage
+visiblePlugin=compressor#0
+
+[Window]
+autostartOnLogin=true

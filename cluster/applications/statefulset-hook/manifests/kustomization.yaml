@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:5ba9e6e58f8f8a80419aa8b7f3573ba5235cae622f0b9d8c98968cf8467bcc74
+  name: ghcr.io/hippocampus-dev/hippocampus/statefulset-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/statefulset-hook

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:0c0def831a8c3eec93daac15cd43a1ee7ad58a7af90ecfd241888e7fcfefddfe
+  name: ghcr.io/hippocampus-dev/hippocampus/job-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/job-hook

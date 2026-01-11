@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+unset ANTHROPIC_API_KEY
+exec claude "$@"

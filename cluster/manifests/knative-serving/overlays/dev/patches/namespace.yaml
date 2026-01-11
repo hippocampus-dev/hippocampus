@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-serving
+  labels:
+    name: knative-serving
+    pod-security.kubernetes.io/enforce: baseline

@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: cluster-local-gateway
+spec:
+  selector:
+    istio: cluster-local-gateway
+  servers:
+    - hosts:
+        - "*"
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

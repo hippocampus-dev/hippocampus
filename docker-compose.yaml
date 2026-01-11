@@ -1,0 +1,769 @@
+include:
+  # --profile=stable-diffusion-webui
+  - docker-compose/docker-compose.stable-diffusion-webui.yaml
+  # --profile=stable-diffusion-webui-forge
+  - docker-compose/docker-compose.stable-diffusion-webui-forge.yaml
+  # --profile=comfyui
+  - docker-compose/docker-compose.comfyui.yaml
+  # --profile=yue
+  - docker-compose/docker-compose.yue.yaml
+  # --profile=llama.cpp
+  - docker-compose/docker-compose.llama.cpp.yaml
+
+services:
+  ephemeral-container:
+    image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+    entrypoint:
+      - armyknife
+    command:
+      - echo
+      - --address=0.0.0.0:8888
+    environment:
+      MC_HOST_minio: http://minio:miniominio@minio:9000
+    ports:
+      - "8888:8888"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - type: bind
+        source: ~/.ephemeral
+        target: /mnt
+      - type: volume
+        source: stable-diffusion-models
+        target: /home/nonroot/stable-diffusion-webui/models
+      - type: volume
+        source: controlnet-models
+        target: /home/nonroot/stable-diffusion-webui/extensions/sd-webui-controlnet/models
+      - type: volume
+        source: stable-diffusion-forge-models
+        target: /home/nonroot/stable-diffusion-webui-forge/models
+      - type: volume
+        source: comfyui-models
+        target: /home/nonroot/ComfyUI/models
+      - type: volume
+        source: comfyui-user
+        target: /home/nonroot/ComfyUI/user
+      - type: volume
+        source: yue-models
+        target: /home/nonroot/yue/models
+      - type: volume
+        source: llama.cpp-models
+        target: /home/nonroot/llama.cpp/models
+    networks:
+      default: {}
+      internal: {}
+  openai-proxy:
+    image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+    entrypoint:
+      - armyknife
+    command:
+      - proxy
+      - https://api.openai.com
+    networks:
+      default: {}
+      internal: {}
+  httpbin:
+    image: kennethreitz/httpbin:latest
+    networks:
+      default: {}
+  mitmproxy:
+    network_mode: host
+    tty: true
+    image: mitmproxy/mitmproxy:9.0.1
+    command:
+      - mitmweb
+      - --listen-port=18080
+      - --web-host=0.0.0.0
+      - --web-port=18081
+      - --set=ssl_verify_upstream_trusted_ca=/home/mitmproxy/.mkcert/rootCA.pem
+      - --set=ssl_verify_upstream_trusted_confdir=/etc/ssl/certs
+    volumes:
+      # Create directories if necessary
+      - ~/.local/share/mkcert:/home/mitmproxy/.mkcert
+      - ./.mitmproxy:/home/mitmproxy/.mitmproxy
+  guacd:
+    image: guacamole/guacd:1.5.5
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      default: {}
+  # Use host.docker.internal:3389(xrdp)
+  guacamole:
+    image: guacamole/guacamole:1.5.5
+    environment:
+      - GUACD_HOSTNAME=guacd
+      - GUACD_PORT=4822
+      - MYSQL_HOSTNAME=mysql
+      - MYSQL_DATABASE=hippocampus
+      - MYSQL_USER=hippocampus
+      - MYSQL_PASSWORD=hippocampus
+    depends_on:
+      guacd:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      default: {}
+  guacamole-ddl:
+    image: guacamole/guacamole:1.5.5
+    user: 1000:1000
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - /opt/guacamole/bin/initdb.sh --mysql > /tmp/guacamole.sql
+    volumes:
+      - type: volume
+        source: mysql-ddl
+        target: /tmp
+    networks:
+      default: {}
+  # Datastore
+  gcs:
+    image: fsouza/fake-gcs-server:1.37
+    command:
+      - -scheme
+      - http
+    volumes:
+      - type: volume
+        source: tokens
+        target: /data/kaidotio-tokens
+    networks:
+      default: {}
+  minio:
+    image: minio/minio:RELEASE.2023-05-04T21-44-30Z
+    command:
+      - server
+      - /var/minio
+      - --console-address
+      - 0.0.0.0:9001
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: miniominio
+    ports:
+      - "9000:9000"
+    networks:
+      default: {}
+  mc:
+    image: minio/mc:RELEASE.2023-05-04T18-10-16Z
+    tty: true
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - |
+        mc mb -p minio/http-kvs
+        mc mb -p minio/cortex-bot
+        mc mb -p minio/translator
+        mc mb -p minio/slackug
+        mc mb -p minio/embedding-gateway
+        mc mb -p minio/whisper-worker
+        mc mb -p minio/reports
+    environment:
+      MC_HOST_minio: http://minio:miniominio@minio:9000
+    depends_on:
+      minio:
+        condition: service_started
+    networks:
+      default: {}
+  redis:
+    image: redis/redis-stack:6.2.6-v6
+    ports:
+      - "6379:6379"
+    networks:
+      default: {}
+  redis-insight:
+    image: redis/redisinsight:2.58
+    networks:
+      default: {}
+  cassandra:
+    image: cassandra:4.0
+    ports:
+      - "9042:9042"
+    environment:
+      - HEAP_NEWSIZE=128M
+      - MAX_HEAP_SIZE=1G
+    networks:
+      default: {}
+  qdrant:
+    image: qdrant/qdrant:v1.10.0
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    networks:
+      default: {}
+  influxdb:
+    image: influxdb:1.11.7
+    environment:
+      - INFLUXDB_DB=hippocampus
+      - INFLUXDB_HTTP_MAX_BODY_SIZE=0
+    ports:
+      - "8086:8086"
+    networks:
+      default: {}
+  mysql:
+    image: mysql:9.0.1
+    command:
+      - --general_log=1
+      - --slow_query_log=1
+    environment:
+      - MYSQL_DATABASE=hippocampus
+      - MYSQL_USER=hippocampus
+      - MYSQL_PASSWORD=hippocampus
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "$MYSQL_USER", "-p$MYSQL_PASSWORD"]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - type: volume
+        source: mysql
+        target: /var/lib/mysql
+      - type: volume
+        source: mysql-ddl
+        target: /docker-entrypoint-initdb.d
+    depends_on:
+      guacamole-ddl:
+        condition: service_completed_successfully
+    networks:
+      default: {}
+  # Observability
+  pyroscope:
+    image: grafana/pyroscope:1.8.0
+    networks:
+      default: {}
+  jaeger:
+    image: jaegertracing/all-in-one:1.32
+    networks:
+      default: {}
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector:0.50.0
+    command:
+      - --config=/etc/opentelemetry-collector.yaml
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/opentelemetry-collector.yaml
+        target: /etc/opentelemetry-collector.yaml
+        read_only: true
+    depends_on:
+      jaeger:
+        condition: service_started
+    networks:
+      default: {}
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.6.0
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.tcpstat
+      - --no-collector.nfsd
+    volumes:
+      - type: bind
+        source: /proc
+        target: /host/proc
+        read_only: true
+      - type: bind
+        source: /sys
+        target: /host/sys
+        read_only: true
+    networks:
+      default: {}
+  prometheus:
+    image: prom/prometheus:v2.37.9
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --enable-feature=extra-scrape-metrics
+    depends_on:
+      node-exporter:
+        condition: service_started
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/prometheus.yaml
+        target: /etc/prometheus/prometheus.yaml
+        read_only: true
+    networks:
+      default: {}
+  k6:
+    network_mode: host
+    image: ghcr.io/hippocampus-dev/hippocampus/k6:main
+    entrypoint:
+      - sleep
+      - infinity
+    environment:
+      - K6_OUT=influxdb=http://127.0.0.1:8086/hippocampus
+  grafana:
+    image: grafana/grafana:9.5.2
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Editor
+    depends_on:
+      prometheus:
+        condition: service_started
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/grafana.ini
+        target: /etc/grafana/grafana.ini
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/dashboardproviders.yaml
+        target: /etc/grafana/provisioning/dashboards/dashboardproviders.yaml
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/datasource.yaml
+        target: /etc/grafana/provisioning/datasources/datasource.yaml
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/overview.json
+        target: /var/lib/grafana/dashboards/system/overview.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/k6.json
+        target: /var/lib/grafana/dashboards/application/k6.json
+        read_only: true
+    networks:
+      default: {}
+  # Gateway
+  protoc:
+    image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+    user: 0:0
+    entrypoint:
+      - protoc
+    command:
+      - -I=/mnt/proto
+      - -I=/mnt/proto/googleapis
+      - --include_imports
+      - --include_source_info
+      - --descriptor_set_out=/mnt/pb/helloworld.pb
+      - /mnt/proto/helloworld.proto
+    volumes:
+      - type: bind
+        source: ./proto
+        target: /mnt/proto
+        read_only: true
+      - type: volume
+        source: pb
+        target: /mnt/pb
+    networks:
+      default: {}
+  envoy:
+    build:
+      dockerfile: Dockerfile
+      context: docker-compose/envoy
+    develop:
+      watch:
+        - action: rebuild
+          path: docker-compose/envoy/Dockerfile
+    user: 1000:1000
+    ports:
+      - "80:10080"
+      - "443:10443"
+      - "9901:9901"
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/envoy/envoy.yaml
+        target: /etc/envoy/envoy.yaml
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: /var/certs/_wildcard.127.0.0.1.nip.io.pem
+        target: /var/certs/_wildcard.127.0.0.1.nip.io.pem
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: /var/certs/_wildcard.127.0.0.1.nip.io-key.pem
+        target: /var/certs/_wildcard.127.0.0.1.nip.io-key.pem
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: /var/certs/_wildcard.minikube.127.0.0.1.nip.io.pem
+        target: /var/certs/_wildcard.minikube.127.0.0.1.nip.io.pem
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: /var/certs/_wildcard.minikube.127.0.0.1.nip.io-key.pem
+        target: /var/certs/_wildcard.minikube.127.0.0.1.nip.io-key.pem
+        read_only: true
+      - type: volume
+        source: pb
+        target: /mnt/pb
+        read_only: true
+    depends_on:
+      jaeger:
+        condition: service_started
+      opentelemetry-collector:
+        condition: service_started
+      gcs:
+        condition: service_started
+      httpbin:
+        condition: service_started
+      protoc:
+        condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      default: {}
+      internal: {}
+  mirror-registry-dockerio:
+    image: registry:2
+    ports:
+      - "5000:5000"
+    environment:
+      - REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/registry-dockerio.yml
+        target: /etc/docker/registry/config.yml
+        read_only: true
+      - type: volume
+        source: registry-dockerio
+        target: /var/lib/registry
+    networks:
+      default: {}
+  mirror-registry-ghcrio:
+    image: registry:2
+    ports:
+      - "5002:5002"
+    environment:
+      - REGISTRY_PROXY_REMOTEURL=https://ghcr.io
+      - REGISTRY_PROXY_USERNAME=kaidotio
+      - REGISTRY_PROXY_PASSWORD=${GITHUB_TOKEN}
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./docker-compose/volumes/registry-ghcrio.yml
+        target: /etc/docker/registry/config.yml
+        read_only: true
+      - type: volume
+        source: registry-ghcrio
+        target: /var/lib/registry
+    networks:
+      default: {}
+  ollama:
+    image: ollama/ollama:0.13.4
+    runtime: nvidia
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - type: volume
+        source: ollama-models
+        target: /root/.ollama/models
+    networks:
+      default: {}
+      internal: {}
+  ollama-downloader:
+    image: ollama/ollama:0.13.4
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - |
+        ollama serve &
+        ollama pull embeddinggemma:300m
+        ollama pull gemma3:4b
+        ollama pull gemma3n:e4b
+        ollama pull gpt-oss:120b
+        ollama pull gpt-oss:20b
+    volumes:
+      - type: volume
+        source: ollama-models
+        target: /root/.ollama/models
+    networks:
+      default: {}
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:dev-ollama
+    environment:
+      - DEFAULT_MODELS=o4-mini
+      - WEBUI_AUTH=false
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - VECTOR_DB=qdrant
+      - QDRANT_URI=http://qdrant:6333
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_EMBEDDING_MODEL=embeddinggemma
+      - RAG_EMBEDDING_BATCH_SIZE=1
+      - RAG_OLLAMA_BASE_URL=http://ollama:11434
+      - OPENAI_API_BASE_URL=openai-proxy:8080
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - type: volume
+        source: open-webui-db
+        target: /app/backend/data
+    depends_on:
+      ollama:
+        condition: service_started
+    networks:
+      internal: {}
+  dcgm-exporter:
+    image: nvidia/dcgm-exporter:4.1.1-4.0.4-ubuntu22.04
+    runtime: nvidia
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
+    volumes:
+      - type: bind
+        source: /run/nvidia-container-devices
+        target: /run/nvidia-container-devices
+        read_only: true
+      - type: bind
+        source: /run/nvidia-persistenced/socket
+        target: /run/nvidia-persistenced/socket
+        read_only: true
+    networks:
+      default: {}
+  api-github-proxy:
+    image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+    entrypoint:
+      - armyknife
+    command:
+      - proxy
+      - https://api.github.com
+      - --mode
+      - tcp
+      - --address
+      - 0.0.0.0:443
+    networks:
+      default: {}
+      internal:
+        ipv4_address: 172.20.255.1
+  github-mcp-server:
+    build:
+      dockerfile: Dockerfile
+      context: docker-compose/github-mcp-server
+    develop:
+      watch:
+        - action: rebuild
+          path: docker-compose/github-mcp-server/Dockerfile
+    environment:
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_TOKEN}
+    extra_hosts:
+      - "api.github.com:172.20.255.1"
+    networks:
+      internal: {}
+  playwright-mcp:
+    image: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp:main
+    networks:
+      default: {}
+      internal: {}
+  chrome-devtools-mcp:
+    image: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-mcp:main
+    networks:
+      default: {}
+      internal: {}
+  mcp-filesystem:
+    build:
+      dockerfile: Dockerfile
+      context: docker-compose/mcp-filesystem
+    develop:
+      watch:
+        - action: rebuild
+          path: docker-compose/mcp-filesystem/Dockerfile
+    command:
+      - /mnt
+    volumes:
+      - type: bind
+        source: .
+        target: /mnt
+        read_only: true
+    networks:
+      internal: {}
+  mcp-inspector:
+    build:
+      dockerfile: Dockerfile
+      context: docker-compose/mcp-inspector
+    develop:
+      watch:
+        - action: rebuild
+          path: docker-compose/mcp-inspector/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      default: {}
+      internal: {}
+  n8n:
+    image: n8nio/n8n:1.105.2
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://n8n.127.0.0.1.nip.io
+    volumes:
+      - type: volume
+        source: n8n
+        target: /home/node/.n8n
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5678/healthz"]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+  n8n-init:
+    image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container:main
+    environment:
+      - N8N_OWNER_EMAIL=${N8N_OWNER_EMAIL:-admin@kaidotio.dev}
+      - N8N_OWNER_FIRST_NAME=${N8N_OWNER_FIRST_NAME:-Admin}
+      - N8N_OWNER_LAST_NAME=${N8N_OWNER_LAST_NAME:-User}
+      - N8N_OWNER_PASSWORD=${N8N_OWNER_PASSWORD:-admin}
+    volumes:
+      - type: bind
+        source: ./docker-compose/n8n/init.sh
+        target: /mnt/init.sh
+        read_only: true
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - /mnt/init.sh
+    depends_on:
+      n8n:
+        condition: service_healthy
+    networks:
+      - default
+  # LSP
+  lsp-rust-analyzer:
+    image: rust:1.88.0-slim-bookworm
+    working_dir: /opt/hippocampus
+    command:
+      - sh
+      - -c
+      - |
+        apt-get update && apt-get install -y socat
+        rustup component add rust-analyzer
+        socat TCP-LISTEN:2087,fork,reuseaddr EXEC:"rust-analyzer"
+    ports:
+      - "2087:2087"
+    volumes:
+      - type: bind
+        source: .
+        target: /opt/hippocampus
+        read_only: true
+    networks:
+      default: {}
+  lsp-gopls:
+    image: golang:1.25-bookworm
+    working_dir: /opt/hippocampus
+    command:
+      - sh
+      - -c
+      - |
+        go install golang.org/x/tools/gopls@latest
+        gopls serve -listen=0.0.0.0:2088
+    ports:
+      - "2088:2088"
+    volumes:
+      - type: bind
+        source: .
+        target: /opt/hippocampus
+        read_only: true
+    networks:
+      default: {}
+  lsp-pyright:
+    image: node:22-slim
+    working_dir: /opt/hippocampus
+    command:
+      - sh
+      - -c
+      - |
+        apt-get update && apt-get install -y --no-install-recommends socat
+        npm install -g pyright
+        socat TCP-LISTEN:2089,reuseaddr,fork EXEC:"pyright-langserver --stdio"
+    ports:
+      - "2089:2089"
+    volumes:
+      - type: bind
+        source: .
+        target: /opt/hippocampus
+        read_only: true
+    networks:
+      default: {}
+  lsp-typescript:
+    image: node:22-slim
+    working_dir: /opt/hippocampus
+    command:
+      - sh
+      - -c
+      - |
+        apt-get update && apt-get install -y --no-install-recommends socat
+        npm install -g typescript typescript-language-server
+        socat TCP-LISTEN:2090,reuseaddr,fork EXEC:"typescript-language-server --stdio"
+    ports:
+      - "2090:2090"
+    volumes:
+      - type: bind
+        source: .
+        target: /opt/hippocampus
+        read_only: true
+    networks:
+      default: {}
+
+networks:
+  internal:
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+  default:
+    driver: bridge
+
+volumes:
+  tokens: {}
+  ollama-models: {}
+  stable-diffusion-models: {}
+  controlnet-models: {}
+  stable-diffusion-forge-models: {}
+  comfyui-models: {}
+  comfyui-user: {}
+  comfyui-custom-nodes: {}
+  llama.cpp-models: {}
+  yue-models: {}
+  open-webui-db: {}
+  pb: {}
+  registry-dockerio: {}
+  registry-ghcrio: {}
+  mysql: {}
+  mysql-ddl: {}
+  n8n: {}

@@ -1,0 +1,14 @@
+package hippocampus:tokenizer@0.1.0;
+
+/// Tokenizer plugin interface for hippocampus full-text search.
+/// Plugins must export the `tokenize` function to split text into tokens.
+world tokenizer {
+  /// Tokenize the input content into a list of string tokens.
+  ///
+  /// # Parameters
+  /// - content: The text to tokenize
+  ///
+  /// # Returns
+  /// A list of tokens extracted from the content
+  export tokenize: func(content: string) -> list<string>;
+}

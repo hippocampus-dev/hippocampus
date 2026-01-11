@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+gh pr list --draft=false | fzf -m | awk '{print $1}' | xargs -r -L1 gh pr merge -m --admin

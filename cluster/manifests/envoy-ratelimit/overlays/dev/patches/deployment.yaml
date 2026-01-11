@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-ratelimit
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: envoy-ratelimit
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: envoy-ratelimit
+              app.kubernetes.io/component: ""
+      containers:
+        - name: envoy-ratelimit
+          env:
+          - name: LOG_LEVEL
+            value: info
+          - name: USE_STATSD
+            value: "true"
+          - name: STATSD_HOST
+            value: envoy-ratelimit-statsd.envoy-ratelimit.svc.cluster.local.
+          - name: STATSD_PORT
+            value: "9125"
+          - name: STATS_FLUSH_INTERVAL
+            value: "15s"
+          - name: BACKEND_TYPE
+            value: memcache
+          - name: MEMCACHE_HOST_PORT
+            value: envoy-ratelimit-mcrouter.envoy-ratelimit.svc.cluster.local.:5000
+          - name: MEMCACHE_MAX_IDLE_CONNS
+            value: "10"
+          - name: RUNTIME_ROOT
+            value: /data
+          - name: RUNTIME_SUBDIRECTORY
+            value: ratelimit
+          - name: RUNTIME_WATCH_ROOT
+            value: "false"
+          - name: RUNTIME_IGNOREDOTFILES
+            value: "true"
+          resources:
+            requests:
+              cpu: 5m
+          volumeMounts:
+            - name: config
+              mountPath: /data/ratelimit/config
+      volumes:
+      - name: config
+        projected:
+          sources:
+          - configMap:
+              name: general.yaml
+          - configMap:
+              name: reporting-server.yaml

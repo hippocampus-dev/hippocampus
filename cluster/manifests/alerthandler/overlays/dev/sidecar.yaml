@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: alerthandler
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: alerthandler
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./api.github.com
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

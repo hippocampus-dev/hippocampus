@@ -1,0 +1,180 @@
+name: Scheduled Snapshot
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Target URL
+        required: true
+        default: https://example.com
+      viewport-width:
+        description: Viewport width in pixels
+        required: false
+        default: "1920"
+      viewport-height:
+        description: Viewport height in pixels
+        required: false
+        default: "1080"
+permissions:
+  contents: write
+  packages: read
+  actions: write
+  issues: write
+  id-token: write
+jobs:
+  snapshot:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_scheduled-snapshot.yaml
+    with:
+      target: ${{ github.event.inputs.target }}
+      headers: "{}"
+      viewport-width: ${{ fromJSON(github.event.inputs.viewport-width) }}
+      viewport-height: ${{ fromJSON(github.event.inputs.viewport-height) }}
+  report:
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    needs: snapshot
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
+        with:
+          name: ${{ needs.snapshot.outputs.artifactName }}
+          path: .snapshot
+      - run: |
+          set -eo pipefail
+          baselineHtmlPath="${{ needs.snapshot.outputs.baselineHtmlPath }}"
+          targetHtmlPath="${{ needs.snapshot.outputs.targetHtmlPath }}"
+          baselineScreenshotPath="${{ needs.snapshot.outputs.baselineScreenshotPath }}"
+          targetScreenshotPath="${{ needs.snapshot.outputs.targetScreenshotPath }}"
+          screenshotDiffPath="${{ needs.snapshot.outputs.screenshotDiffPath }}"
+          htmlDiffAmount="${{ needs.snapshot.outputs.htmlDiffAmount }}"
+          screenshotDiffAmount="${{ needs.snapshot.outputs.screenshotDiffAmount }}"
+          artifactName="${{ needs.snapshot.outputs.artifactName }}"
+
+          if [ "$baselineHtmlPath" == "" ]; then
+            BODY=$(cat <<EOS
+          # Snapshot
+
+          **対象URL:** ${{ github.event.inputs.target }}
+          **実行:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOS
+          )
+
+            ISSUE_URL=$(gh issue create --title "Scheduled Snapshot ${{ github.event.inputs.target }}: $(date '+%Y-%m-%d %H:%M:%S')" --body "$BODY")
+            echo "## Scheduled Snapshot ${{ github.event.inputs.target }} Issue Created" >> $GITHUB_STEP_SUMMARY
+            echo "Issue URL: $ISSUE_URL" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          BRANCH_NAME=snapshot-images-$artifactName
+
+          git config --global user.email "kaidotio@gmail.com"
+          git config --global user.name "kaidotio"
+
+          git checkout -b $BRANCH_NAME
+
+          rm -rf .github/.snapshot
+          mv .snapshot .github/
+
+          cp .github/$baselineHtmlPath .github/.snapshot/compare.html
+          git add .github/.snapshot/compare.html
+          git commit --allow-empty -m "Add baseline HTML"
+          BASELINE_COMMIT=$(git rev-parse HEAD)
+
+          cp .github/$targetHtmlPath .github/.snapshot/compare.html
+          git add .github/.snapshot/compare.html
+          git commit --allow-empty -m "Add target HTML"
+          TARGET_COMMIT=$(git rev-parse HEAD)
+
+          git add .github/.snapshot
+          git commit -m "Upload snapshot"
+          git push -f origin $BRANCH_NAME
+
+          COMPARE_URL="https://github.com/${{ github.repository }}/compare/${BASELINE_COMMIT}...${TARGET_COMMIT}?w=1"
+
+          BODY=$(cat <<EOS
+          # Snapshot
+
+          **対象URL:** ${{ github.event.inputs.target }}
+          **実行:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          **HTML変化量:** $htmlDiffAmount
+          **スクリーンショット変化量:** $screenshotDiffAmount
+
+          ## HTML差分
+
+          [Compare](${COMPARE_URL})
+
+          ## スクリーンショット差分
+          ![diff](https://github.com/${{ github.repository }}/blob/${BRANCH_NAME}/.github/$screenshotDiffPath?raw=true)
+
+          ### Baseline vs Target
+          <details>
+          <summary>BaselineとTargetを並べて表示</summary>
+
+          <table>
+          <tr>
+          <th>Baseline</th>
+          <th>Target</th>
+          </tr>
+          <tr>
+          <td><img src="https://github.com/${{ github.repository }}/blob/${BRANCH_NAME}/.github/$baselineScreenshotPath?raw=true" alt="Baseline"></td>
+          <td><img src="https://github.com/${{ github.repository }}/blob/${BRANCH_NAME}/.github/$targetScreenshotPath?raw=true" alt="Target"></td>
+          </tr>
+          </table>
+          </details>
+          EOS
+          )
+
+          ISSUE_URL=$(gh issue create --title "Scheduled Snapshot ${{ github.event.inputs.target }}: $(date '+%Y-%m-%d %H:%M:%S')" --body "$BODY")
+          echo "## Scheduled Snapshot Issue Created" >> $GITHUB_STEP_SUMMARY
+          echo "Issue URL: $ISSUE_URL" >> $GITHUB_STEP_SUMMARY
+
+          ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_ACTION_PATH}" | jq -re .value)
+          echo "::add-mask::$ID_TOKEN"
+
+          BASELINE_IMAGE_BASE64=$(base64 -w0 ".github/$baselineScreenshotPath")
+          TARGET_IMAGE_BASE64=$(base64 -w0 ".github/$targetScreenshotPath")
+
+          AI_RESPONSE=$(curl -fsSL -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ID_TOKEN}" http://cortex-api.cortex-api.svc.cluster.local:8080/v1/chat/completions -d @- <<EOF
+          {
+            "model": "gpt-5",
+            "messages": [
+              {
+                "role": "system",
+                "content": "2つの画像の差分を日本語で要約してください。変更点、追加された要素、削除された要素などを具体的に説明してください。"
+              },
+              {
+                "role": "user",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "以下の2つのスクリーンショットを比較してください。\n\n1枚目: Baseline(変更前)\n2枚目: Target(変更後)"
+                  },
+                  {
+                    "type": "image_url",
+                    "image_url": {
+                      "url": "data:image/png;base64,${BASELINE_IMAGE_BASE64}"
+                    }
+                  },
+                  {
+                    "type": "image_url",
+                    "image_url": {
+                      "url": "data:image/png;base64,${TARGET_IMAGE_BASE64}"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          )
+
+          AI_SUMMARY=$(echo "$AI_RESPONSE" | jq -r '.choices[0].message.content // "差分の要約を取得できませんでした。"')
+          AI_SUMMARY_BODY=$(cat <<EOS
+          ## AI による差分要約
+
+          $AI_SUMMARY
+          EOS
+          )
+          gh issue comment "$ISSUE_URL" --body "$AI_SUMMARY_BODY"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

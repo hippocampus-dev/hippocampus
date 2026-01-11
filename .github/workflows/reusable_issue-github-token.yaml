@@ -1,0 +1,32 @@
+name: Issue GitHub token
+on:
+  workflow_call:
+    inputs:
+      profile:
+        required: true
+        type: string
+    secrets:
+      GPG_PASSPHRASE:
+        required: true
+    outputs:
+      encrypted_token:
+        value: ${{ jobs.issue-github-token.outputs.encrypted_token }}
+permissions:
+  id-token: write
+jobs:
+  issue-github-token:
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    environment: deployment
+    outputs:
+      encrypted_token: ${{ steps.issue.outputs.encrypted_token }}
+    steps:
+      - id: issue
+        run: |
+          set -eo pipefail
+          ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_ACTION_PATH}" | jq -re .value)
+          echo "::add-mask::$ID_TOKEN"
+          TOKEN=$(curl -fsSL -XPOST -H "Authorization: Bearer $ID_TOKEN" "http://hippocampus-dev-github-token-server.hippocampus-dev-github-token-server.svc.cluster.local:8080/repos/hippocampus-dev/hippocampus/access_tokens?profile=${{ inputs.profile }}" | jq -re .token)
+          echo "::add-mask::$TOKEN"
+          ENCRYPTED_TOKEN=$(echo "$TOKEN" | gpg -cq --batch --passphrase "${{ secrets.GPG_PASSPHRASE }}" | base64 -w0)
+          echo "encrypted_token=$ENCRYPTED_TOKEN" >> $GITHUB_OUTPUT

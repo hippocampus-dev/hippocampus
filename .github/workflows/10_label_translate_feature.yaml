@@ -1,0 +1,95 @@
+name: Label translate feature
+on:
+  pull_request:
+    types:
+      - opened
+  issues:
+    types:
+      - opened
+  issue_comment:
+    types:
+      - created
+  pull_request_review_comment:
+    types:
+      - created
+permissions:
+  pull-requests: write
+  issues: write
+  id-token: write
+jobs:
+  translate:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    env:
+      MODEL: gpt-5.2
+    steps:
+      - if: contains(github.event.pull_request.labels.*.name, 'translate') || contains(github.event.issue.labels.*.name, 'translate')
+        run: |
+          set -eo pipefail
+          function cortex() {
+            ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_ACTION_PATH}" | jq -re .value)
+            echo "::add-mask::$ID_TOKEN" >&2
+            response=$(curl -fsSL -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ID_TOKEN}" http://cortex-api.cortex-api.svc.cluster.local:8080/v1/chat/completions -d "$(echo $@ | jq -sc --arg model ${MODEL} '. as $messages | {model: $model, messages: $messages}')")
+
+            if [ "$(echo $response | jq -r .error)" != "null" ]; then
+              echo $response | jq -r .error 1>&2
+              exit 1
+            fi
+
+            echo $response | jq -r .choices[0].message.content
+          }
+
+          systemPrompt=$(cat <<'EOS'
+          Translate the given text according to the following rules.
+
+          ## Rules
+          - Translate English to Japanese
+          - Translate Japanese to English
+          EOS
+          )
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            userPrompt="${{ github.event.pull_request.body }}"
+          fi
+          if [ "${{ github.event_name }}" == "issues" ]; then
+            userPrompt="${{ github.event.issue.body }}"
+          fi
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            userPrompt="${{ github.event.comment.body }}"
+          fi
+
+          if [ -z "$userPrompt" ]; then
+            exit 0
+          fi
+
+          userPrompt=$(echo "$userPrompt" | sed -r 's|<details>.*</details>||g')
+
+          system=$(jq -n --arg role "system" --arg content "$systemPrompt" '{role: $role, content: $content}')
+          user=$(jq -n --arg role "user" --arg content "$userPrompt" '{role: $role, content: $content}')
+          result=$(cortex "$system" "$user")
+
+          newComment=$(cat <<EOS
+          $userPrompt
+
+          <details>
+          <summary>translate</summary>
+          $result
+          </details>
+          EOS
+          )
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            curl -fsSL -X PATCH -H "Authorization: Bearer ${GITHUB_TOKEN}" "${{ github.event.pull_request.url }}" -d "$(jq -n --arg body "$newComment" '{body: $body}')"
+          fi
+          if [ "${{ github.event_name }}" == "issues" ]; then
+            curl -fsSL -X PATCH -H "Authorization: Bearer ${GITHUB_TOKEN}" "${{ github.event.issue.url }}" -d "$(jq -n --arg body "$newComment" '{body: $body}')"
+          fi
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            curl -fsSL -X PATCH -H "Authorization: Bearer ${GITHUB_TOKEN}" "${{ github.event.comment.url }}" -d "$(jq -n --arg body "$newComment" '{body: $body}')"
+          fi
+          if [ "${{ github.event_name }}" == "pull_request_review_comment" ]; then
+            curl -fsSL -X PATCH -H "Authorization: Bearer ${GITHUB_TOKEN}" "${{ github.event.comment.url }}" -d "$(jq -n --arg body "$newComment" '{body: $body}')"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

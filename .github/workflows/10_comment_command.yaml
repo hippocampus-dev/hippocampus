@@ -1,0 +1,42 @@
+name: Comment command
+on:
+  issue_comment:
+    types:
+      - created
+      - edited
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+jobs:
+  issue-github-token:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_issue-github-token.yaml
+    with:
+      profile: writer
+    secrets: inherit
+  comment:
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    environment: deployment
+    needs: issue-github-token
+    env:
+      MODEL: gpt-5.2
+    if: github.repository_owner == 'kaidotio'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - run: |
+          TOKEN=$(echo "$ENCRYPTED_TOKEN" | base64 -d | gpg -dq --batch --passphrase "${{ secrets.GPG_PASSPHRASE }}")
+          echo "::add-mask::$TOKEN"
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git"
+          bash .github/workflows/10_comment_command/main.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          PULL_REQUEST_EVENT: ${{ toJSON(github.event.issue.pull_request) }}
+          REPOSITORY_EVENT: ${{ toJSON(github.event.repository) }}
+          ENCRYPTED_TOKEN: ${{ needs.issue-github-token.outputs.encrypted_token }}

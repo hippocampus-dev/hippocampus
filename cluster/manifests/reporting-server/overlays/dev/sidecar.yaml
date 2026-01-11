@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: reporting-server
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: reporting-server
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+  - captureMode: DEFAULT
+    hosts:
+    - envoy-ratelimit/envoy-ratelimit.envoy-ratelimit.svc.cluster.local
+    - istio-system/istiod.istio-system.svc.cluster.local
+    - otel/otel-agent.otel.svc.cluster.local
+    - pyroscope/pyroscope-distributor.pyroscope.svc.cluster.local
