@@ -9,6 +9,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:c9161441044b96c5f8d228028c9220b1549244b58b172fcf482864d82aba7c9b
+- digest: sha256:4290c1f9f729a4b7e291665d8eb82384762b164b5aec0e0422b8546e07a03cac
   name: ghcr.io/hippocampus-dev/hippocampus/kube-crud-server
   newName: ghcr.io/hippocampus-dev/hippocampus/kube-crud-server
