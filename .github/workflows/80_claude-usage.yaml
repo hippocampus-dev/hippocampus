@@ -1,0 +1,32 @@
+name: Claude Usage
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  claude:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, local]
+    env:
+      GIT_CONFIG_GLOBAL: /tmp/gitconfig
+      LC_NUMERIC: en_US.UTF-8
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          set -eo pipefail
+          daily=$(cat ~/.claude/projects/**/*.jsonl | jq -r 'select(.costUSD != null and (.timestamp | strptime("%Y-%m-%dT%H:%M:%S.%GZ") | mktime > now - 86400*1)) | .costUSD' | awk '{ sum += $1 } END { print sum }')
+          weekly=$(cat ~/.claude/projects/**/*.jsonl | jq -r 'select(.costUSD != null and (.timestamp | strptime("%Y-%m-%dT%H:%M:%S.%GZ") | mktime > now - 86400*7)) | .costUSD' | awk '{ sum += $1 } END { print sum }')
+          monthly=$(cat ~/.claude/projects/**/*.jsonl | jq -r 'select(.costUSD != null and (.timestamp | strptime("%Y-%m-%dT%H:%M:%S.%GZ") | mktime > now - 86400*30)) | .costUSD' | awk '{ sum += $1 } END { print sum }')
+
+          usd_jpy=$(curl -fsSL https://api.excelapi.org/currency/rate?pair=usd-jpy)
+
+          echo "- Daily: $(echo "${daily} * ${usd_jpy}" | bc -l | xargs -r printf "%.0f" | xargs -r printf "%'d")円" >> $GITHUB_STEP_SUMMARY
+          echo "- Weekly: $(echo "${weekly} * ${usd_jpy}" | bc -l | xargs -r printf "%.0f" | xargs -r printf "%'d")円" >> $GITHUB_STEP_SUMMARY
+          echo "- Monthly: $(echo "${monthly} * ${usd_jpy}" | bc -l | xargs -r printf "%.0f" | xargs -r printf "%'d")円" >> $GITHUB_STEP_SUMMARY

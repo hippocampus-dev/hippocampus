@@ -1,0 +1,49 @@
+name: Release/kubectl-patchstring
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  release:
+    timeout-minutes: 10
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      matrix:
+        include:
+          - platform: ubuntu-24.04
+            goos: darwin
+            goarch: amd64
+          - platform: ubuntu-24.04
+            goos: darwin
+            goarch: arm64
+          - platform: ubuntu-24.04
+            goos: linux
+            goarch: amd64
+          - platform: ubuntu-24.04
+            goos: linux
+            goarch: arm64
+          - platform: ubuntu-24.04
+            goos: windows
+            goarch: amd64
+          - platform: ubuntu-24.04
+            goos: windows
+            goarch: arm64
+    steps:
+      - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
+      - uses: actions/checkout@v5
+      - run: |
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          EXTENSION=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            EXTENSION=".exe"
+          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o dist/kubectl-patchstring_${VERSION}_${{ matrix.goos }}_${{ matrix.goarch }}${EXTENSION} main.go
+          gh release upload ${{ github.event.release.tag_name }} dist/kubectl-patchstring_${VERSION}_${{ matrix.goos }}_${{ matrix.goarch }}${EXTENSION}
+        working-directory: kubectl-plugins/kubectl-patchstring

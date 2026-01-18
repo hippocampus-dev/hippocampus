@@ -1,0 +1,21 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: endpoint-broadcaster
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: endpoint-broadcaster
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      to:
+        - operation:
+            methods:
+              - PURGE
+              - BAN

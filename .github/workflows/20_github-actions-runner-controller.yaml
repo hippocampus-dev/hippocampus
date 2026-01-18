@@ -1,0 +1,24 @@
+name: Release/github-actions-runner-controller
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  release:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
+      - uses: actions/checkout@v5
+      - run: |
+          curl -fsSL https://github.com/goreleaser/goreleaser/releases/download/v2.8.2/goreleaser_Linux_x86_64.tar.gz | tar zx --no-same-owner -C /usr/local/bin goreleaser
+      - run: |
+          goreleaser release
+        working-directory: cluster/applications/github-actions-runner-controller

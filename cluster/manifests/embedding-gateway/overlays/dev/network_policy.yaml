@@ -1,0 +1,154 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: embedding-gateway
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-gateway
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: embedding-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-gateway
+              app.kubernetes.io/component: varnish
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: embedding-gateway-ext-proc-proxy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-gateway
+      app.kubernetes.io/component: ext-proc-proxy
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+        - namespaceSelector:
+            matchLabels:
+              name: embedding-retrieval
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-retrieval
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: embedding-gateway-varnish
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-gateway
+      app.kubernetes.io/component: varnish
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: embedding-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-gateway
+              app.kubernetes.io/component: ext-proc-proxy
+        - namespaceSelector:
+            matchLabels:
+              name: embedding-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-gateway
+              app.kubernetes.io/component: endpoint-broadcaster
+      ports:
+        - protocol: TCP
+          port: 6081
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: embedding-gateway-endpoint-broadcaster
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-gateway
+      app.kubernetes.io/component: endpoint-broadcaster
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: embedding-gateway-minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-gateway
+      app.kubernetes.io/component: minio
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: embedding-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-gateway
+              app.kubernetes.io/component: ""
+        - namespaceSelector:
+            matchLabels:
+              name: embedding-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-gateway
+              app.kubernetes.io/component: mc
+      ports:
+        - protocol: TCP
+          port: 9000

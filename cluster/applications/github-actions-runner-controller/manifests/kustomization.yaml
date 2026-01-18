@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- crd
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+- stateful_set.yaml
+
+images:
+- digest: sha256:3e84f81235dbd90a4fa49f9717b39c11d4bb70e7eb19104332f2a2eca0a0787d
+  name: ghcr.io/hippocampus-dev/hippocampus/github-actions-runner-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/github-actions-runner-controller

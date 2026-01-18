@@ -1,0 +1,1 @@
+{"android":{"identifier":"android","description":"Android-specific capabilities","local":true,"permissions":["gemini:default","timer:default"],"platforms":["android"]},"default":{"identifier":"default","description":"Default capability for Taurim app","local":true,"windows":["main"],"permissions":["core:default"]}}

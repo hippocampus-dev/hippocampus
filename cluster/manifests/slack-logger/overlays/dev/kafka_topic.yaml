@@ -1,0 +1,14 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: slack-logger-cdc
+  labels:
+    strimzi.io/cluster: slack-logger
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"  # Kafka + 1
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 3600000 # 1 hour
+    segment.bytes: 1073741824 # 1 GB

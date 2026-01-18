@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jupyterhub-hub
+spec:
+  # hub does not support HA, so we only want one replica
+  # https://github.com/jupyterhub/jupyterhub/issues/1932#issuecomment-658031232
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8081"
+        prometheus.io/path: /hub/metrics
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jupyterhub
+              app.kubernetes.io/component: hub
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jupyterhub
+              app.kubernetes.io/component: hub
+      containers:
+        - name: hub
+          envFrom:
+            - secretRef:
+                name: jupyterhub-hub
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+            requests:
+              cpu: 10m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /srv/jupyterhub
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

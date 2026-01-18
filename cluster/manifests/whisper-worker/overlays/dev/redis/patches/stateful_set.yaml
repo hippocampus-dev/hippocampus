@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  annotations:
+    REPLICAS: "3"
+    QUORUM: "2"
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8080"
+        prometheus.io/path: /metrics
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: redis
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: redis
+      containers:
+        - name: redis
+          resources:
+            requests:
+              memory: 192Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+        - name: redis-exporter
+          args:
+            - --redis.addr=redis://127.0.0.1:6379
+            - --script=/mnt/lua/metrics.lua
+          volumeMounts:
+            - name: lua
+              mountPath: /mnt/lua
+              readOnly: true
+      volumes:
+        - name: lua
+          configMap:
+            name: lua
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

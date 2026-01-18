@@ -1,0 +1,157 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: istio-ingressgateway-headers
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            default_source_code:
+              inline_string: |
+                function envoy_on_request(request_handle)
+                  local xff_header = request_handle:headers():get("X-Forwarded-For")
+                  if xff_header then
+                    local first_ip = string.gmatch(xff_header, "(%d+.%d+.%d+.%d+)")()
+                    if first_ip then
+                      request_handle:headers():replace("X-Client-IP", first_ip)
+                    end
+                  end
+                end
+
+                function envoy_on_response(response_handle)
+                  if not response_handle:headers():get("Report-To") then
+                    response_handle:headers():add("Report-To", '{"group":"default","max_age":86400,"endpoints":[{"url":"https://reporting-server.minikube.127.0.0.1.nip.io/reports"}],"include_subdomains":true}')
+                  end
+                  -- https://github.com/w3c/reporting/pull/197
+                  if not response_handle:headers():get("Reporting-Endpoints") then
+                    response_handle:headers():add("Reporting-Endpoints", 'default="https://reporting-server.minikube.127.0.0.1.nip.io/reports"')
+                  end
+                  if not response_handle:headers():get("NEL") then
+                    response_handle:headers():add("NEL", '{"report_to":"default","max_age":86400,"include_subdomains":true,"success_fraction":0.0,"failure_fraction":1.0}')
+                  end
+                  if not response_handle:headers():get("Strict-Transport-Security") then
+                    response_handle:headers():add("Strict-Transport-Security", "max-age=600; includeSubDomains; preload")
+                  end
+                  if not response_handle:headers():get("X-Content-Type-Options") then
+                    response_handle:headers():add("X-Content-Type-Options", "nosniff")
+                  end
+                  if not response_handle:headers():get("X-Frame-Options") then
+                    response_handle:headers():add("X-Frame-Options", "DENY")
+                  end
+                  if not response_handle:headers():get("X-XSS-Protection") then
+                    response_handle:headers():add("X-XSS-Protection", "1; mode=block")
+                  end
+                end
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: istio-ingressgateway-traceparent
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.lua
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+            default_source_code:
+              inline_string: |
+                function envoy_on_request(request_handle)
+                  local traceparent = request_handle:headers():get("traceparent")
+                  if traceparent then
+                    request_handle:streamInfo():dynamicMetadata():set("envoy.filters.http.lua", "traceparent", traceparent)
+                  end
+                end
+
+                function envoy_on_response(response_handle)
+                  local metadata = response_handle:streamInfo():dynamicMetadata():get("envoy.filters.http.lua")
+                  if metadata then
+                    local traceparent = metadata["traceparent"]
+                    if traceparent then
+                      response_handle:headers():add("traceparent", traceparent)
+                    end
+                  end
+                end
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: istio-ingressgateway-header-mutation
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+  - applyTo: NETWORK_FILTER
+    match:
+      context: GATEWAY
+      listener:
+        filterChain:
+          filter:
+            name: envoy.filters.network.http_connection_manager
+    patch:
+      operation: MERGE
+      value:
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          server_header_transformation: PASS_THROUGH
+  - applyTo: ROUTE_CONFIGURATION
+    patch:
+      operation: MERGE
+      value:
+        response_headers_to_remove:
+        - x-envoy-upstream-service-time
+        - envoy
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: istio-ingressgateway-xff
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+    - applyTo: NETWORK_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            use_remote_address: false
+            xff_num_trusted_hops: 1

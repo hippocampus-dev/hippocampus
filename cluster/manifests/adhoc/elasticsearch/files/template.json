@@ -1,0 +1,29 @@
+{
+  "index_patterns": ["events-logger-*"],
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1,
+    "default_pipeline": "pipeline"
+  },
+  "mappings": {
+    "dynamic_templates": [
+      {
+        "message": {
+          "path_match": "structural_message.note",
+          "mapping": {
+            "type": "text"
+          }
+        }
+      },
+      {
+        "keywords": {
+          "path_match": "*",
+          "match_mapping_type": "string",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      }
+    ]
+  }
+}

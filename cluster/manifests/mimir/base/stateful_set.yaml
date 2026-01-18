@@ -1,0 +1,376 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mimir-compactor
+spec:
+  serviceName: mimir-compactor
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: compactor
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: compactor
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/mimir
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=compactor
+            - -config.file=/mnt/mimir.yaml
+            - -config.expand-env=true
+          env:
+            - name: JAEGER_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:14268/api/traces
+            - name: JAEGER_SAMPLER_TYPE
+              value: const
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mimir-ingester
+spec:
+  serviceName: mimir-ingester
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: ingester
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ingester
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/mimir
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=ingester
+            - -config.file=/mnt/mimir.yaml
+            - -config.expand-env=true
+          env:
+            - name: JAEGER_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:14268/api/traces
+            - name: JAEGER_SAMPLER_TYPE
+              value: const
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http
+              containerPort: 3100
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mimir-store-gateway
+spec:
+  serviceName: mimir-store-gateway
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: store-gateway
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: store-gateway
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/mimir
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=store-gateway
+            - -config.file=/mnt/mimir.yaml
+            - -config.expand-env=true
+          env:
+            - name: JAEGER_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:14268/api/traces
+            - name: JAEGER_SAMPLER_TYPE
+              value: const
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http
+              containerPort: 3100
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mimir-alertmanager
+spec:
+  serviceName: mimir-alertmanager
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: alertmanager
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: alertmanager
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/mimir
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=alertmanager
+            - -config.file=/mnt/mimir.yaml
+            - -config.expand-env=true
+            - -alertmanager.sharding-ring.replication-factor=$(REPLICATION_FACTOR)
+          env:
+            - name: JAEGER_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:14268/api/traces
+            - name: JAEGER_SAMPLER_TYPE
+              value: const
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+            - name: REPLICATION_FACTOR
+              value: $(REPLICATION_FACTOR)
+          ports:
+            - name: http
+              containerPort: 3100
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mimir-ruler
+spec:
+  serviceName: mimir-ruler
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: mimir
+      app.kubernetes.io/component: ruler
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ruler
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/mimir
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=ruler
+            - -config.file=/mnt/mimir.yaml
+            - -config.expand-env=true
+          env:
+            - name: JAEGER_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:14268/api/traces
+            - name: JAEGER_SAMPLER_TYPE
+              value: const
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http
+              containerPort: 3100
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: rules
+              mountPath: /etc/mimir/rules/anonymous
+              readOnly: true
+      volumes:
+        - name: rules
+          projected:
+            sources:
+              - configMap:
+                  name: system.alerts.rules
+              - configMap:
+                  name: kube-apiserver.alerts.rules
+              - configMap:
+                  name: record.rules
+              - configMap:
+                  name: cilium-operator.alerts.rules

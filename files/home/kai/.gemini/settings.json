@@ -1,0 +1,49 @@
+{
+  "context": {
+    "fileName": "AGENTS.md"
+  },
+  "general": {
+    "previewFeatures": true
+  },
+  "tools": {
+    "allowed": [
+      "codebase_investigator",
+      "replace",
+      "glob",
+      "google_web_search",
+      "read_file",
+      "list_directory",
+      "save_memory",
+      "search_file_content",
+      "run_shell_command(cat)",
+      "run_shell_command(find)",
+      "run_shell_command(ls)",
+      "run_shell_command(grep)",
+      "run_shell_command(sed)",
+      "run_shell_command(awk)",
+      "run_shell_command(make)",
+      "run_shell_command(mkdir)",
+      "run_shell_command(chmod)",
+      "run_shell_command(cargo)",
+      "run_shell_command(go)",
+      "run_shell_command(uv)",
+      "run_shell_command(npm)",
+      "run_shell_command(gh run list)",
+      "run_shell_command(gh run view)",
+      "web_fetch",
+      "write_file",
+      "write_todos"
+    ]
+  },
+  "ui": {
+    "theme": "Default"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
+  }
+}

@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mc
+spec:
+  completions: 1
+  parallelism: 1
+  completionMode: Indexed
+  backoffLimitPerIndex: 6
+  maxFailedIndexes: 0
+  podReplacementPolicy: Failed
+  podFailurePolicy:
+    rules:
+      - action: FailJob
+        onExitCodes:
+          operator: In
+          values:
+            - 127
+      - action: Ignore
+        onPodConditions:
+          - type: DisruptionTarget
+            status: "True"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: mc
+    spec:
+      restartPolicy: Never
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mc
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/mirror/minio/mc@sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MC_HOST_minio
+              value: http://minio:miniominio@skaffold-minio:9000
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              set -e
+              
+              mc mb -p minio/snapshot-controller
+          volumeMounts:
+            - name: mc
+              mountPath: /.mc
+      volumes:
+        - name: mc
+          emptyDir:
+            medium: Memory

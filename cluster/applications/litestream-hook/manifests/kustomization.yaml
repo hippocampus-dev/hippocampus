@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:08dacb05ce450f98c1b901e7c2331852729a2d5966887f72bab74684d26f59b8
+  name: ghcr.io/hippocampus-dev/hippocampus/litestream-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/litestream-hook

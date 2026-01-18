@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+UNIT_NAME="claudex-$$"
+
+tmux setw monitor-silence 3
+
+WORKING_DIRECTORY=$(pwd)
+
+args=()
+LOCAL_MEMORY_FILE=""
+while (( $# )); do
+  case "$1" in
+    --local-memory-file)
+      LOCAL_MEMORY_FILE="$2"
+      shift 2
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+cleanup() {
+  tmux setw monitor-silence 0
+  if [ -n "$LOCAL_MEMORY_FILE" ]; then
+    rm -f ./CLAUDE.local.md
+  fi
+}
+
+trap cleanup EXIT
+
+if [ -n "$LOCAL_MEMORY_FILE" ] && [ -f "$LOCAL_MEMORY_FILE" ]; then
+  cp "$LOCAL_MEMORY_FILE" ./CLAUDE.local.md
+fi
+
+systemd-run \
+  --unit="$UNIT_NAME" \
+  --user \
+  --pipe \
+  --wait \
+  --collect \
+  --same-dir \
+  -E CLAUDE_CONFIG_DIR="${HOME}/.config/claudex" \
+  -E PATH="$PATH" \
+  -E GOPATH="/tmp" \
+  -E TMUX="$TMUX" \
+  -E TMUX_PANE="$TMUX_PANE" \
+  -p BindPaths="/tmp/tmux-$(id -u)" \
+  `#-p AppArmorProfile=claude` \
+  -p ProtectProc=invisible \
+  -p ProcSubset=pid \
+  -p NoNewPrivileges=yes \
+  -p ProtectSystem=strict \
+  -p ProtectHome=read-only \
+  -p ReadWritePaths="$WORKING_DIRECTORY ${HOME}/.asdf ${HOME}/.npm ${HOME}/.cargo ${HOME}/.rustup ${HOME}/.gradle ${HOME}/.android ${HOME}/.cache ${HOME}/.local/share ${HOME}/.local/state ${HOME}/.config/claudex ${HOME}/.codex ${HOME}/.gemini ${HOME}/.docker/buildx /opt/hippocampus/files/${HOME}/.config/claudex/settings.json /opt/hippocampus/target" \
+  -p ReadOnlyDirectories="/opt/hippocampus/.git" \
+  -p InaccessiblePaths="${HOME}/.secrets ${HOME}/.vault ${HOME}/.ssh ${HOME}/.gnupg /etc/passwd /etc/shadow" \
+  -p PrivateTmp=yes \
+  -p PrivateDevices=yes \
+  -p PrivateNetwork=no \
+  -p PrivateUsers=yes \
+  -p PrivateMounts=yes \
+  -p ProtectKernelTunables=yes \
+  -p ProtectKernelModules=yes \
+  -p ProtectKernelLogs=yes \
+  -p ProtectControlGroups=yes \
+  -p ProtectHostname=yes \
+  -p ProtectClock=yes \
+  -p DevicePolicy=closed \
+  -p DeviceAllow="/dev/null rw" \
+  -p DeviceAllow="/dev/random r" \
+  -p DeviceAllow="/dev/urandom r" \
+  -p PrivateIPC=yes \
+  -p RestrictNamespaces=yes \
+  -p RestrictRealtime=yes \
+  -p RestrictSUIDSGID=yes \
+  -p LockPersonality=yes \
+  -p MemoryDenyWriteExecute=no \
+  -p SystemCallArchitectures=native \
+  -p SystemCallFilter="@system-service" \
+  -p SystemCallFilter="~@privileged @debug" \
+  -p SystemCallErrorNumber=EPERM \
+  -p RestrictAddressFamilies="AF_UNIX AF_INET AF_INET6 AF_VSOCK" \
+  -p CapabilityBoundingSet="" \
+  -p AmbientCapabilities="" \
+  -p UMask=0077 \
+  -p CoredumpFilter=0 \
+  -p IPAccounting=yes \
+  -p RestrictFileSystems="ext4 tmpfs proc sysfs" \
+  -p KeyringMode=private \
+  -p NotifyAccess=none \
+  claude "${args[@]}"

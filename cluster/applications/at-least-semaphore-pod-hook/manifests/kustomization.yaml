@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:4b74ddd913217afe606af70b4ceda79b418c14979634c17b8d7e0efdec0fe865
+  name: ghcr.io/hippocampus-dev/hippocampus/at-least-semaphore-pod-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/at-least-semaphore-pod-hook
