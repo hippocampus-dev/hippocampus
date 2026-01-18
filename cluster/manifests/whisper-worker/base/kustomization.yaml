@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 
 images:
-- digest: sha256:8b2f64797b8795cfbd15207eeb6bdeeb5f79e56dfc32a589b593e83063c23944
+- digest: sha256:bc7202f4bcaefa110423cc8ff993b669529e162dedccc0d841c8cc308e754de2
   name: ghcr.io/hippocampus-dev/hippocampus/whisper-worker
   newName: ghcr.io/hippocampus-dev/hippocampus/whisper-worker
