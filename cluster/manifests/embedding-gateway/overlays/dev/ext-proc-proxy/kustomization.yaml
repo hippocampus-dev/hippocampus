@@ -25,6 +25,6 @@ patches:
 - path: patches/service.yaml
 
 images:
-- digest: sha256:c8eb47d5aecd65011261e94791a5fb81f23f614cd95e982d6f66e40c7aca84dd
+- digest: sha256:73be330ff68d7a5e272a3548dfc6a5b5f52dc9546c26306f260d432e06ba2b2f
   name: ghcr.io/hippocampus-dev/hippocampus/ext-proc
   newName: ghcr.io/hippocampus-dev/hippocampus/ext-proc
