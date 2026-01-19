@@ -12,6 +12,6 @@ resources:
 - service_account.yaml
 
 images:
-- digest: sha256:8d007d9d6241b84cd246b6c22db18c67ecf27436434a8e86bc6c879fbb5e0a3c
+- digest: sha256:52587dea6fe3a9ee58ae78a33e95ae5bdb673e6a032a950830c2465d4c4f7d07
   name: ghcr.io/hippocampus-dev/hippocampus/github-actions-exporter-controller
   newName: ghcr.io/hippocampus-dev/hippocampus/github-actions-exporter-controller
