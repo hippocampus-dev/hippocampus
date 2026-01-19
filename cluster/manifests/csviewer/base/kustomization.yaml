@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:93403116ba4c1fb59cf2c716ff1da2fe3a82dbac5ca97e38b4e65b1ba97440b7
+- digest: sha256:153b8599ec773e0d2eddfee8d20f2ca9c3dcd7a9775d1f23866c8bb1976650cf
   name: ghcr.io/hippocampus-dev/hippocampus/csviewer
   newName: ghcr.io/hippocampus-dev/hippocampus/csviewer
