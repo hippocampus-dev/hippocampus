@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyterhub-proxy
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        # Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+        #prometheus.io/scrape: "true"
+        #prometheus.io/scheme: http
+        #prometheus.io/port: "8002"
+        #prometheus.io/path: /metrics
+    spec:
+      serviceAccountName: jupyterhub-proxy
+      automountServiceAccountToken: true
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jupyterproxy
+              app.kubernetes.io/component: proxy
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: jupyterproxy
+              app.kubernetes.io/component: proxy
+      containers:
+        - name: proxy
+          envFrom:
+            - secretRef:
+                name: jupyterhub-proxy
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 256Mi
+            requests:
+              cpu: 10m
+              memory: 64Mi
+          # Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+          #env:
+          #  - name: CONFIGURABLE_PROXY_REDIS_URI
+          #    value: redis://jupyterhub-redis-haproxy-writer.jupyterhub.svc.cluster.local:6379
+          image: splunk/jupyterhub-istio-proxy
+          args: []
+          env:
+            - name: ISTIO_GATEWAY
+              value: jupyterhub
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SUB_DOMAIN_HOST
+              value: notebook.kaidotio.dev
+            - name: VIRTUAL_SERVICE_PREFIX
+              value: jupyterhub
+            - name: WAIT_FOR_WARMUP
+              value: "false" # Avoid hairpinning
+            - name: CLUSTER_DOMAIN
+              value: "cluster.local"
+          ports:
+            - name: api
+              containerPort: 8000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: api
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: api
+            initialDelaySeconds: 60
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5

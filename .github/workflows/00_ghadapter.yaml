@@ -1,0 +1,52 @@
+name: ghelpers
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/00_ghadapter.yaml"
+      - ".github/ghelpers/ghadapter/**"
+      - "!**/*.md"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+jobs:
+  publish:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE: ghelpers
+      KUSTOMIZATION: ""
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache@v5
+        with:
+          path: /home/runner/.cache/docker-build
+          key: ${{ runner.os }}-ghadapter-docker-${{ hashFiles('.github/ghelpers/ghadapter/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-ghadapter-docker-
+      - uses: ./.github/actions/setup-docker
+      - run: |
+          IMAGE_PATH=${GITHUB_REPOSITORY}/${IMAGE}
+          GHCR_IMAGE=ghcr.io/${IMAGE_PATH}
+          TAG=${GITHUB_REF##*/}
+          opt=""
+          if [ -d /home/runner/.cache/docker-build ]; then
+            opt="--cache-from type=local,src=/home/runner/.cache/docker-build"
+          else
+            opt="--cache-from type=registry,ref=$GHCR_IMAGE:cache"
+          fi
+          (
+            cd .github/ghelpers/ghadapter
+
+            docker buildx build --output type=docker,name=$GHCR_IMAGE/ghadapter:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/ghadapter:$TAG
+          )
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

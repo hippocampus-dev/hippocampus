@@ -1,0 +1,28 @@
+[user]
+  name = Kai Aihara
+  email = kaidotio@gmail.com
+  signingkey = 3793741EB89DE0362F2319A5B860CD5F47A42981
+
+[init]
+	templateDir = ~/.config/git/template
+
+[core]
+  excludesfile = ~/.gitignore
+  autocrlf = input
+
+[credential "https://source.developers.google.com"]
+  helper = gcloud.sh
+
+[alias]
+  push = push --force-with-lease --force-if-includes
+
+[commit]
+  gpgsign = true
+
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential

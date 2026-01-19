@@ -1,0 +1,91 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cortex-api
+spec:
+  gateways:
+    - cortex-api
+  hosts:
+    - cortex-api.minikube.127.0.0.1.nip.io
+    - cortex-api.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: cortex-api
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cortex-api-redis
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - cortex-api-redis
+  tcp:
+    - match:
+        - sourceNamespace: cortex-api
+          sourceLabels:
+            app.kubernetes.io/name: cortex-api
+      route:
+        - destination:
+            host: cortex-api-redis
+            port:
+              number: 6379
+            subset: default
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cortex-api-redis-haproxy
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - cortex-api-redis-haproxy
+  tcp:
+    - match:
+        - sourceNamespace: cortex-api
+          sourceLabels:
+            app.kubernetes.io/name: cortex-api
+      route:
+        - destination:
+            host: cortex-api-redis-haproxy
+            port:
+              number: 6379
+            subset: default
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: embedding-retrieval.embedding-retrieval.svc.cluster.local
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - embedding-retrieval.embedding-retrieval.svc.cluster.local
+  http:
+    - match:
+        - sourceNamespace: cortex-api
+          sourceLabels:
+            app.kubernetes.io/name: cortex-api
+      route:
+        - destination:
+            host: embedding-retrieval.embedding-retrieval.svc.cluster.local
+            port:
+              number: 8080
+            subset: default
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

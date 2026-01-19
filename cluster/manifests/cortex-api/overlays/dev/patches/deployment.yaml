@@ -1,0 +1,186 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cortex-api
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 256Mi # Use proxy-wasm
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8083"
+        prometheus.io/path: /metrics
+        prometheus.io/wait: "true" # prometheus-metrics-proxy-hook
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-api
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-api
+              app.kubernetes.io/component: ""
+      containers:
+        - name: cortex-api
+          envFrom:
+            - secretRef:
+                name: cortex-api
+          env:
+            - name: GOOGLE_CLIENT_ID
+              value: 1070864848239-eua4jn0ku6a7p0pivs3op9ehe9q21jbs.apps.googleusercontent.com
+            - name: REDIS_HOST
+              value: 127.0.0.1
+            - name: REDIS_PORT
+              value: "6379"
+            - name: EMBEDDING_RETRIEVAL_URL
+              value: http://embedding-retrieval.embedding-retrieval.svc.cluster.local:8080
+            # playwright crashes with Docker
+            #- name: CHROME_DEVTOOLS_PROTOCOL_URL
+            #  value: http://127.0.0.1:59222
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:4317
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "1.0"
+            - name: OTEL_BSP_SCHEDULE_DELAY
+              value: "5000"
+            - name: OTEL_BSP_EXPORT_TIMEOUT
+              value: "30000"
+            - name: OTEL_BSP_MAX_QUEUE_SIZE
+              value: "2048"
+            - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+              value: "512"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+        - name: redis-proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --local-address=127.0.0.1:6379
+            - --monitor-address=127.0.0.1:8082
+            - --remote-address=cortex-api-redis-haproxy-writer.cortex-api.svc.cluster.local:6379
+            - --reader-routing=true
+            - --reader-remote-address=cortex-api-redis-haproxy-reader.cortex-api.svc.cluster.local:6379
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+            - name: redis-metrics
+              containerPort: 8082
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+        - name: exporter-merger
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MERGER_PORT
+              value: "8083"
+            - name: MERGER_URLS
+              value: http://127.0.0.1:8080/metrics http://127.0.0.1:8082/metrics
+          ports:
+            - name: metrics
+              containerPort: 8083
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+        - name: chrome-devtools-protocol-server
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: cdp
+              containerPort: 59222
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+          volumeMounts:
+            - name: chromium
+              mountPath: /home/nonroot/.config/chromium
+            - name: tmp
+              mountPath: /tmp
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - name: chromium
+          emptyDir:
+            medium: Memory
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: varlog
+          emptyDir:
+            medium: Memory

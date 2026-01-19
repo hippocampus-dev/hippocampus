@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+xlsclients -d :0 -l | awk '/^Window/ {print $2}' | while IFS= read -r window; do
+  kill "$(xprop -display :0 -id "$window" _NET_WM_PID | awk '{print $NF}')"
+done

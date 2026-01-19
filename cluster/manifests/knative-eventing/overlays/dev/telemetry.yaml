@@ -1,0 +1,49 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: eventing-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: eventing-controller
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: eventing-webhook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: eventing-webhook
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

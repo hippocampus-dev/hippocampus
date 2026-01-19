@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - runner.yaml
+  - runner-organization.yaml
+
+configurations:
+  - kustomizeconfig.yaml
+
+secretGenerator:
+  - name: credentials
+    files:
+      - GITHUB_TOKEN
+    type: Opaque

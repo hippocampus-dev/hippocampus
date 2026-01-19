@@ -1,0 +1,36 @@
+name: workers
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/20_workers.yaml"
+      - "workers/**"
+      - "!**/*.md"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  deployments: write
+jobs:
+  deploy:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    environment: deployment
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: workers/package-lock.json
+      - run: npm ci
+        working-directory: workers
+      - run: npm run deploy
+        working-directory: workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

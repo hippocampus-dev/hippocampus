@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: token-request-server
+  labels:
+    name: token-request-server
+    # token-request-server has a waypoint
+    pod-security.kubernetes.io/enforce: baseline
