@@ -35,7 +35,7 @@ images:
 - digest: sha256:fd2035d409dc30db0082d89a1fe79237afee70306ace0accbfe4928e0c8f77f8
   name: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
   newName: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
-- digest: sha256:3c239e1e1964cc101b972a9dfdd0ac427fc9704a121ac09f8b9557a50d250d6a
+- digest: sha256:c4c11e653bb864f48ab39c07aa568b95752bfbe5a54aa2a52743717d0ce66970
   name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
 - digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
