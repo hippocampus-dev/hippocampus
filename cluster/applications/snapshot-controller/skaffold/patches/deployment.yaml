@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snapshot-controller
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: snapshot-controller
+          image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+          env:
+            - name: VARIANT
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['variant']
+            - name: DISTRIBUTED_CALLBACK_HOST
+              value: skaffold-snapshot-controller.skaffold-snapshot-controller.svc.cluster.local:8082
+            - name: S3_BUCKET
+              value: snapshot-controller
+            - name: S3_ENDPOINT_URL
+              value: http://skaffold-minio.skaffold-snapshot-controller.svc.cluster.local:9000
+            - name: AWS_ACCESS_KEY_ID
+              value: minio
+            - name: AWS_SECRET_ACCESS_KEY
+              value: miniominio
+          volumeMounts:
+            # delve uses /home/nonroot/.config for storing delve configuration
+            - name: tmp
+              mountPath: /home/nonroot/.config
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

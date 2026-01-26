@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus-metrics-proxy-hook
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # issuer + 1
+spec:
+  dnsNames:
+    - prometheus-metrics-proxy-hook.prometheus-metrics-proxy-hook.svc
+    - prometheus-metrics-proxy-hook.prometheus-metrics-proxy-hook.svc.cluster.local

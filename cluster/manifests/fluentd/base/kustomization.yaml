@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- daemon_set.yaml
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/fluentd-forward-fluent.conf
+  - files/kubernetes.conf
+  - files/tail_container_parse.conf
+  name: fluentd-forward
+  options:
+    immutable: true
+- files:
+  - files/nginx.conf
+  name: fluentd-aggregator-proxy
+  options:
+    immutable: true
+- files:
+  - files/adhoc.conf
+  - files/fluentd-aggregator-fluent.conf
+  - files/liveness-probe.sh
+  - files/metrics.conf
+  name: fluentd-aggregator
+  options:
+    immutable: true
+images:
+- digest: sha256:254e34f34f2bec7f55bf9ac084e6904c15a4c43c0b55b973d92879f0cf12c1c8
+  name: fluent/fluentd-kubernetes-daemonset
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/fluent/fluentd-kubernetes-daemonset
+- digest: sha256:48930d5b598dee59279a813ac343a9f7b790d6cc886e04b9d035a13d10ba8116
+  name: ghcr.io/hippocampus-dev/hippocampus/fluentd-aggregator
+  newName: ghcr.io/hippocampus-dev/hippocampus/fluentd-aggregator
+- digest: sha256:c20cc0fb2627491f6d0c6eb08eb3a0f892c26effd559607742128b65f11436e1
+  name: nginx
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/nginx

@@ -1,0 +1,67 @@
+name: Release/taurin
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  release:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: "--target aarch64-apple-darwin"
+          - platform: ubuntu-24.04
+            args: ""
+          - platform: windows-latest
+            args: ""
+    runs-on: ${{ matrix.platform }}
+    environment: deployment
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            taurin/
+            bin/
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: taurin/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-taurin-cargo-${{ hashFiles('taurin/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-taurin-cargo-
+      - uses: actions/cache@v5
+        with:
+          path: taurin/src-tauri/target
+          key: ${{ runner.os }}-taurin-target-${{ hashFiles('taurin/src-tauri/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-taurin-target-
+      - if: matrix.platform == 'ubuntu-24.04'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: |
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          ./bin/bump.sh "${VERSION}"
+      - run: npm ci
+        working-directory: taurin
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          releaseId: ${{ github.event.release.id }}
+          args: ${{ matrix.args }}
+          projectPath: taurin

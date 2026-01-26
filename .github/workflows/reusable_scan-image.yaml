@@ -1,0 +1,95 @@
+name: Scan Image
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+        description: "Full image reference (ghcr.io/owner/repo/image:tag)"
+      severity-threshold:
+        required: false
+        type: string
+        default: "CRITICAL,HIGH"
+        description: "Severity levels to trigger issue creation"
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+jobs:
+  issue-github-token:
+    uses: ./.github/workflows/reusable_issue-github-token.yaml
+    with:
+      profile: issues
+    secrets: inherit
+  scan:
+    needs: issue-github-token
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ github.token }}
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ${{ inputs.image }}
+          format: json
+          output: trivy-results.json
+          severity: ${{ inputs.severity-threshold }}
+          exit-code: "0"
+      - id: artifact-name
+        run: echo "name=trivy-$(echo '${{ inputs.image }}' | sed 's/[^a-zA-Z0-9]/-/g')" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact-name.outputs.name }}
+          path: trivy-results.json
+          retention-days: 30
+      - run: |
+          set -eo pipefail
+
+          VULNS=$(jq '[.Results // [] | .[] | .Vulnerabilities // [] | length] | add // 0' trivy-results.json)
+          echo "Found $VULNS vulnerabilities in ${{ inputs.image }}"
+
+          if [ "$VULNS" -eq 0 ]; then
+            exit 0
+          fi
+
+          GH_TOKEN=$(echo "$ENCRYPTED_TOKEN" | base64 -d | gpg -dq --batch --passphrase "$GPG_PASSPHRASE")
+          export GH_TOKEN
+
+          ISSUE_TITLE="Security: Vulnerabilities in ${{ inputs.image }}"
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --search "${ISSUE_TITLE} in:title is:open" --json url --jq '.[0].url // empty')
+
+          if [ -n "$EXISTING" ]; then
+            echo "Issue already exists: $EXISTING"
+            exit 0
+          fi
+
+          SUMMARY=$(jq -r '
+            [.Results // [] | .[] | .Vulnerabilities // [] | .[] | .Severity] |
+            group_by(.) | map({(.[0]): length}) | add // {}
+          ' trivy-results.json)
+
+          BODY=$(cat <<EOF
+          @claude Please triage these vulnerabilities:
+
+          **Image:** \`${{ inputs.image }}\`
+          **Severity threshold:** ${{ inputs.severity-threshold }}
+          **Summary:** \`${SUMMARY}\`
+
+          <details>
+          <summary>Full scan results</summary>
+
+          \`\`\`json
+          $(cat trivy-results.json)
+          \`\`\`
+
+          </details>
+          EOF
+          )
+
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "$ISSUE_TITLE" \
+            --body "$BODY" \
+            --label "security,trivy"
+        env:
+          ENCRYPTED_TOKEN: ${{ needs.issue-github-token.outputs.encrypted_token }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

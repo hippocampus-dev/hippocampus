@@ -1,0 +1,115 @@
+name: proxy-wasm
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/00_proxy-wasm.yaml"
+      - "cluster/applications/proxy-wasm/**"
+      - "!cluster/applications/proxy-wasm/ext-proc/**"
+      - "!cluster/applications/proxy-wasm/manifests/**"
+      - "!cluster/applications/proxy-wasm/skaffold/**"
+      - "!**/*.md"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  id-token: write
+jobs:
+  publish:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE: proxy-wasm
+      KUSTOMIZATION: cluster/applications/proxy-wasm/manifests
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/
+            cluster/applications/proxy-wasm/
+      - uses: actions/cache@v5
+        with:
+          path: /home/runner/.cache/docker-build
+          key: ${{ runner.os }}-proxy-wasm-docker-${{ hashFiles('cluster/applications/proxy-wasm/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-proxy-wasm-docker-
+      - uses: ./.github/actions/setup-docker
+      - run: |
+          IMAGE_PATH=${GITHUB_REPOSITORY}/${IMAGE}
+          GHCR_IMAGE=ghcr.io/${IMAGE_PATH}
+          TAG=${GITHUB_REF##*/}
+          opt=""
+          if [ -d /home/runner/.cache/docker-build ]; then
+            opt="--cache-from type=local,src=/home/runner/.cache/docker-build"
+          else
+            opt="--cache-from type=registry,ref=$GHCR_IMAGE:cache"
+          fi
+          (
+            cd cluster/applications/proxy-wasm
+
+            docker buildx build --target cookie-manipulator --output type=docker,name=$GHCR_IMAGE/cookie-manipulator.wasm:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/cookie-manipulator.wasm:$TAG
+
+            docker buildx build --target envoy-trusted-header --output type=docker,name=$GHCR_IMAGE/envoy-trusted-header.wasm:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/envoy-trusted-header.wasm:$TAG
+
+            docker buildx build --target envoy-xauthrequest --output type=docker,name=$GHCR_IMAGE/envoy-xauthrequest.wasm:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/envoy-xauthrequest.wasm:$TAG
+
+            docker buildx build --target fallback-filter --output type=docker,name=$GHCR_IMAGE/fallback-filter.wasm:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/fallback-filter.wasm:$TAG
+
+            docker buildx build --target header-getter --output type=docker,name=$GHCR_IMAGE/header-getter.wasm:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/header-getter.wasm:$TAG
+
+            docker buildx build --target header-setter --output type=docker,name=$GHCR_IMAGE/header-setter.wasm:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/header-setter.wasm:$TAG
+
+            docker buildx build --target metrics-exporter --output type=docker,name=$GHCR_IMAGE/metrics-exporter.wasm:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+            docker push $GHCR_IMAGE/metrics-exporter.wasm:$TAG
+
+            docker buildx build --target server --output type=docker,name=$GHCR_IMAGE:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max .
+          )
+          DIGEST=$(docker push $GHCR_IMAGE:$TAG | grep -Eo "sha256:[a-f0-9]{64}")
+
+          if [ -n "$KUSTOMIZATION" ]; then
+            git config --global user.email "kaidotio@gmail.com"
+            git config --global user.name "kaidotio"
+            branch=${IMAGE}
+            git checkout -b ${branch}
+
+            IFS_BAK=$IFS
+            IFS=,
+            targets=($KUSTOMIZATION)
+            IFS=$IFS_BAK
+            for target in "${targets[@]}"; do
+              (
+                cd ${target}
+                kustomize edit set image ${GHCR_IMAGE}=${GHCR_IMAGE}@${DIGEST}
+              )
+            done
+
+            git add ${targets[*]}
+            if git commit -m "Deploy ${IMAGE}"; then
+              git fetch origin ${{ github.ref_name }}
+              git rebase origin/${{ github.ref_name }}
+              git push -f origin ${branch}
+              if [ $(gh pr list --head ${branch} --json id | jq '. | length') -eq 0 ]; then
+                gh pr create --title "Update ${IMAGE}" --body "${GHCR_IMAGE}@${DIGEST}" --head ${branch}
+              fi
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  scan:
+    needs: publish
+    uses: ./.github/workflows/reusable_scan-image.yaml
+    with:
+      image: ghcr.io/${{ github.repository }}/proxy-wasm:${{ github.ref_name }}
+    secrets: inherit

@@ -1,0 +1,48 @@
+apiVersion: db.atlasgo.io/v1alpha1
+kind: AtlasSchema
+metadata:
+  name: slack-logger
+spec:
+  devURL: mysql://root:pass@localhost:3306/dev
+  devDB:
+    spec:
+      containers:
+        - name: mysql
+          image: ghcr.io/hippocampus-dev/hippocampus/mirror/mysql:8
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: pass
+            - name: MYSQL_DATABASE
+              value: dev
+          startupProbe:
+            exec:
+              command:
+                - mysql
+                - -ppass
+                - -h
+                - 127.0.0.1
+                - -e
+                - SELECT 1
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 30
+            timeoutSeconds: 1
+  credentials:
+    scheme: mysql
+    host: slack-logger-tidb.slack-logger.svc.cluster.local
+    user: slack_user
+    passwordFrom:
+      secretKeyRef:
+        key: slack_user
+        name: slack-logger
+    database: slack_logger
+    port: 4000
+  schema:
+    configMapKeyRef:
+      key: schema.hcl
+      name: slack-logger-atlas
+  policy:
+    diff:
+      skip:
+        modify_schema: true

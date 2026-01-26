@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+              app.kubernetes.io/component: ""
+      containers:
+        - name: grafana
+          env:
+            - name: GF_SERVER_ROOT_URL
+              value: https://grafana.minikube.127.0.0.1.nip.io
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 1000m
+              memory: 128Mi
+          volumeMounts:
+            - name: datasources
+              mountPath: /etc/grafana/provisioning/datasources
+              readOnly: true
+        - name: mcp
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 1000m
+              memory: 128Mi
+      volumes:
+        - name: datasources
+          configMap:
+            name: datasources

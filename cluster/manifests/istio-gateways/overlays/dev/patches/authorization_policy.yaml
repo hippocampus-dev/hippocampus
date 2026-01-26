@@ -1,0 +1,25 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: istio-ingressgateway-ext-authz
+spec:
+  rules:
+    - to:
+        - operation:
+            notMethods:
+              - OPTIONS
+            hosts:
+              - argocd.kaidotio.dev
+              - talk.kaidotio.dev
+              - cortex-api.kaidotio.dev
+              - hubble-ui.kaidotio.dev
+              - httpbin.kaidotio.dev
+              - httpbin-istio.kaidotio.dev
+              - grafana.kaidotio.dev
+              - notebook.kaidotio.dev
+              - bakery.kaidotio.dev
+              - prometheus.kaidotio.dev
+              - kube-crud.kaidotio.dev
+              - kube-crud-server.kaidotio.dev
+              - embedding-retrieval.kaidotio.dev
+              - embedding-gateway-purge.kaidotio.dev

@@ -1,0 +1,56 @@
+name: Test/hippocampus
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_hippocampus.yaml"
+      - "packages/**"
+      - "Cargo.lock"
+  #merge_group:
+  #  branches:
+  #    - main
+  #  types:
+  #    - checks_requested
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            packages/
+            Cargo.lock
+            Cargo.toml
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-hippocampus-packages-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-hippocampus-packages-
+      - uses: actions/cache@v5
+        with:
+          path: target
+          key: ${{ runner.os }}-hippocampus-${{ hashFiles('packages/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-hippocampus-
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends protobuf-compiler
+      - run: cargo test

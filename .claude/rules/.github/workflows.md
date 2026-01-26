@@ -1,0 +1,94 @@
+---
+paths:
+  - ".github/workflows/**/*.yaml"
+---
+
+* Do not add `name` to `run` steps
+* Use Docker layer caching with `cache-from` and `cache-to` (see Docker Cache Strategy below)
+* Update image digests in Kustomization files after build
+* Always set `concurrency` with `cancel-in-progress: true`
+* Always set `timeout-minutes` on jobs
+* Add `if: github.repository_owner == 'kaidotio'` to jobs for events that can be triggered by non-owners: `pull_request`, `issue_comment`, `schedule`, `workflow_run`. Not needed for `push: branches: main`, `release`, `workflow_dispatch`
+* Multi-line shell scripts with pipes: use `set -eo pipefail` (not `-u`, GitHub Actions environment variables are always defined)
+* Use `${{ runner.temp }}` for temporary files needed only during workflow execution; use `~` for persistent home directory references
+
+## Docker Cache Strategy
+
+| Build Time | Strategy | cache-to |
+|------------|----------|----------|
+| Normal (<60 min) | Local only | `type=local,mode=max,dest=...` |
+| Long (>60 min) | Local + Registry | `type=local,... --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max` |
+
+Registry cache uses `:cache` tag (not `:main`) to avoid overwriting the production image. Add registry cache when:
+- Build exceeds 60 minutes (GitHub Actions cache may be evicted before next build)
+- Dockerfile changes infrequently (Rust cross-compilation base images)
+
+## Naming
+
+| Prefix | Purpose |
+|--------|---------|
+| `00_` | Application Docker builds |
+| `10_` | Event handlers (label, comment) |
+| `20_` | Release/additional builds (armyknife, taurin, Cloudflare Workers) |
+| `40_` | Tests |
+| `50_` | Validation |
+| `80_` | Metrics/sync |
+| `90_` | Auto-generation (readme, crd, jsonnet) |
+| `99_` | Snapshots/mirroring |
+| `reusable_` | Reusable workflow templates |
+| (none) | AI integration (claude*.yaml) |
+
+## Release Workflows
+
+Release workflows (`20_*.yaml`) that build versioned artifacts:
+
+1. Use sparse-checkout with `bin/` included for `bump.sh`
+2. Extract version from tag: `VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')`
+3. Call `bump.sh` before build: `./bin/bump.sh "${VERSION}"`
+
+`bump.sh` handles sparse-checkout gracefully - uses `find` which ignores missing directories, and `if [ -f ... ]` checks for specific files.
+
+## PR Trigger
+
+```yaml
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+```
+
+Exclude drafts: `github.event.pull_request.draft == false && github.event.pull_request.state == 'open'`
+
+## Runner Selection
+
+| Condition | Runner |
+|-----------|--------|
+| Cluster internal access | `[self-hosted, github-actions-runner-controller]` |
+| Local tools (Claude) | `[self-hosted, local]` |
+| Standard builds | `ubuntu-24.04` |
+
+## Path Exclusions
+
+Exclude non-source files from build triggers:
+
+```yaml
+paths:
+  - "!**/*.md"
+  - "!**/manifests/**"
+  - "!**/skaffold/**"
+```
+
+## Secrets
+
+Secrets are managed via `bin/repository-settings.sh`. Add new secrets to the appropriate array.
+
+| Scope | Array | `environment` required |
+|-------|-------|------------------------|
+| All workflows | `repository_secrets` | No |
+| Protected deployments | `environment_secrets` | `deployment` |
+
+External service deployments (Cloudflare, Tauri signing, etc.) use `environment_secrets` with `environment: deployment`.
+
+## Reference
+
+If creating a new build workflow:
+  Read: `.claude/rules/.reference/.github/workflows/creating-build-workflow.md`

@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: embedding-retrieval
+spec:
+  gateways:
+    - embedding-retrieval
+  hosts:
+    - embedding-retrieval.minikube.127.0.0.1.nip.io
+    - embedding-retrieval.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: embedding-retrieval
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:93403116ba4c1fb59cf2c716ff1da2fe3a82dbac5ca97e38b4e65b1ba97440b7
+  name: ghcr.io/hippocampus-dev/hippocampus/csviewer
+  newName: ghcr.io/hippocampus-dev/hippocampus/csviewer

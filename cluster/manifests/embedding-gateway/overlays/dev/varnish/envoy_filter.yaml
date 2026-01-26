@@ -1,0 +1,46 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: varnish-access-log
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: varnish
+  configPatches:
+    - applyTo: NETWORK_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            access_log:
+              - name: envoy.access_loggers.file
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                  path: /dev/stdout
+                  log_format:
+                    json_format:
+                      time: "%START_TIME%"
+                      host: "%DOWNSTREAM_REMOTE_ADDRESS_WITHOUT_PORT%"
+                      forwardedfor: "%REQ(X-FORWARDED-FOR)%"
+                      method: "%REQ(:METHOD)%"
+                      uri: "%REQ(:PATH)%"
+                      protocol: "%PROTOCOL%"
+                      status: "%RESPONSE_CODE%"
+                      size: "%BYTES_SENT%"
+                      reqsize: "%BYTES_RECEIVED%"
+                      referer: "%REQ(REFERER)%"
+                      ua: "%REQ(USER-AGENT)%"
+                      vhost: "%REQ(:AUTHORITY)%"
+                      reqtime: "%DURATION%"
+                      respflag: "%RESPONSE_FLAGS%"
+                      scheme: "%REQ(:SCHEME)%"
+                      traceparent: "%REQ(TRACEPARENT)%"
+                      "x-client-ip": "%REQ(X-CLIENT-IP)%"
+                      "x-body-hash": "%REQ(X-BODY-HASH)%"
