@@ -5,6 +5,6 @@ resources:
 - deployment.yaml
 - pod_disruption_budget.yaml
 images:
-- digest: sha256:c2308e1ac4caf76b475308167f463b6e769ec2356bac54f56bb5c61c2f8648e8
+- digest: sha256:7f79a37ab3b62de028e950237b7b715d5e27c6ad2fbe63f324cac60ff273e26b
   name: ghcr.io/hippocampus-dev/hippocampus/slack-bolt-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/slack-bolt-proxy
