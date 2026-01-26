@@ -5,6 +5,6 @@ resources:
 - deployment.yaml
 - service.yaml
 images:
-- digest: sha256:6670e57db3f9167e8f9b76098e7def0b1ff189c0ea630846a33e039521fd4ee7
+- digest: sha256:84efff0d6deaa29639d6f5352a2094d3fb2fc0526e6704923ac3033afe571dbc
   name: ghcr.io/hippocampus-dev/hippocampus/lighthouse-exporter
   newName: ghcr.io/hippocampus-dev/hippocampus/lighthouse-exporter
