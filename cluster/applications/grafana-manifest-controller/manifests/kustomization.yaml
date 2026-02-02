@@ -14,6 +14,6 @@ resources:
 - crd
 
 images:
-- digest: sha256:e98ed3177d13d3aed7e8ca7d2a06b1a08b84215e9dc4bab55dae430f6092af9a
+- digest: sha256:2fd6bc92027e2fec5bc7da6993ac2521b3d023747aaa1508567f6e75335f15e8
   name: ghcr.io/hippocampus-dev/hippocampus/grafana-manifest-controller
   newName: ghcr.io/hippocampus-dev/hippocampus/grafana-manifest-controller
