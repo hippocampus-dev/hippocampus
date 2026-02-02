@@ -10,6 +10,6 @@ images:
 - digest: sha256:7adca939c5a1ea3bb59bdb13e1022995513b69e40dbb0d42e48f77f84b291b8b
   name: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller
   newName: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller
-- digest: sha256:42fc3a2e8c2e51f1dfc8857360c7b5c746861a67ed1a3876699c17f457ea9362
+- digest: sha256:7e7ef7f0d868ab8dd05041aea65fdf454fa1bc6303a1fe54e7ed4fc9e3d99295
   name: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller/snapshot-diff-server
   newName: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller/snapshot-diff-server
