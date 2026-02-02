@@ -6,6 +6,6 @@ resources:
 - pod_disruption_budget.yaml
 
 images:
-- digest: sha256:91d25f50e14c5a9db24812dbd96bb9226b8af6873a9bd8aa0e60f1bd9a749055
+- digest: sha256:f58549177c2c7fa5cc03ca822ae1a02cc6793724d2e5f3160c54f3187e2d7df9
   name: ghcr.io/hippocampus-dev/hippocampus/translator
   newName: ghcr.io/hippocampus-dev/hippocampus/translator
