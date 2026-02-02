@@ -1,0 +1,48 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: cortex-api
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: ""
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - cortex-api.minikube.127.0.0.1.nip.io
+            - cortex-api.kaidotio.dev
+    - from:
+        - source:
+            namespaces:
+              - runner
+      when:
+        - key: request.auth.claims[iss]
+          values:
+            - https://token.actions.githubusercontent.com
+        - key: request.auth.claims[repository]
+          values:
+            - hippocampus-dev/hippocampus
+    - from:
+        - source:
+            namespaces:
+              - runner
+      when:
+        - key: request.auth.claims[iss]
+          values:
+            - https://kubernetes.default.svc.cluster.local
+        - key: request.auth.claims[sub]
+          values:
+            - system:serviceaccount:token-request-server:default
+    - from:
+        - source:
+            namespaces:
+              - jupyterhub

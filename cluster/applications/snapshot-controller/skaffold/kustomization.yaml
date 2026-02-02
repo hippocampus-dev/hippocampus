@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: skaffold-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: skaffold
+
+namespace: skaffold-snapshot-controller
+
+resources:
+  - ../manifests
+  - mc.yaml
+  - minio.yaml
+  - namespace.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  # CRD does not support namePrefix
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: snapshots.skaffold.snapshot.kaidotio.github.io
+      - op: replace
+        path: /spec/group
+        value: skaffold.snapshot.kaidotio.github.io
+    target:
+      kind: CustomResourceDefinition
+      name: snapshots.snapshot.kaidotio.github.io
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: scheduledsnapshots.skaffold.snapshot.kaidotio.github.io
+      - op: replace
+        path: /spec/group
+        value: skaffold.snapshot.kaidotio.github.io
+    target:
+      kind: CustomResourceDefinition
+      name: scheduledsnapshots.snapshot.kaidotio.github.io
+  - patch: |
+      - op: add
+        path: /rules/0
+        value:
+          apiGroups:
+            - skaffold.snapshot.kaidotio.github.io
+          resources:
+            - "*"
+          verbs:
+            - "*"
+    target:
+      kind: ClusterRole
+      name: snapshot-controller

@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fluentd-aggregator-proxy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-aggregator
+      app.kubernetes.io/component: proxy
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: fluentd
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: fluentd-forward
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 24224
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fluentd-aggregator
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-aggregator
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: fluentd
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: fluentd-aggregator
+              app.kubernetes.io/component: proxy
+      ports:
+        - protocol: TCP
+          port: 24224

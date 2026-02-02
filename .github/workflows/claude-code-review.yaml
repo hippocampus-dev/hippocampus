@@ -1,0 +1,71 @@
+name: Claude Code Review
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  claude:
+    if: github.repository_owner == 'kaidotio' && (github.event.pull_request.user.login == 'kaidotio' || github.event.pull_request.user.login == 'hippocampus-github-app[bot]')
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          mkdir -p ${{ runner.temp }}/claude-home
+          cp files/home/kai/.config/claudex/CLAUDE.ci.md ${{ runner.temp }}/claude-home/CLAUDE.md
+          cp files/home/kai/.config/claudex/CLAUDE.important.md ${{ runner.temp }}/claude-home/CLAUDE.important.md
+          cp files/home/kai/.config/claudex/CLAUDE.general.md ${{ runner.temp }}/claude-home/CLAUDE.general.md
+          cp -r files/home/kai/.config/claudex/agents ${{ runner.temp }}/claude-home/agents
+      - uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: claude,hippocampus-github-app
+          additional_permissions: |
+            actions: read
+          track_progress: true
+          use_sticky_comment: true
+          prompt: |
+            # Task
+
+            Perform a security-focused code review to identify HIGH-CONFIDENCE security vulnerabilities in this pull request. All interactions should be in Japanese.
+
+            ## Objectives
+
+            1. Identify security vulnerabilities with >80% confidence of actual exploitability
+            2. Focus ONLY on security implications newly added by this PR
+            3. Provide actionable feedback for identified issues
+
+            ## Process
+
+            - Phase 1: Research repository context - identify existing security frameworks and patterns
+            - Phase 2: Compare new code against established secure practices
+            - Phase 3: Examine modified files, trace data flow, identify injection points
+
+            ## Security Categories
+
+            - Input Validation: SQL/Command/XXE/Template/NoSQL injection, Path traversal
+            - Authentication & Authorization: Bypass logic, Privilege escalation, Session flaws, JWT vulnerabilities
+            - Crypto & Secrets: Hardcoded credentials, Weak algorithms, Key management issues
+            - Injection & Code Execution: Deserialization RCE, Pickle/YAML injection, Eval injection, XSS
+            - Data Exposure: Sensitive data logging, PII violations, API leakage, Debug info exposure
+
+            ## Important
+
+            - MINIMIZE FALSE POSITIVES: Only flag issues with >80% confidence
+            - AVOID NOISE: Skip theoretical issues, style concerns, or low-impact findings
+            - FOCUS ON IMPACT: Prioritize unauthorized access, data breaches, system compromise
+            - EXCLUSIONS: Do NOT report DoS vulnerabilities, secrets on disk, rate limiting issues
+            - Local network exploitability can still be HIGH severity
+          claude_args: |
+            --system-prompt "出力結果は日本語でお願いします。"
+            --allowedTools "Task,Glob,Grep,LS,Read,TodoRead,TodoWrite,WebSearch,WebFetch,Bash(find:*),Bash(ls:*),Bash(grep:*),Bash(git diff:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),mcp__github_inline_comment__create_inline_comment"

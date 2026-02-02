@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: metrics-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metrics-server
+  mtls:
+    mode: STRICT

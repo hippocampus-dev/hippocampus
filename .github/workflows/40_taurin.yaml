@@ -1,0 +1,53 @@
+name: Test/taurin
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_taurin.yaml"
+      - "taurin/src-tauri/**"
+      - "packages/bakery/**"
+      - "packages/openai/**"
+      - "packages/audio/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            taurin/
+            packages/
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-taurin-cargo-${{ hashFiles('taurin/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-taurin-cargo-
+      - uses: actions/cache@v5
+        with:
+          path: taurin/src-tauri/target
+          key: ${{ runner.os }}-taurin-target-${{ hashFiles('taurin/src-tauri/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-taurin-target-
+      - run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: cargo test
+        working-directory: taurin/src-tauri

@@ -1,0 +1,166 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cortex-api-prometheus-metrics-proxy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 65532
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cortex-api
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+        - namespaceSelector:
+            matchLabels:
+              name: runner
+        - namespaceSelector:
+            matchLabels:
+              name: jupyterhub
+      ports:
+        - protocol: TCP
+          port: 8080
+        # HBONE
+        - protocol: TCP
+          port: 15008
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cortex-api-redis
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: redis
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: cortex-api
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: cortex-api
+          app.kubernetes.io/component: ""
+    - namespaceSelector:
+        matchLabels:
+          name: cortex-api
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: cortex-api
+          app.kubernetes.io/component: redis-haproxy
+    ports:
+    - protocol: TCP
+      port: 6379
+    # HBONE
+    - protocol: TCP
+      port: 15008
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cortex-api-redis-haproxy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cortex-api
+      app.kubernetes.io/component: redis-haproxy
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: cortex-api
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cortex-api
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 6380
+        - protocol: TCP
+          port: 6381
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cortex-api-redis-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+          podSelector:
+            matchLabels:
+              app: istiod
+      ports:
+        - protocol: TCP
+          port: 15012
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: otel
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: otel-agent
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 4317

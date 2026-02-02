@@ -1,0 +1,104 @@
+services:
+  stable-diffusion-webui:
+    profiles:
+      - stable-diffusion-webui
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: stable-diffusion-webui
+    develop:
+      watch:
+        - action: rebuild
+          path: stable-diffusion-webui/Dockerfile
+    runtime: nvidia
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
+    command:
+      - --allow-code
+      - --medvram
+      - --enable-insecure-extension-access
+      - --api
+      - --listen
+      - --ckpt=models/Stable-diffusion/v1-5-pruned-emaonly.ckpt
+    environment:
+      - SD_WEBUI_CACHE_FILE=/home/nonroot/stable-diffusion-webui/models/.cache/cache.json
+      - HUGGINGFACE_HUB_CACHE=/home/nonroot/stable-diffusion-webui/models/.cache/huggingface
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/tmp/.Xauthority
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ${XAUTHORITY:-~/.Xauthority}
+        target: /tmp/.Xauthority
+      - type: bind
+        bind:
+          create_host_path: false
+        source: stable-diffusion-webui/styles.csv
+        target: /home/nonroot/stable-diffusion-webui/styles.csv
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: stable-diffusion-webui/extensions/Config-Presets/config-img2img.json
+        target: /home/nonroot/stable-diffusion-webui/extensions/Config-Presets/config-img2img.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: stable-diffusion-webui/extensions/Config-Presets/config-txt2img.json
+        target: /home/nonroot/stable-diffusion-webui/extensions/Config-Presets/config-txt2img.json
+        read_only: true
+      - type: volume
+        source: stable-diffusion-models
+        target: /home/nonroot/stable-diffusion-webui/models
+      - type: volume
+        source: controlnet-models
+        target: /home/nonroot/stable-diffusion-webui/extensions/sd-webui-controlnet/models
+    networks:
+      - default
+  stable-diffusion-webui-downloader:
+    profiles:
+      - stable-diffusion-webui
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: stable-diffusion-webui/downloader
+    develop:
+      watch:
+        - action: rebuild
+          path: stable-diffusion-webui/downloader/Dockerfile
+        - action: rebuild
+          path: stable-diffusion-webui/downloader/links.txt
+    command:
+      - -j
+      - "5"
+      - -x
+      - "8"
+      - -s
+      - "8"
+      - -k
+      - "100M"
+      - --header
+      - "Authorization: Bearer ${HF_HUB_TOKEN}"
+    environment:
+      - HF_HUB_TOKEN=${HF_HUB_TOKEN}
+    volumes:
+      - type: volume
+        source: stable-diffusion-models
+        target: /home/nonroot/models
+      - type: volume
+        source: controlnet-models
+        target: /home/nonroot/extensions/sd-webui-controlnet/models
+    networks:
+      - default

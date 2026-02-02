@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- crd
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+
+images:
+- digest: sha256:0892331d040ed40e74f41b7c8daa38b4d480eb94496f4eb876e60b1ea7002f69
+  name: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/snapshot-controller

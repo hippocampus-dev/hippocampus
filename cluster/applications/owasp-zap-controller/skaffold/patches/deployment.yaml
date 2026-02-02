@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: owasp-zap-controller
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: owasp-zap-controller
+          image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+          env:
+            - name: VARIANT
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['variant']
+            - name: CALLBACK_HOST
+              value: skaffold-owasp-zap-controller.skaffold-owasp-zap-controller.svc.cluster.local:8082
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 1000m
+              memory: 128Mi
+          volumeMounts:
+            # delve uses /home/nonroot/.config for storing delve configuration
+            - name: tmp
+              mountPath: /home/nonroot/.config
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

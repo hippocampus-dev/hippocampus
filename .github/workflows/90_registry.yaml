@@ -1,0 +1,101 @@
+name: Update Registry rules
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "cluster/applications/fluentd-aggregator/plugins/filter_metadata.rb"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  update-registry-grouping:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Configure Codex
+        run: |
+          set -eo pipefail
+          ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_ACTION_PATH}" | jq -re .value)
+          echo "::add-mask::$ID_TOKEN"
+          HTTP_CODE=$(curl -sSL -w "%{http_code}" -o "${{ runner.temp }}/response.json" -XPOST -H "Authorization: Bearer $ID_TOKEN" "http://token-request-server.token-request-server.svc.cluster.local:8080/token")
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "::error::$(cat "${{ runner.temp }}/response.json")"
+            exit 1
+          fi
+          TOKEN=$(jq -re .token "${{ runner.temp }}/response.json")
+          echo "::add-mask::$TOKEN"
+
+          mkdir -p ${{ runner.temp }}/codex-home
+          mkdir -p ${{ runner.temp }}/codex-home/.cache
+          mkdir -p ${{ runner.temp }}/codex-home/.cache/gh
+          cat > ${{ runner.temp }}/codex-home/config.toml << EOF
+          model = "gpt-5.1"
+          model_provider = "cortex"
+
+          [sandbox_workspace_write]
+          network_access = true
+          writable_roots = ["${{ runner.temp }}/codex-home/.cache"]
+
+          [shell_environment_policy]
+          ignore_default_excludes = true
+
+          [features]
+          web_search_request = true
+
+          [model_providers.cortex]
+          name = "Cortex API"
+          base_url = "http://cortex-api.cortex-api.svc.cluster.local:8080/v1"
+          http_headers = { "Authorization" = "Bearer ${TOKEN}" }
+          EOF
+
+          echo '{"port":0}' > ${{ runner.temp }}/codex-home/${{ github.run_id }}.json
+      - uses: openai/codex-action@v1
+        with:
+          codex-home: ${{ runner.temp }}/codex-home
+          codex-version: v0.58.0
+          allow-bots: true
+          prompt: |
+            # Task
+
+            The fluentd log grouping logic in `cluster/applications/fluentd-aggregator/plugins/filter_metadata.rb` has been updated.
+            Update the `logsGroupingName` function in `armyknife/internal/registry/parser.go` to match.
+
+            ## Context
+
+            `filter_metadata.rb` determines Fluentd log grouping tags using Kubernetes pod labels:
+            1. It tries labels in priority order to find a "name" (e.g., `app.kubernetes.io/name`, then `k8s-app`, then `app`, then `component`)
+            2. If a name is found and `app.kubernetes.io/component` exists, it appends `-{component}` to the name
+            3. The grouping tag becomes `kubernetes.{namespace}.{name}`
+
+            The Go function `logsGroupingName` in `armyknife/internal/registry/parser.go` must replicate this exact logic.
+
+            ## Process
+
+            1. Read `cluster/applications/fluentd-aggregator/plugins/filter_metadata.rb` to extract the current label priority order and component suffix logic
+            2. Read `armyknife/internal/registry/parser.go` and find the `logsGroupingName` function
+            3. Compare the two implementations
+            4. If they differ, update `logsGroupingName` to match `filter_metadata.rb`
+            5. If changes were made, create a pull request
+
+            ## Important Rules
+
+            - Only modify the `logsGroupingName` function in `armyknife/internal/registry/parser.go`
+            - Do NOT modify `filter_metadata.rb`
+            - Do NOT modify any other functions or files
+            - Do NOT commit directly to the main branch - always create a PR
+            - If no changes are needed (logic already matches), do nothing
+            - The PR title should describe the specific change (e.g., "Update logsGroupingName to match filter_metadata.rb label priority")
+        env:
+          XDG_CACHE_HOMES: ${{ runner.temp }}/codex-home/.cache
+          GH_CONFIG_DIR: ${{ runner.temp }}/codex-home/.cache/gh
+          GH_TOKEN: ${{ github.token }}

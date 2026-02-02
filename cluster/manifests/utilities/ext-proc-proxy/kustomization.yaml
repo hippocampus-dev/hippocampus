@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+
+images:
+- digest: sha256:6e43aca18e7cbe2a2b91649aca6f712ed7482e959402770a909f23197e2d873a
+  name: alpine/socat
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/alpine/socat
+- digest: sha256:52eee1e7eb3c34c8c5c3cdf08e41e5949840c2c1c6ba051560255d4e7be69359
+  name: ghcr.io/hippocampus-dev/hippocampus/ext-proc
+  newName: ghcr.io/hippocampus-dev/hippocampus/ext-proc

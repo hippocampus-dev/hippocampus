@@ -1,0 +1,35 @@
+name: github-actions-exporter-controller
+namespace: github-actions-exporter-controller
+components:
+  - name: github-actions-exporter-controller
+    labels:
+      app.kubernetes.io/component: ""
+      app.kubernetes.io/name: github-actions-exporter-controller
+    logs:
+      grouping: kubernetes.github-actions-exporter-controller.github-actions-exporter-controller
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.github-actions-exporter-controller.github-actions-exporter-controller%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=github-actions-exporter-controller&var-workload_type=deployment&var-workload=github-actions-exporter-controller
+      labelSets:
+        - labels:
+            destination_service_name: github-actions-exporter-controller
+            destination_service_namespace: github-actions-exporter-controller
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: github-actions-exporter-controller
+            source_workload_namespace: github-actions-exporter-controller
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            app_kubernetes_io_component: ""
+            app_kubernetes_io_name: github-actions-exporter-controller
+            namespace: github-actions-exporter-controller
