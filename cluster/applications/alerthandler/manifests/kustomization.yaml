@@ -8,6 +8,6 @@ configurations:
 - kustomizeconfig.yaml
 
 images:
-- digest: sha256:9e20315576510e1c3d85fc7c513d4b4bf87196fb401d4c97dc725fc44a565633
+- digest: sha256:0108c3c9ce28b7de0fd373dcded51fbf1d07a8953b8d8c7755745a084b68fa5a
   name: ghcr.io/hippocampus-dev/hippocampus/alerthandler
   newName: ghcr.io/hippocampus-dev/hippocampus/alerthandler
