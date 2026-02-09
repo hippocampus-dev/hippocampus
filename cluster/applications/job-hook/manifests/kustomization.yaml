@@ -10,6 +10,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:cbdf33bd417fb03418e577d6872ab5985f32106a231ca55a46370d77ab9dbc72
+- digest: sha256:13ed133915c1942a824c7607379728cd2192988eb2ef327f152f13fcd7392928
   name: ghcr.io/hippocampus-dev/hippocampus/job-hook
   newName: ghcr.io/hippocampus-dev/hippocampus/job-hook
