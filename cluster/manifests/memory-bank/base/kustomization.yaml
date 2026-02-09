@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:82e1d04dece17a2da430b08bbd2cfef801dea4dbc88245a0aac0ea14ccb9d028
+- digest: sha256:28caa69061c595e0e59870b0f0ff7a53e883ac84fe7795ba8f539972c6a347c0
   name: ghcr.io/hippocampus-dev/hippocampus/memory-bank
   newName: ghcr.io/hippocampus-dev/hippocampus/memory-bank
