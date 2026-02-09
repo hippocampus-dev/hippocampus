@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: descheduler
+spec:
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            sidecar.istio.io/inject: "true"
+          annotations:
+            sidecar.istio.io/proxyCPULimit: 1000m
+            sidecar.istio.io/proxyMemoryLimit: 1Gi
+            sidecar.istio.io/proxyCPU: 30m
+            sidecar.istio.io/proxyMemory: 64Mi
+        spec:
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+          containers:
+            - name: descheduler
+              command:
+                - /bin/descheduler
+              args:
+                - --policy-config-file=/etc/descheduler/policy.yaml
+              volumeMounts:
+                - name: descheduler
+                  mountPath: /etc/descheduler
+                  readOnly: true
+          volumes:
+            - name: descheduler
+              configMap:
+                name: descheduler

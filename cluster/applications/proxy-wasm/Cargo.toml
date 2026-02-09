@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+exclude = ["ext-proc"]
+members = [
+    "packages/cookie-manipulator",
+    "packages/envoy-trusted-header",
+    "packages/envoy-xauthrequest",
+    "packages/fallback-filter",
+    "packages/header-getter",
+    "packages/header-setter",
+    "packages/metrics",
+    "packages/metrics-exporter",
+    "packages/finalizer",
+]
+
+[profile.release]
+strip = "symbols"
+lto = true
+panic = "abort"

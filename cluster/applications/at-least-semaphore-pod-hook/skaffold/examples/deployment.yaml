@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicas1
+spec:
+  replicas: 2
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: my-replicas1
+  template:
+    metadata:
+      labels:
+        <<: *labels
+      annotations:
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/at-least-semaphore-pod: "true"
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/key: "my-replicas"
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/length: "3"
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/expiration: "60"
+    spec:
+      containers:
+        - name: my-container
+          image: nginx
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicas2
+spec:
+  replicas: 2
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: my-replicas2
+  template:
+    metadata:
+      labels:
+        <<: *labels
+      annotations:
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/at-least-semaphore-pod: "true"
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/key: "my-replicas"
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/length: "3"
+        skaffold.at-least-semaphore-pod-hook.kaidotio.github.io/expiration: "60"
+    spec:
+      containers:
+        - name: my-container
+          image: nginx

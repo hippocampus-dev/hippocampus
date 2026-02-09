@@ -1,0 +1,223 @@
+name: utilities
+namespace: utilities
+components:
+  - name: elasticsearch-ingest
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: ingest
+    logs:
+      grouping: kubernetes.utilities.elasticsearch-ingest
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.elasticsearch-ingest%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=elasticsearch-ingest
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            namespace: utilities
+  - name: elasticsearch-coordinating
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: coordinating
+    logs:
+      grouping: kubernetes.utilities.elasticsearch-coordinating
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.elasticsearch-coordinating%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=elasticsearch-coordinating
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            namespace: utilities
+  - name: endpoint-broadcaster
+    labels:
+      app.kubernetes.io/component: endpoint-broadcaster
+    logs:
+      grouping: kubernetes.utilities.endpoint-broadcaster
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.endpoint-broadcaster%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=endpoint-broadcaster
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: endpoint-broadcaster
+            namespace: utilities
+  - name: ext-proc-proxy
+    labels:
+      app.kubernetes.io/component: ext-proc-proxy
+    logs:
+      grouping: kubernetes.utilities.ext-proc-proxy
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.ext-proc-proxy%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=ext-proc-proxy
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: ext-proc-proxy
+            namespace: utilities
+  - name: github-token-server
+    labels:
+      app.kubernetes.io/component: github-token-server
+    logs:
+      grouping: kubernetes.utilities.github-token-server
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.github-token-server%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=github-token-server
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: github-token-server
+            namespace: utilities
+  - name: httpbin
+    labels:
+      app.kubernetes.io/component: httpbin
+    logs:
+      grouping: kubernetes.utilities.httpbin
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.httpbin%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=httpbin
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: httpbin
+            namespace: utilities
+  - name: httpbin-istio
+    labels:
+      app.kubernetes.io/component: httpbin-istio
+    logs:
+      grouping: kubernetes.utilities.httpbin-istio
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.httpbin-istio%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=httpbin-istio
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: httpbin-istio
+            namespace: utilities
+  - name: mcrouter
+    labels:
+      app.kubernetes.io/component: mcrouter
+    logs:
+      grouping: kubernetes.utilities.mcrouter
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.mcrouter%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=mcrouter
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: mcrouter
+            namespace: utilities
+  - name: redis-haproxy
+    labels:
+      app.kubernetes.io/component: redis-haproxy
+    logs:
+      grouping: kubernetes.utilities.redis-haproxy
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.redis-haproxy%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=redis-haproxy
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: redis-haproxy
+            namespace: utilities
+  - name: statsd-exporter
+    labels:
+      app.kubernetes.io/component: statsd-exporter
+    logs:
+      grouping: kubernetes.utilities.statsd-exporter
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.statsd-exporter%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=deployment&var-workload=statsd-exporter
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: statsd-exporter
+            namespace: utilities
+  - name: elasticsearch-master
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: master
+    logs:
+      grouping: kubernetes.utilities.elasticsearch-master
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.elasticsearch-master%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=elasticsearch-master
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            namespace: utilities
+  - name: elasticsearch-data
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: data
+    logs:
+      grouping: kubernetes.utilities.elasticsearch-data
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.elasticsearch-data%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=elasticsearch-data
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            namespace: utilities
+  - name: etcd
+    labels:
+      app.kubernetes.io/component: etcd
+    logs:
+      grouping: kubernetes.utilities.etcd
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.etcd%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=etcd
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: etcd
+            namespace: utilities
+  - name: memcached
+    labels:
+      app.kubernetes.io/component: memcached
+    logs:
+      grouping: kubernetes.utilities.memcached
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.memcached%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=memcached
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: memcached
+            namespace: utilities
+  - name: minio
+    labels:
+      app.kubernetes.io/component: minio
+    logs:
+      grouping: kubernetes.utilities.minio
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.minio%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=minio
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: minio
+            namespace: utilities
+  - name: qdrant
+    labels:
+      app.kubernetes.io/component: qdrant
+    logs:
+      grouping: kubernetes.utilities.qdrant
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.qdrant%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=qdrant
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: qdrant
+            namespace: utilities
+  - name: redis
+    labels:
+      app.kubernetes.io/component: redis
+    logs:
+      grouping: kubernetes.utilities.redis
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.redis%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=redis
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: redis
+            namespace: utilities
+  - name: varnish
+    labels:
+      app.kubernetes.io/component: varnish
+    logs:
+      grouping: kubernetes.utilities.varnish
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.utilities.varnish%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=utilities&var-workload_type=statefulset&var-workload=varnish
+      labelSets:
+        - labels:
+            app_kubernetes_io_component: varnish
+            namespace: utilities

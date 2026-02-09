@@ -1,0 +1,13 @@
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  name: cloudevents-relay
+spec:
+  schedule: "* * * * *"
+  contentType: "application/json"
+  data: '{"documents": [{"text": "Hello, world!"}], "categories": ["test"]}'
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: skaffold-cloudevents-relay

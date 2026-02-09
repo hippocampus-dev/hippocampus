@@ -1,0 +1,134 @@
+name: envoy-ratelimit
+namespace: envoy-ratelimit
+components:
+  - name: envoy-ratelimit
+    labels:
+      app.kubernetes.io/component: ""
+      app.kubernetes.io/name: envoy-ratelimit
+    logs:
+      grouping: kubernetes.envoy-ratelimit.envoy-ratelimit
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.envoy-ratelimit.envoy-ratelimit%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=envoy-ratelimit&var-workload_type=deployment&var-workload=envoy-ratelimit
+      labelSets:
+        - labels:
+            destination_service_name: envoy-ratelimit
+            destination_service_namespace: envoy-ratelimit
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: envoy-ratelimit
+            source_workload_namespace: envoy-ratelimit
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            app_kubernetes_io_component: ""
+            app_kubernetes_io_name: envoy-ratelimit
+            namespace: envoy-ratelimit
+  - name: envoy-ratelimit-mcrouter
+    labels:
+      app.kubernetes.io/component: mcrouter
+      app.kubernetes.io/name: envoy-ratelimit
+      variant: utilities
+    logs:
+      grouping: kubernetes.envoy-ratelimit.envoy-ratelimit-mcrouter
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.envoy-ratelimit.envoy-ratelimit-mcrouter%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=envoy-ratelimit&var-workload_type=deployment&var-workload=envoy-ratelimit-mcrouter
+      labelSets:
+        - labels:
+            destination_service_name: envoy-ratelimit-mcrouter
+            destination_service_namespace: envoy-ratelimit
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: envoy-ratelimit-mcrouter
+            source_workload_namespace: envoy-ratelimit
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            app_kubernetes_io_component: mcrouter
+            app_kubernetes_io_name: envoy-ratelimit
+            namespace: envoy-ratelimit
+  - name: envoy-ratelimit-statsd-exporter
+    labels:
+      app.kubernetes.io/component: statsd-exporter
+      app.kubernetes.io/name: envoy-ratelimit
+      variant: utilities
+    logs:
+      grouping: kubernetes.envoy-ratelimit.envoy-ratelimit-statsd-exporter
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.envoy-ratelimit.envoy-ratelimit-statsd-exporter%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=envoy-ratelimit&var-workload_type=deployment&var-workload=envoy-ratelimit-statsd-exporter
+      labelSets:
+        - labels:
+            destination_service_name: envoy-ratelimit-statsd-exporter
+            destination_service_namespace: envoy-ratelimit
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: envoy-ratelimit-statsd-exporter
+            source_workload_namespace: envoy-ratelimit
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            app_kubernetes_io_component: statsd-exporter
+            app_kubernetes_io_name: envoy-ratelimit
+            namespace: envoy-ratelimit
+  - name: envoy-ratelimit-memcached
+    labels:
+      app.kubernetes.io/component: memcached
+      app.kubernetes.io/name: envoy-ratelimit
+      variant: utilities
+    logs:
+      grouping: kubernetes.envoy-ratelimit.envoy-ratelimit-memcached
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.envoy-ratelimit.envoy-ratelimit-memcached%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=envoy-ratelimit&var-workload_type=statefulset&var-workload=envoy-ratelimit-memcached
+      labelSets:
+        - labels:
+            destination_service_name: envoy-ratelimit-memcached
+            destination_service_namespace: envoy-ratelimit
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: envoy-ratelimit-memcached
+            source_workload_namespace: envoy-ratelimit
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            app_kubernetes_io_component: memcached
+            app_kubernetes_io_name: envoy-ratelimit
+            namespace: envoy-ratelimit

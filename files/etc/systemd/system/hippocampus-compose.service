@@ -1,0 +1,17 @@
+[Unit]
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+RestartSec=60s
+
+User=kai
+Environment=HOME=/home/kai
+WorkingDirectory=/opt/hippocampus
+ExecStartPre=/usr/bin/docker container prune -f
+ExecStart=/usr/bin/docker compose --profile comfyui up --build
+ExecStopPost=/usr/bin/docker compose down
+
+[Install]
+WantedBy=multi-user.target

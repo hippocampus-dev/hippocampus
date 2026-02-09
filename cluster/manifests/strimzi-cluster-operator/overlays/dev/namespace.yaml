@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: strimzi-cluster-operator
+  labels:
+    name: strimzi-cluster-operator
+    # strimzi-cluster-operator upstream lacks securityContext
+    pod-security.kubernetes.io/enforce: baseline

@@ -1,0 +1,35 @@
+name: k6-operator
+namespace: k6-operator
+components:
+  - name: k6-operator
+    labels:
+      app.kubernetes.io/component: ""
+      app.kubernetes.io/name: k6-operator
+    logs:
+      grouping: kubernetes.k6-operator.k6-operator
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.k6-operator.k6-operator%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=k6-operator&var-workload_type=deployment&var-workload=k6-operator
+      labelSets:
+        - labels:
+            destination_service_name: k6-operator
+            destination_service_namespace: k6-operator
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: k6-operator
+            source_workload_namespace: k6-operator
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            app_kubernetes_io_component: ""
+            app_kubernetes_io_name: k6-operator
+            namespace: k6-operator

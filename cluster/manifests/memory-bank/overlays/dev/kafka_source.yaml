@@ -1,0 +1,15 @@
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: memory-bank-upsert
+spec:
+  consumerGroup: memory-bank-upsert
+  topics:
+    - memory-bank-upsert
+  bootstrapServers:
+    - memory-bank-kafka-bootstrap.memory-bank.svc.cluster.local:9092
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: cloudevents-relay

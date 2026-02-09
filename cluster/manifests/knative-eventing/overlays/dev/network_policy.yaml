@@ -1,0 +1,123 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-broker-receiver
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-broker-receiver
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-channel-receiver
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-channel-receiver
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-sink-receiver
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-sink-receiver
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudevents-logger
+spec:
+  podSelector:
+    matchLabels:
+      serving.knative.dev/service: cloudevents-logger
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              app: cluster-local-gateway
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: activator
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: autoscaler
+      ports:
+        - protocol: TCP
+          port: 9090
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-broker-dispatcher
+      ports:
+        - protocol: TCP
+          port: 8012

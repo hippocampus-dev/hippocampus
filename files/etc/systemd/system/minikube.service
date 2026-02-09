@@ -1,0 +1,18 @@
+[Unit]
+Requires=network-online.target libvirtd.service polkit.service
+After=network-online.target libvirtd.service polkit.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+User=kai
+Environment=ETCDCTL_CACERT=/var/lib/minikube/certs/etcd/ca.crt
+Environment=ETCDCTL_CERT=/var/lib/minikube/certs/apiserver-etcd-client.crt
+Environment=ETCDCTL_KEY=/var/lib/minikube/certs/apiserver-etcd-client.key
+ExecStart=/usr/local/bin/minikube-start.sh
+ExecStop=/usr/local/bin/minikube-stop.sh
+TimeoutStopSec=1800
+
+[Install]
+WantedBy=multi-user.target
