@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:2cb73472ece4dc8d6dd7aba7d63d5acd28b093d75ed61dbfa45a6e24a4452749
+- digest: sha256:4c57b43234933b464830b8fabb919db38f9cd59bcee8eceb26a0d203d19e5ce8
   name: ghcr.io/hippocampus-dev/hippocampus/reporting-server
   newName: ghcr.io/hippocampus-dev/hippocampus/reporting-server
