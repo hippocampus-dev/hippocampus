@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- custom_resource_definition.yaml
+- deployment.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+- validating_webhook_configuration.yaml
+images:
+- digest: sha256:5cc751f8fde077e152c0119bb9fc0841d4f2c9ab8d69fb80ab538afd19c74044
+  name: quay.io/jetstack/cert-manager-cainjector
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/jetstack/cert-manager-cainjector
+- digest: sha256:368b7c507fa17c03963cf7892f68180ae8e82ca022163f86c330637adb9ac7fd
+  name: quay.io/jetstack/cert-manager-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/jetstack/cert-manager-controller
+- digest: sha256:dae618dc264fcf26d67083bd0b0e6e87700cad6684e22852b3e67283533a1096
+  name: quay.io/jetstack/cert-manager-webhook
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/jetstack/cert-manager-webhook

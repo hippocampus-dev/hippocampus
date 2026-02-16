@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: hubble-ui
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - hubble-ui.minikube.127.0.0.1.nip.io
+        - hubble-ui.kaidotio.dev
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

@@ -1,0 +1,45 @@
+name: Sync to Public Repository
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    environment: deployment
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - run: |
+          git config --global user.email "kaidotio@gmail.com"
+          git config --global user.name "kaidotio"
+
+          grep -l hippocampus-dev/hippocampus -r . --exclude-dir=.git | xargs -r sed -i 's|hippocampus-dev/hippocampus|hippocampus-dev/hippocampus|g'
+
+          git checkout --orphan tmp
+          git add -A
+          git commit -m "Sync to the latest hippocampus [$(date +%Y%m%d)]"
+
+          git remote add public "https://x-access-token:${PUBLIC_REPOSITORY_PAT}@github.com/hippocampus-dev/hippocampus.git"
+          git push -f public HEAD:main
+
+          gh release delete v0.1.0 --repo hippocampus-dev/hippocampus --cleanup-tag --yes || true
+
+          # https://github.com/cli/cli/issues/8458
+          while gh api repos/hippocampus-dev/hippocampus/git/refs/tags/v0.1.0 --silent 2>/dev/null; do
+            sleep 1
+          done
+
+          gh release create v0.1.0 --repo hippocampus-dev/hippocampus --title "v0.1.0" --generate-notes
+        env:
+          PUBLIC_REPOSITORY_PAT: ${{ secrets.PUBLIC_REPOSITORY_PAT }}
+          GH_TOKEN: ${{ secrets.PUBLIC_REPOSITORY_PAT }}

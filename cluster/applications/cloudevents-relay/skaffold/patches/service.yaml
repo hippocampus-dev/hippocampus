@@ -1,0 +1,20 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cloudevents-relay
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+        autoscaling.knative.dev/metric: concurrency
+        autoscaling.knative.dev/target: "1"
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "1"
+    spec:
+      containers:
+        - name: handler
+          image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+          env:
+            - name: TARGET_URL
+              value: "http://skaffold-cloudevents-logger.skaffold-cloudevents-logger.svc.cluster.local"

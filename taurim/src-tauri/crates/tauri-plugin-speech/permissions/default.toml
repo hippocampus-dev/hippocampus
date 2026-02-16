@@ -1,0 +1,3 @@
+[default]
+description = "Default permissions for the Speech plugin"
+permissions = ["allow-start-listening", "allow-stop-listening", "allow-register-listener", "allow-remove-listener"]

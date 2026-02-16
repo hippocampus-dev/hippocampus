@@ -1,0 +1,114 @@
+name: Update Dockerfile
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/*/Cargo.toml"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    outputs:
+      has_new_packages: ${{ steps.check.outputs.has_new_packages }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: git fetch --depth=1 origin ${{ github.event.before }}
+      - id: check
+        run: |
+          if git diff ${{ github.event.before }}..${{ github.sha }} --name-only --diff-filter=AR -- 'packages/*/Cargo.toml' | grep -q .; then
+            echo "has_new_packages=true" >> $GITHUB_OUTPUT
+          fi
+  update-dockerfile:
+    needs: check
+    if: needs.check.outputs.has_new_packages == 'true'
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller]
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Configure Codex
+        run: |
+          set -eo pipefail
+          ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_ACTION_PATH}" | jq -re .value)
+          echo "::add-mask::$ID_TOKEN"
+          HTTP_CODE=$(curl -sSL -w "%{http_code}" -o "${{ runner.temp }}/response.json" -XPOST -H "Authorization: Bearer $ID_TOKEN" "http://token-request-server.token-request-server.svc.cluster.local:8080/token")
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "::error::$(cat "${{ runner.temp }}/response.json")"
+            exit 1
+          fi
+          TOKEN=$(jq -re .token "${{ runner.temp }}/response.json")
+          echo "::add-mask::$TOKEN"
+
+          mkdir -p ${{ runner.temp }}/codex-home
+          mkdir -p ${{ runner.temp }}/codex-home/.cache
+          mkdir -p ${{ runner.temp }}/codex-home/.cache/gh
+          cat > ${{ runner.temp }}/codex-home/config.toml << EOF
+          model = "gpt-5.2"
+          model_provider = "cortex"
+
+          [sandbox_workspace_write]
+          network_access = true
+          writable_roots = ["${{ runner.temp }}/codex-home/.cache"]
+
+          [shell_environment_policy]
+          ignore_default_excludes = true
+
+          [features]
+          web_search_request = true
+
+          [model_providers.cortex]
+          name = "Cortex API"
+          base_url = "http://cortex-api.cortex-api.svc.cluster.local:8080/v1"
+          http_headers = { "Authorization" = "Bearer ${TOKEN}" }
+          EOF
+
+          echo '{"port":0}' > ${{ runner.temp }}/codex-home/${{ github.run_id }}.json
+      - uses: openai/codex-action@v1
+        with:
+          codex-home: ${{ runner.temp }}/codex-home
+          codex-version: v0.58.0
+          allow-bots: true
+          prompt: |
+            # Task
+
+            Analyze changes in this push and update the root Dockerfile if a new package was added to packages/.
+
+            ## Context
+
+            The Dockerfile has a specific structure for caching Rust dependencies:
+
+            1. **Section 1**: Creates dummy crates with `RUN USER=root cargo new --lib <package_name>` (after `WORKDIR /opt/builder/packages`)
+            2. **Section 2**: Copies Cargo.toml files with `COPY packages/<package_name>/Cargo.toml /opt/builder/packages/<package_name>/` (after `COPY Cargo.toml Cargo.lock`)
+            3. **Section 3**: Removes dummy src directories with `rm -rf /opt/builder/packages/<package_name>/src` (inside `RUN cargo fetch && rm -rf ...`)
+
+            ## Process
+
+            1. Parse workspace members from root Cargo.toml
+            2. Compare with entries in the Dockerfile
+            3. If there are missing entries, add them to all three sections maintaining alphabetical order
+            4. If there are extra entries in Dockerfile that don't exist in packages/, remove them
+            5. Create a pull request with the changes
+
+            ## Important Rules
+
+            - Maintain the existing code style and formatting
+            - Keep entries in alphabetical order within each section
+            - Do NOT modify any other parts of the Dockerfile
+            - Do NOT commit directly to the main branch - always create a PR
+            - Handle nested packages (like packages/gcs/examples/http2-server, packages/hippocampus-core/benches) - these need special handling in Section 1 with WORKDIR changes
+            - The PR title should be descriptive (e.g., "Add new-package-name to Dockerfile")
+        env:
+          XDG_CACHE_HOMES: ${{ runner.temp }}/codex-home/.cache
+          GH_CONFIG_DIR: ${{ runner.temp }}/codex-home/.cache/gh
+          GH_TOKEN: ${{ github.token }}

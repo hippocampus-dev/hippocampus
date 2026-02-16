@@ -1,0 +1,81 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: reporting-server-ratelimit
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: reporting-server
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: envoy.filters.network.http_connection_manager
+            subFilter:
+              name: envoy.filters.http.router
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.ratelimit
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
+          domain: reporting-server
+          failure_mode_deny: false
+          enable_x_ratelimit_headers: DRAFT_VERSION_03
+          disable_x_envoy_ratelimited_header: true
+          timeout: 1s
+          rate_limit_service:
+            grpc_service:
+              envoy_grpc:
+                cluster_name: outbound|8081||envoy-ratelimit.envoy-ratelimit.svc.cluster.local
+                authority: envoy-ratelimit.envoy-ratelimit.svc.cluster.local
+            transport_api_version: V3
+  - applyTo: VIRTUAL_HOST
+    match:
+      context: SIDECAR_INBOUND
+      routeConfiguration:
+        vhost:
+          route:
+            action: ANY
+    patch:
+      operation: MERGE
+      value:
+        # https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-msg-config-route-v3-ratelimit
+        rate_limits:
+        - actions:
+          - request_headers:
+              header_name: x-client-ip
+              descriptor_key: X-CLIENT-IP
+          - header_value_match:
+              descriptor_key: PATH
+              descriptor_value: /csp-reports
+              headers:
+              - name: ":path"
+                exact_match: /csp-reports
+        - actions:
+          - request_headers:
+              header_name: x-client-ip
+              descriptor_key: X-CLIENT-IP
+          - header_value_match:
+              descriptor_key: PATH
+              descriptor_value: /reports
+              headers:
+              - name: ":path"
+                exact_match: /reports
+        - actions:
+          - header_value_match:
+              descriptor_key: PATH
+              descriptor_value: /csp-reports
+              headers:
+              - name: ":path"
+                exact_match: /csp-reports
+        - actions:
+          - header_value_match:
+              descriptor_key: PATH
+              descriptor_value: /reports
+              headers:
+              - name: ":path"
+                exact_match: /reports

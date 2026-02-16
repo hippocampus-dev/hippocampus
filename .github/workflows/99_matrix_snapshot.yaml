@@ -1,0 +1,170 @@
+name: Matrix Snapshot
+on:
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: read
+  actions: write
+  issues: write
+  id-token: write
+jobs:
+  load:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    outputs:
+      include: ${{ steps.load.outputs.include }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows/99_matrix_snapshot/
+      - id: load
+        run: |
+          INCLUDE='[]'
+          while IFS= read -r target; do
+            BASELINE_URL=$(echo "$target" | jq -r '.baseline.url')
+            TARGET_URL=$(echo "$target" | jq -r '.target.url')
+            BASELINE_MASK_SELECTORS=$(echo "$target" | jq -r '.baseline.mask_selectors // ""')
+            TARGET_MASK_SELECTORS=$(echo "$target" | jq -r '.target.mask_selectors // ""')
+            BASELINE_HEADERS=$(echo "$target" | jq -c '.baseline.headers // {}')
+            TARGET_HEADERS=$(echo "$target" | jq -c '.target.headers // {}')
+            VIEWPORT_WIDTH=$(echo "$target" | jq -r '.viewport.width // 1920')
+            VIEWPORT_HEIGHT=$(echo "$target" | jq -r '.viewport.height // 1080')
+            ARTIFACT_NAME="result-$(echo -n "${BASELINE_URL}-${TARGET_URL}_${VIEWPORT_WIDTH}x${VIEWPORT_HEIGHT}" | sha256sum | awk '{print $1}')"
+            INCLUDE=$(echo "$INCLUDE" | jq --arg baselineUrl "$BASELINE_URL" --arg targetUrl "$TARGET_URL" --arg baselineMaskSelectors "$BASELINE_MASK_SELECTORS" --arg targetMaskSelectors "$TARGET_MASK_SELECTORS" --arg baselineHeaders "$BASELINE_HEADERS" --arg targetHeaders "$TARGET_HEADERS" --arg viewportWidth "$VIEWPORT_WIDTH" --arg viewportHeight "$VIEWPORT_HEIGHT" --arg artifactName "$ARTIFACT_NAME" '. + [{"baselineUrl": $baselineUrl, "targetUrl": $targetUrl, "baselineMaskSelectors": $baselineMaskSelectors, "targetMaskSelectors": $targetMaskSelectors, "baselineHeaders": $baselineHeaders, "targetHeaders": $targetHeaders, "viewportWidth": ($viewportWidth | tonumber), "viewportHeight": ($viewportHeight | tonumber), "artifactName": $artifactName}]')
+          done < <(cat .github/workflows/99_matrix_snapshot/config.json | jq -c '.targets[]')
+          echo "include=$(echo "$INCLUDE" | jq -c .)" >> $GITHUB_OUTPUT
+  snapshot:
+    uses: ./.github/workflows/reusable_snapshot.yaml
+    strategy:
+      max-parallel: 10
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.load.outputs.include) }}
+    needs: load
+    with:
+      baseline: ${{ matrix.baselineUrl }}
+      target: ${{ matrix.targetUrl }}
+      baseline-mask-selectors: ${{ matrix.baselineMaskSelectors }}
+      target-mask-selectors: ${{ matrix.targetMaskSelectors }}
+      baseline-headers: ${{ matrix.baselineHeaders }}
+      target-headers: ${{ matrix.targetHeaders }}
+      viewport-width: ${{ matrix.viewportWidth }}
+      viewport-height: ${{ matrix.viewportHeight }}
+      artifact-name: ${{ matrix.artifactName }}
+  create-issue:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    needs: [snapshot, load]
+    outputs:
+      issue-url: ${{ steps.create-issue.outputs.issue-url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/
+      - id: create-issue
+        run: |
+          BODY=$(cat <<EOS
+          # Matrix Snapshot Report
+
+          **実行:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ## 概要
+          複数のURL比較結果を以下のコメントで報告します。
+          EOS
+          )
+
+          ISSUE_URL=$(gh issue create --title "Matrix Snapshot Report: $(date '+%Y-%m-%d %H:%M:%S')" --body "$BODY")
+          echo "issue-url=$ISSUE_URL" >> $GITHUB_OUTPUT
+          echo "## Matrix Snapshot Issue Created" >> $GITHUB_STEP_SUMMARY
+          echo "Issue URL: $ISSUE_URL" >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  report:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    needs: [snapshot, load, create-issue]
+    strategy:
+      max-parallel: 10
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.load.outputs.include) }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/
+      - uses: actions/download-artifact@v7
+        with:
+          name: ${{ matrix.artifactName }}
+          path: .snapshot
+      - run: |
+          eval $(cat .snapshot/output.json | jq -r 'to_entries | .[] | "export \(.key)=\"\(.value)\""')
+
+          BRANCH_NAME=snapshot-images-${{ matrix.artifactName }}
+
+          git config --global user.email "kaidotio@gmail.com"
+          git config --global user.name "kaidotio"
+
+          git checkout -b $BRANCH_NAME
+
+          rm -rf .github/.snapshot
+          mv .snapshot .github/
+
+          cp .github/$baselineHtmlPath .github/.snapshot/compare.html
+          git add .github/.snapshot/compare.html
+          git commit --allow-empty -m "Add baseline HTML"
+          BASELINE_COMMIT=$(git rev-parse HEAD)
+
+          cp .github/$targetHtmlPath .github/.snapshot/compare.html
+          git add .github/.snapshot/compare.html
+          git commit --allow-empty -m "Add target HTML"
+          TARGET_COMMIT=$(git rev-parse HEAD)
+
+          git add .github/.snapshot
+          git commit -m "Upload snapshot"
+          git push -f origin $BRANCH_NAME
+
+          COMPARE_URL="https://github.com/${{ github.repository }}/compare/${BASELINE_COMMIT}...${TARGET_COMMIT}?w=1"
+
+          BODY=$(cat <<EOS
+          ## ${{ matrix.baselineUrl }} vs ${{ matrix.targetUrl }}
+
+          **HTML変化量:** $htmlDiffAmount
+          **スクリーンショット変化量:** $screenshotDiffAmount
+
+          ### HTML差分
+
+          [Compare](${COMPARE_URL})
+
+          ### スクリーンショット差分
+          ![diff](https://github.com/${{ github.repository }}/blob/${BRANCH_NAME}/.github/$screenshotDiffPath?raw=true)
+
+          ### Baseline vs Target
+          <details>
+            <summary>BaselineとTargetを並べて表示</summary>
+
+            <table>
+              <tr>
+                <th>Baseline</th>
+                <th>Target</th>
+              </tr>
+              <tr>
+                <td><img src="https://github.com/${{ github.repository }}/blob/${BRANCH_NAME}/.github/$baselineScreenshotPath?raw=true" alt="Baseline"></td>
+                <td><img src="https://github.com/${{ github.repository }}/blob/${BRANCH_NAME}/.github/$targetScreenshotPath?raw=true" alt="Target"></td>
+              </tr>
+            </table>
+          </details>
+          EOS
+          )
+
+          gh issue comment "${{ needs.create-issue.outputs.issue-url }}" --body "$BODY"
+          echo "## Comment added for ${{ matrix.baselineUrl }} vs ${{ matrix.targetUrl }}" >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

@@ -1,0 +1,12 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cloudevents-relay
+spec:
+  template:
+    spec:
+      containers:
+        - name: handler
+          env:
+            - name: TARGET_URL
+              value: "http://memory-bank.memory-bank.svc.cluster.local:8080/upsert"
