@@ -12,6 +12,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:bb6e1e13f0a31df5bcb6d0258b88446251026e2ca63637e3dab51390367b0885
+- digest: sha256:4d109506f11fc0e12c37434844218cda5cfcee540676ca57d52d1ca10c561bc1
   name: ghcr.io/hippocampus-dev/hippocampus/statefulset-hook
   newName: ghcr.io/hippocampus-dev/hippocampus/statefulset-hook
