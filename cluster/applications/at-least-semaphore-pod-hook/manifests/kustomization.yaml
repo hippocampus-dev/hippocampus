@@ -10,6 +10,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:b95730d48f90e19647a19068a0d21a6e3a0651671a9f29031494299031773b0e
+- digest: sha256:7a3283bae6ae917af9f46a8c724dcce8c00bc814d965a0e1367866a650d8a427
   name: ghcr.io/hippocampus-dev/hippocampus/at-least-semaphore-pod-hook
   newName: ghcr.io/hippocampus-dev/hippocampus/at-least-semaphore-pod-hook
