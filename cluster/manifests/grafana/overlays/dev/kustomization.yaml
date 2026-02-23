@@ -29,7 +29,7 @@ configMapGenerator:
     immutable: true
 
 images:
-- digest: sha256:2842c0c40c351bc3e2c28dd28faf279dd7e0be3fe497d56651a778debf36e0f4
+- digest: sha256:85a947c38c96e8d1b9b13d53ceb2821f16c968a06120d947bb4bbab06811f11d
   name: ghcr.io/hippocampus-dev/hippocampus/headless-page-renderer
   newName: ghcr.io/hippocampus-dev/hippocampus/headless-page-renderer
 - digest: sha256:1478b27f75d22dfbec1f71ec555bebd07c51027966e9171a88fd6cd7682e1bd1
