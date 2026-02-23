@@ -32,7 +32,7 @@ images:
 - digest: sha256:ea4c7aa11d179ab24a99914b15ed413017bdb7a99de06c7353eeea86e1384115
   name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
   newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
-- digest: sha256:2c819a4ad0a6f62d5f86841e7300fd717cad0d62b80edad67f442c87c8b26605
+- digest: sha256:e70d55df045b19b4e5741bf8c83a59a46b070c173b07cebf9626edf31734eb1d
   name: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
   newName: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
 - digest: sha256:efae7fd5f6061dac5b61b4fe924b91ef136e93841dc83b53cc0f643f2e89bea7
