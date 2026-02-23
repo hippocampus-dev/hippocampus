@@ -7,6 +7,6 @@ resources:
 configurations:
 - kustomizeconfig.yaml
 images:
-- digest: sha256:d037a7e31b7bbad131153ab3ee24967a97f63df2a4bf902355fa75fe1dab55c6
+- digest: sha256:34a30093cf90b9ed8928bb8a9ffeeedd1cbe82121d8e815019d664d6c44283b6
   name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-ingress
   newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-ingress
