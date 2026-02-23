@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:1810842b6543adcddf7d766c4aa227a446dec782502457aaf6be8752a19149b0
+- digest: sha256:083e66042dc01393e152c6ce948c1d0271722e599b3caf7065aef69f84ed8be4
   name: ghcr.io/hippocampus-dev/hippocampus/embedding-retrieval
   newName: ghcr.io/hippocampus-dev/hippocampus/embedding-retrieval
