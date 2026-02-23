@@ -1,0 +1,187 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-agent
+spec:
+  podSelector:
+    matchLabels:
+      telepresence.io/workloadEnabled: "true"
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: memory-bank
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: memory-bank
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: cloudevents-relay
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudevents-relay
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: cloudevents-relay
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              app: cluster-local-gateway
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: activator
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: autoscaler
+      ports:
+        - protocol: TCP
+          port: 9090
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-eventing
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-source-dispatcher
+      ports:
+        - protocol: TCP
+          port: 8012
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudevents-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: cloudevents-ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              app: cluster-local-gateway
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              app: istio-ingressgateway
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: activator
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: autoscaler
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: memory-bank-qdrant
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: memory-bank
+      app.kubernetes.io/component: qdrant
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: memory-bank
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: memory-bank
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 6333

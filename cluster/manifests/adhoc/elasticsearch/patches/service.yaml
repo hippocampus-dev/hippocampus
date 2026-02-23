@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-master
+spec:
+  trafficDistribution: PreferClose
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-data
+spec:
+  trafficDistribution: PreferClose
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-ingest
+spec:
+  trafficDistribution: PreferClose
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+spec:
+  trafficDistribution: PreferClose

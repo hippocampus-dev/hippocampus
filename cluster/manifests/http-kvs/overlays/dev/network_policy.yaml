@@ -1,0 +1,97 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-agent
+spec:
+  podSelector:
+    matchLabels:
+      telepresence.io/workloadEnabled: "true"
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: http-kvs
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: http-kvs
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+        - namespaceSelector:
+            matchLabels:
+              name: url-shortener
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: url-shortener
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: http-kvs-minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: http-kvs
+      app.kubernetes.io/component: minio
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: http-kvs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: http-kvs
+              app.kubernetes.io/component: ""
+        - namespaceSelector:
+            matchLabels:
+              name: http-kvs
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: http-kvs
+              app.kubernetes.io/component: mc
+      ports:
+        - protocol: TCP
+          port: 9000

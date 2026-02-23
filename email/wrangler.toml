@@ -1,0 +1,29 @@
+name = "email-worker"
+account_id = "e646938998c521013d47874db7e1d2d7"
+main = "src/index.ts"
+compatibility_date = "2025-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[observability.logs]
+invocation_logs = true
+head_sampling_rate = 1.0
+
+[observability.traces]
+enabled = true
+
+[ai]
+binding = "AI"
+
+# Email routing: configure in Cloudflare Dashboard
+# Dashboard > Email > Email Routing > Email Workers
+# Route: *@kaidotio.dev -> this worker
+
+# send_email binding for replies
+[[send_email]]
+name = "SEND_EMAIL"
+# Destination addresses must be verified in Cloudflare Dashboard
+# Dashboard > Email > Email Routing > Destination addresses
+destination_address = "kaidotio@gmail.com"

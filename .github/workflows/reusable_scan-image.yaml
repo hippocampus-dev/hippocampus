@@ -1,0 +1,52 @@
+name: Scan Image
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+        description: "Full image reference (ghcr.io/owner/repo/image:tag)"
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+jobs:
+  issue-github-token:
+    uses: ./.github/workflows/reusable_issue-github-token.yaml
+    with:
+      profile: writer
+    secrets: inherit
+  scan:
+    needs: issue-github-token
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    environment: deployment
+    steps:
+      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ github.token }}
+      - uses: aquasecurity/trivy-action@0.34.0
+        with:
+          image-ref: ${{ inputs.image }}
+          format: json
+          output: ${{ runner.temp }}/trivy-results.json
+          severity: CRITICAL
+          exit-code: "0"
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/scripts/create-cve-issues.sh
+      - run: |
+          set -eo pipefail
+
+          VULNERABILITIES=$(jq '[.Results // [] | .[] | .Vulnerabilities // [] | length] | add // 0' "${{ runner.temp }}/trivy-results.json")
+          if [ "$VULNERABILITIES" -eq 0 ]; then
+            exit 0
+          fi
+
+          TOKEN=$(echo "$ENCRYPTED_TOKEN" | base64 -d | gpg -dq --batch --passphrase "$GPG_PASSPHRASE")
+          echo "::add-mask::$TOKEN"
+          export GH_TOKEN="$TOKEN"
+
+          bash .github/scripts/create-cve-issues.sh "${{ runner.temp }}/trivy-results.json"
+        env:
+          ENCRYPTED_TOKEN: ${{ needs.issue-github-token.outputs.encrypted_token }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- network_policy.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/startup-probe.sh
+  - files/readiness-probe.sh
+  - files/liveness-probe.sh
+  - files/redis.conf
+  - files/sentinel.conf
+  - files/redis-server.sh
+  - files/redis-sentinel.sh
+  name: redis
+  options:
+    immutable: true
+- files:
+  - files/haproxy.cfg
+  - files/init-haproxy.sh
+  name: redis-haproxy
+  options:
+    immutable: true
+images:
+- digest: sha256:ea4c7aa11d179ab24a99914b15ed413017bdb7a99de06c7353eeea86e1384115
+  name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+  newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+- digest: sha256:790121464abc4b8f47b108213a6145c3f6b552dc19515bf052f10803d0a21a7c
+  name: ghcr.io/hippocampus-dev/hippocampus/redis-fullstack
+  newName: ghcr.io/hippocampus-dev/hippocampus/redis-fullstack
+- digest: sha256:904b3db4090a816603c89acb2c26a4ab43fd64e91969b8720588d8791e33750a
+  name: haproxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/haproxy
+- digest: sha256:6f291fae19d819f10338eabcfcb54f546f4b083eb0d48138f30a383759788331
+  name: leominov/redis_sentinel_exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/leominov/redis_sentinel_exporter
+- digest: sha256:3cd79f7119e1da82654823a8a69e6181d95db6a80e5af04a7ea5e4a36888237c
+  name: oliver006/redis_exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/oliver006/redis_exporter
+- digest: sha256:8ac500b7e5842a2c39be647ebef25d387574a4c54aa22696075d3d6f9db823da
+  name: quay.io/prometheus/haproxy-exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/prometheus/haproxy-exporter
+- digest: sha256:1470b9ec1fe34a679609bbf3d56f155b2c6c326e43b4516019946a81f425ffaa
+  name: redis/redis-stack
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/redis/redis-stack

@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: embedding-retrieval
+
+resources:
+- ../../base
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+- qdrant
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+generators:
+- secrets_from_vault.yaml
+images:
+- digest: sha256:ea4c7aa11d179ab24a99914b15ed413017bdb7a99de06c7353eeea86e1384115
+  name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+  newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+- digest: sha256:6f1ba0391e33bfe2e65d702980ab8f6c638a06fdb7df94c0689dfacd2c6de4ac
+  name: ghcr.io/hippocampus-dev/hippocampus/tcp-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/tcp-proxy

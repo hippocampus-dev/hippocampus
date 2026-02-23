@@ -1,0 +1,55 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cloudevents-ingress
+  labels:
+    networking.knative.dev/visibility: cluster-local
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+        autoscaling.knative.dev/metric: concurrency
+        autoscaling.knative.dev/target: "10"
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+      labels:
+        app.kubernetes.io/component: cloudevents-ingress
+    spec:
+      containerConcurrency: 0
+      containers:
+        - name: handler
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/cloudevents-ingress
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: BROKER_URL
+              value: ""
+            - name: DEFAULT_TYPE
+              value: "cloudevents-ingress.event"
+            - name: DEFAULT_SOURCE
+              value: "cloudevents-ingress"
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 1000m
+              memory: 128Mi

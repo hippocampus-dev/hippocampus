@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cortex-api
+
+resources:
+- ../../base
+- authorization_policy.yaml
+- destination_rule.yaml
+- envoy_filter.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- request_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+- waypoint.yaml
+- redis
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+generators:
+- secrets_from_vault.yaml
+images:
+- digest: sha256:e4449af67f1657379c3fdc1b5e93e753af8d62379a8a324cdfacdc1c483616dd
+  name: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
+- digest: sha256:ea4c7aa11d179ab24a99914b15ed413017bdb7a99de06c7353eeea86e1384115
+  name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+  newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+- digest: sha256:efae7fd5f6061dac5b61b4fe924b91ef136e93841dc83b53cc0f643f2e89bea7
+  name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy

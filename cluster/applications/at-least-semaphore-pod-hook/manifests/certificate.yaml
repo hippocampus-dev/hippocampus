@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: at-least-semaphore-pod-hook
+spec:
+  secretName: at-least-semaphore-pod-hook-certs
+  issuerRef:
+    name: at-least-semaphore-pod-hook-selfsigned

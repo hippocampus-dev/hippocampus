@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-manager
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: telepresence
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: traffic-manager
+      automountServiceAccountToken: true
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: traffic-manager
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            # tel2 image requires UID 1000
+            runAsUser: 1000
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/telepresenceio/tel2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: REGISTRY
+              value: ghcr.io/hippocampus-dev/hippocampus/mirror/ghcr.io/telepresenceio
+            - name: SERVER_PORT
+              value: "8081"
+            - name: POD_CIDR_STRATEGY
+              value: auto
+            - name: MUTATOR_WEBHOOK_PORT
+              value: "8443"
+            - name: AGENT_INJECTOR_SECRET
+              value: telepresence-certs
+            - name: GRPC_MAX_RECEIVE_SIZE
+              value: 4Mi
+            - name: CLIENT_CONNECTION_TTL
+              value: 24h
+            - name: ENABLED_WORKLOAD_KINDS
+              value: Deployment StatefulSet ReplicaSet
+            - name: INTERCEPT_ALLOW_GLOBAL
+              value: "true"
+            - name: INTERCEPT_INACTIVE_BLOCK_TIMEOUT
+              value: 10m
+            - name: AGENT_ARRIVAL_TIMEOUT
+              value: "300s"
+            - name: AGENT_INJECT_POLICY
+              value: OnDemand
+            - name: AGENT_INJECTOR_NAME
+              value: agent-injector
+            - name: AGENT_INJECTOR_MUTATION_AWARE
+              value: "true"
+            - name: AGENT_PORT
+              value: "9900"
+            - name: AGENT_ENABLE_H2C_PROBING
+              value: "true"
+            - name: AGENT_CONSUMPTION_METRICS
+              value: "true"
+            - name: AGENT_MOUNT_POLICIES
+              value: '{"/tmp":"Local"}'
+            - name: AGENT_INIT_CONTAINER_ENABLED
+              value: "true"
+            - name: AGENT_IMAGE_PULL_POLICY
+              value: IfNotPresent
+            - name: MAX_NAMESPACE_SPECIFIC_WATCHERS
+              value: "10"
+            - name: MANAGER_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: CLIENT_DNS_EXCLUDE_SUFFIXES
+              value: .com .io .net .org .ru .telepresence
+          ports:
+            - name: grpc
+              containerPort: 8081
+              protocol: TCP
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          readinessProbe:
+            grpc:
+              port: 8081
+            periodSeconds: 5
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

@@ -1,0 +1,306 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-agent
+spec:
+  podSelector:
+    matchLabels:
+      telepresence.io/workloadEnabled: "true"
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: slack-logger
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: slack-logger
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: cortex-bot
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: slack-bolt-proxy
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-discovery
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: discovery
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: slack-logger
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: tidb-operator
+              app.kubernetes.io/component: pd
+      ports:
+        - protocol: TCP
+          port: 10261
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-pd-peer
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: pd
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: tidb-operator
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: tidb-operator
+              app.kubernetes.io/component: controller-manager
+        - namespaceSelector:
+            matchLabels:
+              name: slack-logger
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: tidb-operator
+      ports:
+        - protocol: TCP
+          port: 2379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-pd-metrics
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: pd
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 2379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-tikv-peer
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: tikv
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: slack-logger
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: tidb-operator
+      ports:
+        - protocol: TCP
+          port: 20160
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-tikv-metrics
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: tikv
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 20180
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-tidb-peer
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: tidb
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: tidb-operator
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: tidb-operator
+              app.kubernetes.io/component: controller-manager
+        - namespaceSelector:
+            matchLabels:
+              name: slack-logger
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: tidb-operator
+      ports:
+        - protocol: TCP
+          port: 10080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-tidb
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: tidb
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: atlas-operator
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: atlas-operator
+              app.kubernetes.io/component: controller-manager
+        - namespaceSelector:
+            matchLabels:
+              name: slack-logger
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: tidb-operator
+        - namespaceSelector:
+            matchLabels:
+              name: slack-logger
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: slack-logger
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 4000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-tidb-metrics
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: tidb
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 10080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tidb-operator-ticdc-metrics
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/managed-by: tidb-operator
+      app.kubernetes.io/component: ticdc
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 8301
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: atlas-dev-db
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: atlas-dev-db
+      app.kubernetes.io/part-of: atlas-operator
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: atlas-operator
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: atlas-operator
+              app.kubernetes.io/component: controller-manager
+      ports:
+        - protocol: TCP
+          port: 3306

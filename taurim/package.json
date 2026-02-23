@@ -1,0 +1,28 @@
+{
+  "name": "taurim",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "cross-env NO_STRIP=1 tauri"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.3",
+    "@tailwindcss/vite": "^4.1.18",
+    "@tauri-apps/cli": "^2",
+    "autoprefixer": "^10.4.21",
+    "cross-env": "^7.0.3",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.1.8",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.1.1",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-notification": "^2",
+    "preact": "^10.22.1"
+  }
+}

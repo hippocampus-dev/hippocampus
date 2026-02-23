@@ -1,0 +1,74 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: cert-manager-cainjector
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: cainjector
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: cert-manager
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: controller
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: cert-manager-webhook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: webhook
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

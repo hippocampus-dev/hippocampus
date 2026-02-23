@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: memory-bank-
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: memory-bank
+      variant: utilities
+
+resources:
+  - ../../../../utilities/cloudevents-relay
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0
+        value:
+          name: TARGET_URL
+          value: "http://memory-bank.memory-bank.svc.cluster.local:8080/upsert"
+    target:
+      group: serving.knative.dev
+      version: v1
+      kind: Service
+      name: cloudevents-relay

@@ -1,0 +1,44 @@
+name: Test/sheetserver
+on:
+  pull_request:
+    branches:
+    - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+    - ".github/workflows/40_sheetserver.yaml"
+    - "google-app-scripts/sheetserver/**"
+  #merge_group:
+  #  branches:
+  #    - main
+  #  types:
+  #    - checks_requested
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        sparse-checkout: |
+          google-app-scripts/sheetserver/
+    - uses: actions/setup-node@v6
+      with:
+        node-version: lts/*
+        cache: npm
+    - run: |
+        npm ci
+        npm run test
+      working-directory: google-app-scripts/sheetserver

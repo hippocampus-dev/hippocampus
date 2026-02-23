@@ -1,0 +1,16 @@
+{
+  "id": "rename-vscode-user",
+  "version": "1.0.0",
+  "name": "Rename vscode user",
+  "description": "Rename the default user from 'vscode'",
+  "options": {
+    "username": {
+      "type": "string",
+      "proposals": [
+        "devcontainer"
+      ],
+      "default": "devcontainer",
+      "description": "Enter name of a non-root user to configure"
+    }
+  }
+}

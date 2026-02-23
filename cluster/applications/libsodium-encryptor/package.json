@@ -1,0 +1,8 @@
+{
+  "name": "libsodium-encryptor",
+  "private": true,
+  "dependencies": {
+    "express": "5.0.1",
+    "tweetsodium": "^0.0.5"
+  }
+}

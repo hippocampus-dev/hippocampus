@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: e2e-envoy-request-hasher
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+
+images:
+  - name: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher
+    newName: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher
+
+configMapGenerator:
+- name: envoy
+  files:
+  - files/envoy.yaml
