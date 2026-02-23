@@ -7,6 +7,6 @@ resources:
 configurations:
 - kustomizeconfig.yaml
 images:
-- digest: sha256:02eccb6f25aaaa51903c0c8788aeebe60e626d0d0be79c78d3df947b9c7a9bae
+- digest: sha256:9ef7eeae6b8b3a0bf4fefa97c7bed070e16215728c75ccbd3460667f10c63ca5
   name: ghcr.io/hippocampus-dev/hippocampus/runner
   newName: ghcr.io/hippocampus-dev/hippocampus/runner
