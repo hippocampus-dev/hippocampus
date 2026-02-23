@@ -60,7 +60,7 @@ jobs:
         image: ${{ fromJson(needs.parse.outputs.images) }}
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ github.token }}
-      - uses: aquasecurity/trivy-action@0.34.0
+      - uses: aquasecurity/trivy-action@0.34.1
         with:
           image-ref: ghcr.io/${{ github.repository }}/mirror/${{ matrix.image }}
           format: json
