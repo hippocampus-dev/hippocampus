@@ -35,6 +35,6 @@ images:
 - digest: sha256:ea4c7aa11d179ab24a99914b15ed413017bdb7a99de06c7353eeea86e1384115
   name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
   newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
-- digest: sha256:efae7fd5f6061dac5b61b4fe924b91ef136e93841dc83b53cc0f643f2e89bea7
+- digest: sha256:c3b4b18a9681f33340dee35de7408ae1df6ef55d07824b05edf88ba0d00c3444
   name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
