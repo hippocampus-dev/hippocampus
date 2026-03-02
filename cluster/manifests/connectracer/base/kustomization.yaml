@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
 - daemon_set.yaml
 images:
-- digest: sha256:a60eee472640369059b5d8d816e99861b13d8927cbb972791feb15e4cca38b61
+- digest: sha256:6b12322641f339b333997a0966e20457791aadf4e2da156d9fcc471fa624010a
   name: ghcr.io/hippocampus-dev/hippocampus/connectracer
   newName: ghcr.io/hippocampus-dev/hippocampus/connectracer
