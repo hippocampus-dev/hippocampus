@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-local-dns
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: node-local-dns
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      automountServiceAccountToken: false
+      dnsPolicy: Default
+      hostNetwork: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: node-local-dns
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            # https://github.com/containerd/containerd/blob/v2.0.0/pkg/oci/spec.go#L118
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_BIND_SERVICE
+              drop:
+                - ALL
+            # write to /usr/sbin/* for iptables
+            #readOnlyRootFilesystem: true
+            # need to add interface
+            #runAsUser: 65532
+            #runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: registry.k8s.io/dns/k8s-dns-node-cache
+          imagePullPolicy: IfNotPresent
+          args:
+            - -localip=169.254.20.10,10.96.0.10
+            - -conf=/etc/coredns/Corefile
+            - -basecorefile=/mnt/Corefile.base
+            - -upstreamsvc=kube-dns-upstream
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http
+              containerPort: 8053
+              protocol: TCP
+            - name: tcp-dns
+              containerPort: 53
+              protocol: TCP
+            - name: udp-dns
+              containerPort: 53
+              protocol: UDP
+          livenessProbe:
+            httpGet:
+              host: 169.254.20.10
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /etc/coredns
+            - name: xtables-lock
+              mountPath: /run/xtables.lock
+            - name: node-local-dns
+              mountPath: /mnt
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: xtables-lock
+          hostPath:
+            path: /run/xtables.lock
+            type: FileOrCreate
+        - name: node-local-dns
+          configMap:
+            name: node-local-dns

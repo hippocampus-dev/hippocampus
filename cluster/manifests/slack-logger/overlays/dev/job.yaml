@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ticdc-changefeed
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  completions: 1
+  parallelism: 1
+  completionMode: Indexed
+  backoffLimitPerIndex: 6
+  maxFailedIndexes: 1
+  podReplacementPolicy: Failed
+  podFailurePolicy:
+    rules:
+      - action: FailJob
+        onExitCodes:
+          operator: In
+          values:
+            - 127
+      - action: Ignore
+        onPodConditions:
+          - type: DisruptionTarget
+            status: "True"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slack-logger
+        app.kubernetes.io/component: ticdc-changefeed
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      restartPolicy: Never
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: changefeed
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/mirror/pingcap/ticdc:v8.5.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              set -e
+
+              until /cdc cli capture list --server=http://slack-logger-ticdc-0.slack-logger-ticdc-peer.slack-logger.svc.cluster.local:8301 2>/dev/null; do
+                sleep 1
+              done
+
+              /cdc cli changefeed create \
+                --server=http://slack-logger-ticdc-0.slack-logger-ticdc-peer.slack-logger.svc.cluster.local:8301 \
+                --changefeed-id=slack-logger-cdc \
+                --sink-uri="kafka://slack-logger-kafka-bootstrap.slack-logger.svc.cluster.local:9092/slack-logger-cdc?protocol=canal-json&partition-num=3" \
+                --config=/mnt/changefeed.toml
+
+              curl -fsSL -X POST http://127.0.0.1:15020/quitquitquit
+          volumeMounts:
+            - name: ticdc-changefeed
+              mountPath: /mnt
+              readOnly: true
+      volumes:
+        - name: ticdc-changefeed
+          configMap:
+            name: ticdc-changefeed

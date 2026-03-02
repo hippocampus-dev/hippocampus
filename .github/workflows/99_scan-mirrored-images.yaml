@@ -1,0 +1,89 @@
+name: Scan mirrored images
+on:
+  workflow_run:
+    workflows: ["Mirror docker images"]
+    types:
+      - completed
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+  actions: read
+jobs:
+  issue-github-token:
+    if: |
+      github.repository_owner == 'kaidotio' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.conclusion == 'success'
+    uses: ./.github/workflows/reusable_issue-github-token.yaml
+    with:
+      profile: writer
+    secrets: inherit
+  parse:
+    if: |
+      github.repository_owner == 'kaidotio' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.conclusion == 'success'
+    timeout-minutes: 5
+    runs-on: ubuntu-24.04
+    outputs:
+      images: ${{ steps.aggregate.outputs.images }}
+      has_images: ${{ steps.aggregate.outputs.has_images }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pushed-*
+          path: ${{ runner.temp }}/artifacts
+          merge-multiple: true
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+      - id: aggregate
+        run: |
+          set -eo pipefail
+          if [ -d "${{ runner.temp }}/artifacts" ] && [ -n "$(ls -A "${{ runner.temp }}/artifacts"/*.txt 2>/dev/null)" ]; then
+            images=$(cat "${{ runner.temp }}/artifacts"/*.txt | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "images=${images}" >> $GITHUB_OUTPUT
+            echo "has_images=true" >> $GITHUB_OUTPUT
+          else
+            echo "images=[]" >> $GITHUB_OUTPUT
+            echo "has_images=false" >> $GITHUB_OUTPUT
+          fi
+  scan:
+    if: github.repository_owner == 'kaidotio' && needs.parse.outputs.has_images == 'true'
+    needs: [issue-github-token, parse]
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    environment: deployment
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.parse.outputs.images) }}
+    steps:
+      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ github.token }}
+      - uses: aquasecurity/trivy-action@0.34.1
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/mirror/${{ matrix.image }}
+          format: json
+          output: ${{ runner.temp }}/trivy-results.json
+          severity: CRITICAL
+          exit-code: "0"
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/scripts/create-cve-issues.sh
+      - run: |
+          set -eo pipefail
+
+          VULNERABILITIES=$(jq '[.Results // [] | .[] | .Vulnerabilities // [] | length] | add // 0' "${{ runner.temp }}/trivy-results.json")
+          if [ "$VULNERABILITIES" -eq 0 ]; then
+            exit 0
+          fi
+
+          TOKEN=$(echo "$ENCRYPTED_TOKEN" | base64 -d | gpg -dq --batch --passphrase "$GPG_PASSPHRASE")
+          echo "::add-mask::$TOKEN"
+          export GH_TOKEN="$TOKEN"
+
+          bash .github/scripts/create-cve-issues.sh "${{ runner.temp }}/trivy-results.json"
+        env:
+          ENCRYPTED_TOKEN: ${{ needs.issue-github-token.outputs.encrypted_token }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

@@ -1,0 +1,54 @@
+name: Claude Code
+on:
+  issue_comment:
+    types:
+      - created
+  pull_request_review_comment:
+    types:
+      - created
+  issues:
+    types:
+      - opened
+  pull_request_review:
+    types:
+      - submitted
+jobs:
+  claude:
+    if: |
+      github.repository_owner == 'kaidotio' && (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') && (github.event.comment.user.login == 'kaidotio' || github.event.comment.user.login == 'hippocampus-github-app[bot]')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') && (github.event.comment.user.login == 'kaidotio' || github.event.comment.user.login == 'hippocampus-github-app[bot]')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') && (github.event.review.user.login == 'kaidotio' || github.event.review.user.login == 'hippocampus-github-app[bot]')) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) && (github.event.issue.user.login == 'kaidotio' || github.event.issue.user.login == 'hippocampus-github-app[bot]'))
+      )
+    timeout-minutes: 10
+    runs-on: [self-hosted, local]
+    env:
+      GIT_CONFIG_GLOBAL: /tmp/gitconfig
+    permissions:
+      contents: write
+      id-token: write
+      actions: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          mkdir -p ${{ runner.temp }}/claude-home
+          cp ${HOME}/.claude/.credentials.json ${{ runner.temp }}/claude-home/
+          cp files/home/kai/.config/claudex/CLAUDE.ci.md ${{ runner.temp }}/claude-home/CLAUDE.md
+          cp files/home/kai/.config/claudex/CLAUDE.important.md ${{ runner.temp }}/claude-home/CLAUDE.important.md
+          cp files/home/kai/.config/claudex/CLAUDE.general.md ${{ runner.temp }}/claude-home/CLAUDE.general.md
+          cp -r files/home/kai/.config/claudex/agents ${{ runner.temp }}/claude-home/agents
+      - uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
+        with:
+          anthropic_api_key: dummy
+          path_to_claude_code_executable: /home/kai/bin/hacklaudex
+          allowed_bots: hippocampus-github-app
+          additional_permissions: |
+            actions: read
+          show_full_output: true
+          claude_args: |
+            --allowedTools "Glob,Grep,Read,Edit,WebFetch,Bash(gh issue close:*),Bash(gh pr review:*),Bash(gh pr comment:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*)"

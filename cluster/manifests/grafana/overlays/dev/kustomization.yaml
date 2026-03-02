@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: grafana
+
+resources:
+- ../../base
+- cron_job.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+configMapGenerator:
+- files:
+  - files/datasource.yaml
+  name: datasources
+  options:
+    immutable: true
+
+images:
+- digest: sha256:a1dc71e248e355c3c9470e347df6e95f1bda076288ea0e90406652c04e6aab38
+  name: ghcr.io/hippocampus-dev/hippocampus/headless-page-renderer
+  newName: ghcr.io/hippocampus-dev/hippocampus/headless-page-renderer
+- digest: sha256:1478b27f75d22dfbec1f71ec555bebd07c51027966e9171a88fd6cd7682e1bd1
+  name: ghcr.io/hippocampus-dev/hippocampus/realtime-search-exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/realtime-search-exporter

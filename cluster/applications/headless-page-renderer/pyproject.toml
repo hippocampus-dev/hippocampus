@@ -1,0 +1,12 @@
+[project]
+name = "headless-page-renderer"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "playwright==1.46.0",
+    "requests==2.31.0",
+    "statsd==4.0.1",
+]
