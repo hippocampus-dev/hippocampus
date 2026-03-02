@@ -36,7 +36,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -60,7 +60,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -84,7 +84,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -108,7 +108,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -132,7 +132,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -156,7 +156,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -180,7 +180,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -204,7 +204,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -227,7 +227,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -251,7 +251,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -275,7 +275,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -299,7 +299,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -322,7 +322,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -345,7 +345,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -368,7 +368,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -392,7 +392,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -416,7 +416,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -440,7 +440,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -464,7 +464,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -488,7 +488,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -512,7 +512,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -545,7 +545,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -569,7 +569,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -594,7 +594,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -618,7 +618,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -642,7 +642,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -666,7 +666,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -690,7 +690,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -714,7 +714,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -738,7 +738,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -762,7 +762,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -786,7 +786,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -810,7 +810,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -833,7 +833,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -857,7 +857,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -881,7 +881,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -905,7 +905,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -929,7 +929,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -953,7 +953,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -977,7 +977,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1001,7 +1001,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1025,7 +1025,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1049,7 +1049,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1073,7 +1073,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1097,7 +1097,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1121,7 +1121,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1145,7 +1145,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1169,7 +1169,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1195,7 +1195,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1219,7 +1219,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1244,7 +1244,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1268,7 +1268,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1292,7 +1292,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1316,7 +1316,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1340,7 +1340,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1364,7 +1364,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1388,7 +1388,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1412,7 +1412,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1436,7 +1436,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1460,7 +1460,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1484,7 +1484,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1508,7 +1508,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1532,7 +1532,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1556,7 +1556,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1580,7 +1580,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1603,7 +1603,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1626,7 +1626,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1649,7 +1649,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1672,7 +1672,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1696,7 +1696,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1720,7 +1720,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1743,7 +1743,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1767,7 +1767,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
@@ -1791,7 +1791,7 @@ jobs:
       - id: mirror
         run: bash .github/workflows/bin/mirror.sh
       - if: steps.mirror.outputs.pushed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pushed-${{ github.job }}
           path: ${{ runner.temp }}/pushed/
