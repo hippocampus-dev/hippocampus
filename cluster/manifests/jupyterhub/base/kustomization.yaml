@@ -21,6 +21,6 @@ images:
 - digest: sha256:9f5e2ee3ea09d77c414c4e6875f07629a80dd357a3abad976dd8dfc2cf289962
   name: ghcr.io/hippocampus-dev/hippocampus/configurable-http-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/configurable-http-proxy
-- digest: sha256:e784053ecd722b58f68cb49841e29db3d111fe6b60f9531774509668575b3231
+- digest: sha256:85d1e1c93a4a1604f842c3f54bfff7ca743df02e6b4a1e26ef842e92b3d9842a
   name: ghcr.io/hippocampus-dev/hippocampus/jupyterhub
   newName: ghcr.io/hippocampus-dev/hippocampus/jupyterhub
