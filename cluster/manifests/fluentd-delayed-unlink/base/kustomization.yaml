@@ -5,6 +5,6 @@ resources:
 - daemon_set.yaml
 images:
 - digest: sha256:c99aa53abf02067b30a530c53ddaeae437706652cf837dfca3bb555142e33999
-- digest: sha256:144dc407babf12f505986618fbf8064b6a46f89f7e457ec3d0d0f83181b5f8c3
+- digest: sha256:a9328d4ac08ac3837e76a03ceaec90206d9a220288ecc451396e0c07bd4c1bc0
   name: ghcr.io/hippocampus-dev/hippocampus/fluentd-delayed-unlink
   newName: ghcr.io/hippocampus-dev/hippocampus/fluentd-delayed-unlink
