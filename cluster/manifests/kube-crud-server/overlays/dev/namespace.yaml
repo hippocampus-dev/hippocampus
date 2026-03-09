@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-crud-server
+  labels:
+    name: kube-crud-server
+    pod-security.kubernetes.io/enforce: restricted

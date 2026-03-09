@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: libsodium-encryptor
+  labels:
+    name: libsodium-encryptor
+    pod-security.kubernetes.io/enforce: restricted

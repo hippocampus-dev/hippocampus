@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+images:
+- digest: sha256:8ae8773ea3da7bde296c425dd76edbd2082e04813287be0af277ee7b705bac25
+  name: grafana/pyroscope
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/grafana/pyroscope

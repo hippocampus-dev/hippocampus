@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: bakery
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bakery
+      app.kubernetes.io/component: ""

@@ -1,0 +1,8 @@
+apiVersion: skaffold.snapshot.kaidotio.github.io/v1
+kind: ScheduledSnapshot
+metadata:
+  name: example
+spec:
+  schedule: "* * * * *"
+  target: https://example.com
+  diffFormat: rectangle

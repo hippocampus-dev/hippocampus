@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+JB_HOME=${JB_HOME:-../jsonnet-bundler}
+
+hash=$(cat jsonnetfile.lock.json | sha256sum | cut -d ' ' -f 1)
+if [ ! -f "${JB_HOME}/.jb-hash" ] || [ "$(cat "${JB_HOME}/.jb-hash")" != "$hash" ]; then
+  jb install --jsonnetpkg-home="$JB_HOME"
+  echo "$hash" > "${JB_HOME}/.jb-hash"
+fi
+
+if [ "$1" == "--only-install" ]; then
+  exit 0
+fi
+exec jsonnet -J "$JB_HOME" -J . "$@"

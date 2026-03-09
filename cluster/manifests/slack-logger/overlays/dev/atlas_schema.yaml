@@ -1,0 +1,65 @@
+apiVersion: db.atlasgo.io/v1alpha1
+kind: AtlasSchema
+metadata:
+  name: slack-logger
+spec:
+  devURL: mysql://root:pass@localhost:3306/dev
+  devDB:
+    spec:
+      containers:
+        - name: mysql
+          image: ghcr.io/hippocampus-dev/hippocampus/mirror/mysql:8
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: pass
+            - name: MYSQL_DATABASE
+              value: dev
+          startupProbe:
+            exec:
+              command:
+                - mysql
+                - -ppass
+                - -h
+                - 127.0.0.1
+                - -e
+                - SELECT 1
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 30
+            timeoutSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  exec > /dev/null 2>&1
+                  mysql -ppass -h 127.0.0.1 -e "SELECT 1" || exit 0
+                  tables=$(mysql -ppass -h 127.0.0.1 -sN -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='dev';") || exit 0
+                  [ "$tables" -eq 0 ] && exit 0
+                  active=$(mysql -ppass -h 127.0.0.1 -sN -e "SELECT COUNT(*) FROM information_schema.PROCESSLIST WHERE DB='dev' AND ID != CONNECTION_ID();") || exit 0
+                  [ "$active" -eq 0 ] && exit 1
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 5
+  credentials:
+    scheme: mysql
+    host: slack-logger-tidb.slack-logger.svc.cluster.local
+    user: slack_user
+    passwordFrom:
+      secretKeyRef:
+        key: slack_user
+        name: slack-logger
+    database: slack_logger
+    port: 4000
+  schema:
+    configMapKeyRef:
+      key: schema.hcl
+      name: slack-logger-atlas
+  policy:
+    diff:
+      skip:
+        modify_schema: true

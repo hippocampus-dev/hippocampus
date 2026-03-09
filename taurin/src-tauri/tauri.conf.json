@@ -1,0 +1,70 @@
+{
+  "productName": "taurin",
+  "version": "0.1.0",
+  "identifier": "kaidotio.github.io",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "taurin",
+        "width": 1000,
+        "height": 600,
+        "minWidth": 800,
+        "center": true,
+        "maximizable": false,
+        "minimizable": false,
+        "closable": false,
+        "hiddenTitle": true,
+        "skipTaskbar": true,
+        "decorations": false,
+        "focus": true,
+        "alwaysOnTop": true,
+        "visible": false
+      },
+      {
+        "label": "voice-indicator",
+        "url": "/voice-indicator",
+        "width": 200,
+        "height": 56,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "resizable": false,
+        "closable": false,
+        "minimizable": false,
+        "maximizable": false,
+        "focus": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon16.png",
+      "icons/icon32.png",
+      "icons/icon48.png",
+      "icons/icon128.png",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQwQURBRjc3OEQ0QUU3MDUKUldRRjUwcU5kNit0UU5kVmYxVVhOWFN1dFdRbDA1SWRhUDkzdUVQQVRQY3pCNEE0Z2t0OUcwRzYK",
+      "endpoints": [
+        "https://tauri-releases.kaidotio.dev/latest.json"
+      ]
+    }
+  }
+}

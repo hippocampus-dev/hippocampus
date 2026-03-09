@@ -1,0 +1,13 @@
+[Unit]
+Requires=minikube.service
+After=minikube.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+User=kai
+ExecStart=/usr/local/bin/minikube-context.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,90 @@
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: kubernetes-cluster
+spec:
+  folder: Kubernetes
+  configMapRef:
+    name: kubernetes-cluster.jsonnet
+    key: cluster.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: kubernetes-cronjob
+spec:
+  folder: Kubernetes
+  configMapRef:
+    name: kubernetes-cronjob.jsonnet
+    key: cronjob.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: kubernetes-namespace
+spec:
+  folder: Kubernetes
+  configMapRef:
+    name: kubernetes-namespace.jsonnet
+    key: namespace.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: kubernetes-node
+spec:
+  folder: Kubernetes
+  configMapRef:
+    name: kubernetes-node.jsonnet
+    key: node.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: kubernetes-pod
+spec:
+  folder: Kubernetes
+  configMapRef:
+    name: kubernetes-pod.jsonnet
+    key: pod.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: kubernetes-volume
+spec:
+  folder: Kubernetes
+  configMapRef:
+    name: kubernetes-volume.jsonnet
+    key: volume.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: kubernetes-workload
+spec:
+  folder: Kubernetes
+  configMapRef:
+    name: kubernetes-workload.jsonnet
+    key: workload.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: other-lighthouse
+spec:
+  folder: Other
+  configMapRef:
+    name: other-lighthouse.jsonnet
+    key: lighthouse.jsonnet
+---
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: other-overview
+spec:
+  homeDashboard: true
+  folder: Other
+  configMapRef:
+    name: other-overview.jsonnet
+    key: overview.jsonnet

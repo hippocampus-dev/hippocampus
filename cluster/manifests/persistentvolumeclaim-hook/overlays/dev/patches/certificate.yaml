@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: persistentvolumeclaim-hook
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # issuer + 1
+spec:
+  dnsNames:
+    - persistentvolumeclaim-hook.persistentvolumeclaim-hook.svc
+    - persistentvolumeclaim-hook.persistentvolumeclaim-hook.svc.cluster.local

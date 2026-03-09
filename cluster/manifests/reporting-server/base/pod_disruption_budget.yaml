@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: reporting-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reporting-server
+      app.kubernetes.io/component: ""

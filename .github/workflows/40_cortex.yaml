@@ -1,0 +1,48 @@
+name: Test/cortex
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_cortex.yaml"
+      - "cluster/applications/packages/cortex/**"
+  #merge_group:
+  #  branches:
+  #    - main
+  #  types:
+  #    - checks_requested
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows/bin/
+            cluster/applications/packages/cortex/
+      - run: bash .github/workflows/bin/cleanup.sh
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.11
+          # https://github.com/actions/setup-python/pull/818
+          #cache: uv
+      - run: |
+          pip install --upgrade uv --break-system-packages
+          uv sync --frozen
+          uv run -- python -m unittest discover -s tests
+        working-directory: cluster/applications/packages/cortex

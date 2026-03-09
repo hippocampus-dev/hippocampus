@@ -1,0 +1,44 @@
+# Example 1: Inline Jsonnet
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: example-dashboard
+  namespace: monitoring
+spec:
+  folder: "Infrastructure"
+  jsonnet: |
+    local g = import "github.com/grafana/grafonnet/gen/grafonnet-v10.4.0/main.libsonnet";
+
+    g.dashboard.new("Example Dashboard")
+    + g.dashboard.withUid("example-dashboard")
+    + g.dashboard.withEditable(false)
+    + g.dashboard.withTimezone("browser")
+    + g.dashboard.withRefresh("30s")
+    + g.dashboard.time.withFrom("now-1h")
+    + g.dashboard.time.withTo("now")
+    + g.dashboard.withPanels([
+        g.panel.timeSeries.new("CPU Usage")
+        + g.panel.timeSeries.panelOptions.withGridPos(h=8, w=12, x=0, y=0)
+        + g.panel.timeSeries.queryOptions.withTargets([
+            g.query.prometheus.new("Prometheus", 'rate(node_cpu_seconds_total{mode="user"}[5m])')
+            + g.query.prometheus.withLegendFormat("{{instance}}"),
+        ]),
+        g.panel.timeSeries.new("Memory Usage")
+        + g.panel.timeSeries.panelOptions.withGridPos(h=8, w=12, x=12, y=0)
+        + g.panel.timeSeries.queryOptions.withTargets([
+            g.query.prometheus.new("Prometheus", 'node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes')
+            + g.query.prometheus.withLegendFormat("{{instance}}"),
+        ]),
+    ])
+---
+# Example 2: ConfigMap Reference
+apiVersion: grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: example-dashboard-from-configmap
+  namespace: monitoring
+spec:
+  folder: "Infrastructure"
+  configMapRef:
+    name: dashboard-source
+    key: dashboard.jsonnet

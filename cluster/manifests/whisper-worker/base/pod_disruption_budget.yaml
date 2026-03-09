@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: whisper-worker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: whisper-worker
+      app.kubernetes.io/component: ""

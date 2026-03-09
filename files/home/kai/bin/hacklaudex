@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+unset ANTHROPIC_API_KEY
+export CLAUDE_CONFIG_DIR="/home/kai/.config/claudex"
+exec claude "$@"

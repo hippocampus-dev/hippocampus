@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- crd
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+
+images:
+- digest: sha256:bcfad82da49800f46e5d88525b7eb139bf36766338a929567a88f8ff86917b1b
+  name: ghcr.io/hippocampus-dev/hippocampus/github-actions-exporter-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/github-actions-exporter-controller

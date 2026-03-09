@@ -1,0 +1,1689 @@
+{
+   "annotations": {
+      "list": [
+         {
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "expr": "sum(ALERTS{alertstate=\"firing\",severity=\"critical\"}) by (alertname)",
+            "iconColor": "rgba(255, 96, 96, 1)",
+            "name": "Critical Alerts",
+            "textFormat": "{{alertname}}"
+         }
+      ]
+   },
+   "graphTooltip": 1,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 1,
+         "title": "Summary",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #A"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "CPU"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fcpu%5Fusage%5Fseconds%5Ftotal%7Bcontainer%21%3D%5C%22%5C%22%7D%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #B"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "CPU Requests"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Frequests%7Bresource%3D%5C%22cpu%5C%22%2Cunit%3D%5C%22core%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #C"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "CPU Limits"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Flimits%7Bresource%3D%5C%22cpu%5C%22%2Cunit%3D%5C%22core%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #D"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Memory"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Fmemory%5Fusage%5Fbytes%7Bcontainer%21%3D%5C%22%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #E"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Memory Requests"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Frequests%7Bresource%3D%5C%22memory%5C%22%2Cunit%3D%5C%22byte%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #F"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Memory Limits"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Flimits%7Bresource%3D%5C%22memory%5C%22%2Cunit%3D%5C%22byte%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #G"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Network Receive"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fnetwork%5Freceive%5Fbytes%5Ftotal%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bps"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #H"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Network Transmit"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fnetwork%5Ftransmit%5Fbytes%5Ftotal%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bps"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #I"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Disk"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Ffs%5Fusage%5Fbytes%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #J"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Inode"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Ffs%5Finodes%5Ftotal%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #K"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "File Descriptors"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Ffile%5Fdescriptors%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #L"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Pods"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fstatus%5Fphase%7Bphase%3D%5C%22Running%5C%22%7D%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 4,
+            "w": 24
+         },
+         "id": 2,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_requests{resource=\"cpu\",unit=\"core\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_limits{resource=\"cpu\",unit=\"core\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_memory_usage_bytes{container!=\"\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_requests{resource=\"memory\",unit=\"byte\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_limits{resource=\"memory\",unit=\"byte\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_network_receive_bytes_total[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_network_transmit_bytes_total[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_fs_usage_bytes * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_fs_inodes_total * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_file_descriptors * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_status_phase{phase=\"Running\"} * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Quotas",
+         "transformations": [
+            {
+               "id": "joinByField"
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "max": 1,
+               "min": 0,
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": null
+                     },
+                     {
+                        "color": "yellow",
+                        "value": 0.69999999999999996
+                     },
+                     {
+                        "color": "red",
+                        "value": 0.90000000000000002
+                     }
+                  ]
+               },
+               "unit": "percentunit"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 24
+         },
+         "id": 3,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) / sum(kube_pod_all_container_resource_requests{resource=\"cpu\",unit=\"core\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "instant": true,
+               "legendFormat": "CPU Requests %"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) / sum(kube_pod_all_container_resource_limits{resource=\"cpu\",unit=\"core\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "instant": true,
+               "legendFormat": "CPU Limits %"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_memory_usage_bytes{container!=\"\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) / sum(kube_pod_all_container_resource_requests{resource=\"memory\",unit=\"byte\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "instant": true,
+               "legendFormat": "Memory Requests %"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_memory_usage_bytes{container!=\"\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) / sum(kube_pod_all_container_resource_limits{resource=\"memory\",unit=\"byte\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod))",
+               "instant": true,
+               "legendFormat": "Memory Limits %"
+            }
+         ],
+         "title": "Gauges",
+         "type": "gauge"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 4,
+         "title": "Summary per pod",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "w"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Pod"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Drill down",
+                              "tooltip": "Drill down",
+                              "type": "link",
+                              "url": "/d/pod/pod?var-namespace=${__data.fields[\"namespace\"]}&var-pod=${__data.fields[\"pod\"]}&from=${__from}&to=${__to}"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "namespace"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "pod"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #A"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Created Time"
+                     },
+                     {
+                        "id": "unit",
+                        "value": "dateTimeAsIso"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #B"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.cellOptions",
+                        "value": {
+                           "type": "color-background"
+                        }
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Phase"
+                     },
+                     {
+                        "id": "mappings",
+                        "value": [
+                           {
+                              "options": {
+                                 "from": 0,
+                                 "result": {
+                                    "color": "red",
+                                    "text": "NotRunning"
+                                 },
+                                 "to": 0
+                              },
+                              "type": "range"
+                           },
+                           {
+                              "options": {
+                                 "from": 1,
+                                 "result": {
+                                    "color": "green",
+                                    "text": "Running"
+                                 },
+                                 "to": 1
+                              },
+                              "type": "range"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #C"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "CPU"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fcpu%5Fusage%5Fseconds%5Ftotal%7Bcontainer%21%3D%5C%22%5C%22%7D%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #D"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "CPU Requests"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Frequests%7Bresource%3D%5C%22cpu%5C%22%2Cunit%3D%5C%22core%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #E"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "CPU Limits"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Flimits%7Bresource%3D%5C%22cpu%5C%22%2Cunit%3D%5C%22core%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #F"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Memory"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Fmemory%5Fusage%5Fbytes%7Bcontainer%21%3D%5C%22%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #G"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Memory Requests"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Frequests%7Bresource%3D%5C%22memory%5C%22%2Cunit%3D%5C%22byte%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #H"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Memory Limits"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fall%5Fcontainer%5Fresource%5Flimits%7Bresource%3D%5C%22memory%5C%22%2Cunit%3D%5C%22byte%5C%22%7D%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #I"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Network Receive"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fnetwork%5Freceive%5Fbytes%5Ftotal%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bps"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #J"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Network Transmit"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fnetwork%5Ftransmit%5Fbytes%5Ftotal%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bps"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #K"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Disk"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Ffs%5Fusage%5Fbytes%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #L"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Inode"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Ffs%5Finodes%5Ftotal%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #M"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "File Descriptors"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28container%5Ffile%5Fdescriptors%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #N"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Pods"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fpod%5Fstatus%5Fphase%7Bphase%3D%5C%22Running%5C%22%7D%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 16,
+            "w": 24
+         },
+         "id": 5,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_created * 1000 * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_status_phase{phase=\"Running\"} * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_requests{resource=\"cpu\",unit=\"core\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_limits{resource=\"cpu\",unit=\"core\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_memory_usage_bytes{container!=\"\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_requests{resource=\"memory\",unit=\"byte\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_all_container_resource_limits{resource=\"memory\",unit=\"byte\"} * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_network_receive_bytes_total[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_network_transmit_bytes_total[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_fs_usage_bytes * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_fs_inodes_total * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(container_file_descriptors * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_status_phase{phase=\"Running\"} * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Quotas",
+         "transformations": [
+            {
+               "id": "joinByField",
+               "options": {
+                  "byField": "w",
+                  "mode": "outer"
+               }
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "w"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Pod"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Drill down",
+                              "tooltip": "Drill down",
+                              "type": "link",
+                              "url": "/d/pod/pod?var-namespace=${__data.fields[\"namespace\"]}&var-pod=${__data.fields[\"pod\"]}&from=${__from}&to=${__to}"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "namespace"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "pod"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #A"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Created Time"
+                     },
+                     {
+                        "id": "unit",
+                        "value": "dateTimeAsIso"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #B"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.cellOptions",
+                        "value": {
+                           "type": "color-background"
+                        }
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Phase"
+                     },
+                     {
+                        "id": "mappings",
+                        "value": [
+                           {
+                              "options": {
+                                 "from": 0,
+                                 "result": {
+                                    "color": "red",
+                                    "text": "NotRunning"
+                                 },
+                                 "to": 0
+                              },
+                              "type": "range"
+                           },
+                           {
+                              "options": {
+                                 "from": 1,
+                                 "result": {
+                                    "color": "green",
+                                    "text": "Running"
+                                 },
+                                 "to": 1
+                              },
+                              "type": "range"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #C"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "CPU Throttled"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fcpu%5Fcfs%5Fthrottled%5Fseconds%5Ftotal%7Bcontainer%21%3D%5C%22%5C%22%7D%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #D"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Memory Throttled"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fmemory%5Ffailcnt%7Bcontainer%21%3D%5C%22%5C%22%7D%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #E"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Network Receive Dropped"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fnetwork%5Freceive%5Fpackets%5Fdropped%5Ftotal%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #F"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Network Transmit Dropped"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28irate%28container%5Fnetwork%5Ftransmit%5Fpackets%5Fdropped%5Ftotal%5B%24%5F%5Frange%5D%29%20%2A%20on%28namespace%2Cpod%2Ccontainer%29%20group%5Fleft%20kube%5Fpod%5Fall%5Fcontainer%5Fstatus%5Frunning%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%28node%29%20group%28kube%5Fpod%5Finfo%7Bnode%3D%5C%22${node}%5C%22%7D%29%20by%20%28node%2Cnamespace%2Cpod%29%29%20by%20%28namespace%2Cpod%29%20%2A%20on%28namespace%2Cpod%29%20group%5Fleft%20group%28kube%5Fpod%5Fcreated%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpod%3D%5C%22${__data.fields[\"pod\"]}%5C%22%7D%29%20by%20%28namespace%2Cpod%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 16,
+            "w": 24
+         },
+         "id": 6,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_created * 1000 * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_pod_status_phase{phase=\"Running\"} * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_cpu_cfs_throttled_seconds_total{container!=\"\"}[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_memory_failcnt{container!=\"\"}[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_network_receive_packets_dropped_total[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(rate(container_network_transmit_packets_dropped_total[$__range]) * on(namespace,pod,container) group_left kube_pod_all_container_status_running * on(namespace,pod) group_left(node) group(kube_pod_info{node=\"${node}\"}) by (node,namespace,pod)) by (namespace,pod) * on(namespace,pod) group_left(w) group(label_join(kube_pod_info, \"w\", \"/\", \"namespace\", \"pod\")) by (namespace,pod,w)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Saturation",
+         "transformations": [
+            {
+               "id": "joinByField",
+               "options": {
+                  "byField": "w",
+                  "mode": "outer"
+               }
+            }
+         ],
+         "type": "table"
+      }
+   ],
+   "schemaVersion": 36,
+   "templating": {
+      "list": [
+         {
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "name": "node",
+            "query": "label_values(kube_pod_info, node)",
+            "type": "query"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-1h",
+      "to": "now"
+   },
+   "timezone": "browser",
+   "title": "Node",
+   "uid": "node"
+}

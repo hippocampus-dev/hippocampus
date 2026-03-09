@@ -1,0 +1,3 @@
+name: strimzi-cluster-operator
+namespace: strimzi-cluster-operator
+components: []

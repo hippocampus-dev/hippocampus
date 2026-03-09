@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "voice-indicator",
+  "description": "Capability for the voice indicator window",
+  "windows": [
+    "voice-indicator"
+  ],
+  "permissions": [
+    "core:event:default"
+  ]
+}

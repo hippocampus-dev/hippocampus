@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+images:
+- digest: sha256:eb56907cece6a14e7a8ddac0641e785bbeaa33b7350723221a72838c5cb6cfd2
+  name: ghcr.io/hippocampus-dev/hippocampus/events-logger
+  newName: ghcr.io/hippocampus-dev/hippocampus/events-logger
