@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:b1ead099df47987762f5695fd03c3fa70e8011d6ca2dddfb143df32f74340668
+- digest: sha256:f39fb8f64628fca26c1a27ed4be76ec21ad67b8c4fd53bec72a8827ceb05cfe4
   name: ghcr.io/hippocampus-dev/hippocampus/bakery
   newName: ghcr.io/hippocampus-dev/hippocampus/bakery
