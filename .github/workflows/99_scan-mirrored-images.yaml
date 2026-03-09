@@ -60,14 +60,14 @@ jobs:
         image: ${{ fromJson(needs.parse.outputs.images) }}
     steps:
       - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ github.token }}
-      - uses: aquasecurity/trivy-action@0.34.2
+      - uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: ghcr.io/${{ github.repository }}/mirror/${{ matrix.image }}
           format: json
           output: ${{ runner.temp }}/trivy-results.json
           severity: CRITICAL
           exit-code: "0"
-      - uses: aquasecurity/trivy-action@0.34.2
+      - uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: ghcr.io/${{ github.repository }}/mirror/${{ matrix.image }}
           format: cyclonedx
