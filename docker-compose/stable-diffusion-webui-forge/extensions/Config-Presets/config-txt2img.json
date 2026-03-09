@@ -1,0 +1,74 @@
+{
+    "None": {},
+    "SD 1.5 - 512x512": {
+        "txt2img_width": 512,
+        "txt2img_height": 512
+    },
+    "SD 2.1 - 768x768": {
+        "txt2img_width": 768,
+        "txt2img_height": 768
+    },
+    "SDXL --- 1024x1024": {
+        "txt2img_width": 1024,
+        "txt2img_height": 1024
+    },
+    "Low quality ------ steps: 10, batch size: 8, DPM++ 2M Karras": {
+        "txt2img_sampling": "DPM++ 2M Karras",
+        "txt2img_steps": 10,
+        "txt2img_enable_hr": false,
+        "txt2img_batch_count": 1,
+        "txt2img_batch_size": 8
+    },
+    "Medium quality - steps: 15, batch size: 4, DPM++ 2M Karras": {
+        "txt2img_sampling": "DPM++ 2M Karras",
+        "txt2img_steps": 15,
+        "txt2img_enable_hr": false,
+        "txt2img_batch_count": 1,
+        "txt2img_batch_size": 4
+    },
+    "High quality ------ steps: 20, batch size: 4, DPM++ 2S a Karras": {
+        "txt2img_sampling": "DPM++ 2S a Karras",
+        "txt2img_steps": 20,
+        "txt2img_enable_hr": false,
+        "txt2img_batch_count": 1,
+        "txt2img_batch_size": 4
+    },
+    "High res -------- steps: 30, DPM++ 2M Karras, [Hires fix - Upscale by: 2, Denoising: 0.4, Hires steps: 10]": {
+        "txt2img_steps": 30,
+        "txt2img_sampling": "DPM++ 2M Karras",
+        "txt2img_enable_hr": true,
+        "txt2img_hr_scale": 2,
+        "txt2img_hires_steps": 10,
+        "txt2img_denoising_strength": 0.4
+    },
+    "1080p ----------- 432x768 -> 1920x1080, steps: 20, DPM++ 2M Karras, [Hires fix - Upscale by: 2.5, Denoising: 0.4, Hires steps: 10]": {
+        "txt2img_steps": 20,
+        "txt2img_sampling": "DPM++ 2M Karras",
+        "txt2img_width": 768,
+        "txt2img_height": 432,
+        "txt2img_enable_hr": true,
+        "txt2img_hr_scale": 2.5,
+        "txt2img_hires_steps": 10,
+        "txt2img_denoising_strength": 0.4
+    },
+    "1440p ----------- 432x768 -> 2560x1440, steps: 25, DPM++ 2M Karras, [Hires fix - Upscale by: 3.3334, Denoising: 0.3, Hires steps: 10]": {
+        "txt2img_steps": 25,
+        "txt2img_sampling": "DPM++ 2M Karras",
+        "txt2img_width": 768,
+        "txt2img_height": 432,
+        "txt2img_enable_hr": true,
+        "txt2img_hr_scale": 3.3334,
+        "txt2img_hires_steps": 10,
+        "txt2img_denoising_strength": 0.4
+    },
+    "4k ---------------- 432x768 -> 3840x2160, steps: 30, DPM++ 2M Karras, [Upscale by: 5, Denoising: 0.3, Hires steps: 15]": {
+        "txt2img_steps": 30,
+        "txt2img_sampling": "DPM++ 2M Karras",
+        "txt2img_width": 768,
+        "txt2img_height": 432,
+        "txt2img_enable_hr": true,
+        "txt2img_hr_scale": 5,
+        "txt2img_hires_steps": 15,
+        "txt2img_denoising_strength": 0.4
+    }
+}

@@ -1,0 +1,5 @@
+{
+  "prometheus": {
+    "query": "<<.Series>>{<<.LabelMatchers>>} * on(namespace,pod) group_left(workload,workload_type) mixin_pod_workload{namespace=\"default\",workload_type=\"deployment\",workload=\"foo\"}",
+  }
+}

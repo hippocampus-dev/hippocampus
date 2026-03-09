@@ -1,0 +1,124 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: scheduledsnapshots.snapshot.kaidotio.github.io
+spec:
+  group: snapshot.kaidotio.github.io
+  names:
+    kind: ScheduledSnapshot
+    listKind: ScheduledSnapshotList
+    plural: scheduledsnapshots
+    singular: scheduledsnapshot
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: ScheduledSnapshot is the schema for the scheduledsnapshots API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ScheduledSnapshotSpec defines the desired state of ScheduledSnapshot
+            properties:
+              htmlDiffFormat:
+                default: line
+                description: HTMLDiffFormat specifies the format for HTML diff generation
+                  ("line")
+                enum:
+                - line
+                type: string
+              maskSelectors:
+                description: MaskSelectors is a list of CSS selectors to mask during
+                  capture to avoid diff noise
+                items:
+                  type: string
+                type: array
+              schedule:
+                description: Schedule in Cron format, see https://en.wikipedia.org/wiki/Cron.
+                type: string
+              screenshotDiffFormat:
+                default: pixel
+                description: ScreenshotDiffFormat specifies the format for diff generation
+                  ("pixel" or "rectangle")
+                enum:
+                - pixel
+                - rectangle
+                type: string
+              target:
+                description: Target is the URL to take a screenshot of
+                type: string
+            required:
+            - htmlDiffFormat
+            - schedule
+            - screenshotDiffFormat
+            - target
+            type: object
+          status:
+            description: ScheduledSnapshotStatus defines the observed state of ScheduledSnapshot
+            properties:
+              baselineHtmlUrl:
+                description: BaselineHTMLURL is the storage URL where the baseline
+                  HTML is stored
+                type: string
+              baselineUrl:
+                description: BaselineURL is the storage URL where the baseline screenshot
+                  is stored
+                type: string
+              htmlDiffAmount:
+                description: HTMLDiffAmount is the percentage of HTML difference (0.0
+                  to 1.0)
+                maximum: 1
+                minimum: 0
+                type: number
+              htmlDiffUrl:
+                description: HTMLDiffURL is the storage URL where the HTML diff is
+                  stored
+                type: string
+              lastSnapshotTime:
+                description: LastSnapshotTime is the time when the last snapshot was
+                  taken
+                format: date-time
+                type: string
+              screenshotDiffAmount:
+                description: ScreenshotDiffAmount is the percentage of screenshot
+                  difference (0.0 to 1.0)
+                maximum: 1
+                minimum: 0
+                type: number
+              screenshotDiffUrl:
+                description: ScreenshotDiffURL is the storage URL where the screenshot
+                  diff image is stored
+                type: string
+              targetHtmlUrl:
+                description: TargetHTMLURL is the storage URL where the target HTML
+                  is stored
+                type: string
+              targetUrl:
+                description: TargetURL is the storage URL where the target screenshot
+                  is stored
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

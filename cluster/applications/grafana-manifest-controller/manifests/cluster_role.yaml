@@ -1,0 +1,44 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: grafana-manifest-controller
+rules:
+  - apiGroups:
+      - grafana-manifest.kaidotio.github.io
+    resources:
+      - dashboards
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - grafana-manifest.kaidotio.github.io
+    resources:
+      - dashboards/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - grafana-manifest.kaidotio.github.io
+    resources:
+      - dashboards/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch

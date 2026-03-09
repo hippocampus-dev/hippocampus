@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -e
+
+notify-send 'Current Volume' "$(pactl get-sink-volume @DEFAULT_SINK@ | head -n1 | awk -F'[/,]' '{gsub(/ /, "", $2); gsub(/ /, "", $5); print "L: " $2 ", R: " $5}')"

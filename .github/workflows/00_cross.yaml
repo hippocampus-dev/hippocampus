@@ -1,0 +1,168 @@
+name: cross
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/00_cross.yaml"
+      - "cross/x86_64-unknown-linux-gnu.Dockerfile"
+      - "cross/x86_64-unknown-linux-musl.Dockerfile"
+      - "!**/*.md"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  id-token: write
+jobs:
+  x86_64-unknown-linux-gnu:
+    timeout-minutes: 300
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE: cross/x86_64-unknown-linux-gnu
+      KUSTOMIZATION: ""
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/
+            cross/
+      - run: git config --global submodule.recurse false
+      - run: bash .github/workflows/bin/cleanup.sh
+      - uses: actions/cache@v5
+        with:
+          path: /home/runner/.cache/docker-build
+          key: ${{ runner.os }}-x86_64-unknown-linux-gnu-docker-${{ hashFiles('cross/x86_64-unknown-linux-gnu.Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-x86_64-unknown-linux-gnu-docker-
+      - uses: ./.github/actions/setup-docker
+      - run: |
+          IMAGE_PATH=${GITHUB_REPOSITORY}/${IMAGE}
+          GHCR_IMAGE=ghcr.io/${IMAGE_PATH}
+          TAG=${GITHUB_REF##*/}
+          opt=""
+          if [ -d /home/runner/.cache/docker-build ]; then
+            opt="--cache-from type=local,src=/home/runner/.cache/docker-build"
+          else
+            opt="--cache-from type=registry,ref=$GHCR_IMAGE:cache"
+          fi
+          (
+            cd cross
+
+            docker buildx build --output type=docker,name=$GHCR_IMAGE:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max -f x86_64-unknown-linux-gnu.Dockerfile .
+          )
+          DIGEST=$(docker push $GHCR_IMAGE:$TAG | grep -Eo "sha256:[a-f0-9]{64}")
+
+          if [ -n "$KUSTOMIZATION" ]; then
+            git config --global user.email "kaidotio@gmail.com"
+            git config --global user.name "kaidotio"
+            branch=${IMAGE}
+            git checkout -b ${branch}
+
+            IFS_BAK=$IFS
+            IFS=,
+            targets=($KUSTOMIZATION)
+            IFS=$IFS_BAK
+            for target in "${targets[@]}"; do
+              (
+                cd ${target}
+                kustomize edit set image ${GHCR_IMAGE}=${GHCR_IMAGE}@${DIGEST}
+              )
+            done
+
+            git add ${targets[*]}
+            if git commit -m "Deploy ${IMAGE}"; then
+              git fetch origin ${{ github.ref_name }}
+              git rebase origin/${{ github.ref_name }}
+              git push -f origin ${branch}
+              if [ $(gh pr list --head ${branch} --json id | jq '. | length') -eq 0 ]; then
+                gh pr create --title "Update ${IMAGE}" --body "${GHCR_IMAGE}@${DIGEST}" --head ${branch}
+              fi
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  x86_64-unknown-linux-musl:
+    timeout-minutes: 60
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE: cross/x86_64-unknown-linux-musl
+      KUSTOMIZATION: ""
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/
+            cross/
+      - run: git config --global submodule.recurse false
+      - uses: actions/cache@v5
+        with:
+          path: /home/runner/.cache/docker-build
+          key: ${{ runner.os }}-x86_64-unknown-linux-musl-docker-${{ hashFiles('cross/x86_64-unknown-linux-musl.Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-x86_64-unknown-linux-musl-docker-
+      - uses: ./.github/actions/setup-docker
+      - run: |
+          IMAGE_PATH=${GITHUB_REPOSITORY}/${IMAGE}
+          GHCR_IMAGE=ghcr.io/${IMAGE_PATH}
+          TAG=${GITHUB_REF##*/}
+          opt=""
+          if [ -d /home/runner/.cache/docker-build ]; then
+            opt="--cache-from type=local,src=/home/runner/.cache/docker-build"
+          else
+            opt="--cache-from type=registry,ref=$GHCR_IMAGE:cache"
+          fi
+          (
+            cd cross
+
+            docker buildx build --output type=docker,name=$GHCR_IMAGE:$TAG,push=false ${opt} --cache-to type=local,mode=max,dest=/home/runner/.cache/docker-build --cache-to type=registry,ref=$GHCR_IMAGE:cache,mode=max -f x86_64-unknown-linux-musl.Dockerfile .
+          )
+          DIGEST=$(docker push $GHCR_IMAGE:$TAG | grep -Eo "sha256:[a-f0-9]{64}")
+
+          if [ -n "$KUSTOMIZATION" ]; then
+            git config --global user.email "kaidotio@gmail.com"
+            git config --global user.name "kaidotio"
+            branch=${IMAGE}
+            git checkout -b ${branch}
+
+            IFS_BAK=$IFS
+            IFS=,
+            targets=($KUSTOMIZATION)
+            IFS=$IFS_BAK
+            for target in "${targets[@]}"; do
+              (
+                cd ${target}
+                kustomize edit set image ${GHCR_IMAGE}=${GHCR_IMAGE}@${DIGEST}
+              )
+            done
+
+            git add ${targets[*]}
+            if git commit -m "Deploy ${IMAGE}"; then
+              git fetch origin ${{ github.ref_name }}
+              git rebase origin/${{ github.ref_name }}
+              git push -f origin ${branch}
+              if [ $(gh pr list --head ${branch} --json id | jq '. | length') -eq 0 ]; then
+                gh pr create --title "Update ${IMAGE}" --body "${GHCR_IMAGE}@${DIGEST}" --head ${branch}
+              fi
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  scan-x86_64-unknown-linux-gnu:
+    if: github.repository_owner == 'kaidotio'
+    needs: x86_64-unknown-linux-gnu
+    uses: ./.github/workflows/reusable_scan-image.yaml
+    with:
+      image: ghcr.io/${{ github.repository }}/cross/x86_64-unknown-linux-gnu:${{ github.ref_name }}
+    secrets: inherit
+  scan-x86_64-unknown-linux-musl:
+    if: github.repository_owner == 'kaidotio'
+    needs: x86_64-unknown-linux-musl
+    uses: ./.github/workflows/reusable_scan-image.yaml
+    with:
+      image: ghcr.io/${{ github.repository }}/cross/x86_64-unknown-linux-musl:${{ github.ref_name }}
+    secrets: inherit

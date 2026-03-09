@@ -1,0 +1,42 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TidbCluster
+metadata:
+  name: slack-logger
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  version: v8.5.0
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
+  pd:
+    baseImage: ghcr.io/hippocampus-dev/hippocampus/mirror/pingcap/pd
+    replicas: 1
+    maxFailoverCount: 3
+    requests:
+      storage: "1Gi"
+    config: {}
+  tikv:
+    baseImage: ghcr.io/hippocampus-dev/hippocampus/mirror/pingcap/tikv
+    replicas: 1
+    maxFailoverCount: 3
+    requests:
+      storage: "10Gi"
+    config: {}
+  tidb:
+    baseImage: ghcr.io/hippocampus-dev/hippocampus/mirror/pingcap/tidb
+    replicas: 1
+    maxFailoverCount: 3
+    service:
+      type: ClusterIP
+    slowLogTailer:
+      image: ghcr.io/hippocampus-dev/hippocampus/mirror/busybox:1.26.2
+    config: {}
+  ticdc:
+    baseImage: ghcr.io/hippocampus-dev/hippocampus/mirror/pingcap/ticdc
+    replicas: 1
+    config: {}

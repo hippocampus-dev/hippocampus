@@ -1,0 +1,167 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": false,
+      "installOhMyZsh": false,
+      "installOhMyZshConfig": false,
+      "username": "nonroot",
+      "userUid": "65532",
+      "userGid": "65532",
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "22",
+    },
+    "./features/cache": {},
+    "./features/rename-vscode-user": {
+      "username": "${localEnv:USER}",
+    },
+  },
+  "remoteUser": "${localEnv:USER}",
+  "updateRemoteUserUID": true,
+  "remoteEnv": {
+    "LOCAL_USER": "${localEnv:USER}",
+    "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
+  },
+  "mounts": [
+    {
+      "source": "${localWorkspaceFolder}/files/etc/docker/daemon.json",
+      "target": "/etc/docker/daemon.json",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/etc/profile.d/editor.sh",
+      "target": "/etc/profile.d/editor.sh",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/etc/profile.d/makeflags.sh",
+      "target": "/etc/profile.d/makeflags.sh",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/etc/profile.d/path.sh",
+      "target": "/etc/profile.d/path.sh",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/etc/profile.d/sslkeylog.sh",
+      "target": "/etc/profile.d/sslkeylog.sh",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/etc/profile.d/tls.sh",
+      "target": "/etc/profile.d/tls.sh",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.asdf/plugins/hippocampus",
+      "target": "${localEnv:HOME}/.asdf/plugins/hippocampus",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.config/fish/completions/k9s.fish",
+      "target": "${localEnv:HOME}/.config/fish/completions/k9s.fish",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.config/fish/completions/kubectl.fish",
+      "target": "${localEnv:HOME}/.config/fish/completions/kubectl.fish",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.config/fish/config.fish",
+      "target": "${localEnv:HOME}/.config/fish/config.fish",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.config/k9s/plugins.yaml",
+      "target": "${localEnv:HOME}/.config/k9s/plugins.yaml",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.config/k9s/skin.yaml",
+      "target": "${localEnv:HOME}/.config/k9s/skin.yaml",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.bash_profile",
+      "target": "${localEnv:HOME}/.bash_profile",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.asdfrc",
+      "target": "${localEnv:HOME}/.asdfrc",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.gitconfig",
+      "target": "${localEnv:HOME}/.gitconfig",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.gitignore",
+      "target": "${localEnv:HOME}/.gitignore",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.tmux.conf",
+      "target": "${localEnv:HOME}/.tmux.conf",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.tmux.dev.conf",
+      "target": "${localEnv:HOME}/.tmux.dev.conf",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/.tool-versions",
+      "target": "${localEnv:HOME}/.tool-versions",
+      "type": "bind",
+    },
+    {
+      "source": "${localWorkspaceFolder}/files/home/kai/bin/env",
+      "target": "${localEnv:HOME}/bin/env",
+      "type": "bind",
+    },
+    {
+      "source": "${localEnv:HOME}/.local/share/fish/fish_history",
+      "target": "${localEnv:HOME}/.local/share/fish/fish_history",
+      "type": "bind",
+    },
+  ],
+  "postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
+  "postStartCommand": "bash .devcontainer/postStartCommand.sh",
+  "postAttachCommand": "bash .devcontainer/postAttachCommand.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "Shopify.ruby-lsp",
+        "golang.Go",
+        "rust-lang.rust-analyzer",
+        "denoland.vscode-deno",
+        "ms-python.python",
+        "vscodevim.vim",
+      ],
+    },
+    "jetbrains": {
+      "backend": "IntelliJ",
+      "plugins": [
+        "com.intellij.aqua",
+        "com.intellij.ml.llm",
+        "org.intellij.plugins.hcl",
+        "org.jetbrains.plugins.ruby",
+        "org.jetbrains.plugins.go",
+        "org.jetbrains.plugins.go-template",
+        "com.jetbrains.rust",
+        "name.kropp.intellij.makefile",
+        "deno",
+        "Pythonid",
+        "PythonCore",
+        "IdeaVIM",
+      ]
+    }
+  }
+}

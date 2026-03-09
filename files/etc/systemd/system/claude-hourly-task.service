@@ -1,0 +1,12 @@
+[Unit]
+Requires=network-online.target minikube.service
+After=network-online.target minikube.service
+
+[Service]
+Type=oneshot
+Restart=on-failure
+
+User=kai
+Environment=KUBECONFIG=/home/kai/.kube/config
+ExecStart=/usr/local/bin/claude-hourly-task.sh
+TimeoutStartSec=600

@@ -1,0 +1,45 @@
+name: Release/insight
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: read
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  release:
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${GITHUB_TOKEN}
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            insight/
+            packages/
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-insight-packages-${{ hashFiles('insight/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-insight-packages-
+      - uses: actions/cache@v5
+        with:
+          path: insight/target
+          key: ${{ runner.os }}-insight-${{ hashFiles('insight/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-insight-
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: |
+          curl -fsSL https://github.com/goreleaser/goreleaser/releases/download/v2.8.2/goreleaser_Linux_x86_64.tar.gz | tar zx --no-same-owner -C /usr/local/bin goreleaser
+          curl -fsSL https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz | tar zx --no-same-owner -C /usr/local/bin cross
+      - run: |
+          rustup component add rustfmt
+          rustup component add rust-src
+          goreleaser release
+        working-directory: insight

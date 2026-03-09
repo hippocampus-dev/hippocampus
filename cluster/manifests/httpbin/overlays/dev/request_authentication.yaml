@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: httpbin-istio
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: httpbin-istio
+  jwtRules:
+    - issuer: https://token.actions.githubusercontent.com
+      jwksUri: https://token.actions.githubusercontent.com/.well-known/jwks
+      outputClaimToHeaders:
+        - claim: sub
+          header: X-Auth-Request-User

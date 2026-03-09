@@ -1,0 +1,19 @@
+name: Diff
+inputs:
+  baseline:
+    required: true
+    description: "Baseline path"
+  target:
+    required: true
+    description: "Target path"
+outputs:
+  diffPath:
+    description: "Diff path"
+  diffAmount:
+    description: "Difference amount"
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.baseline }}
+    - ${{ inputs.target }}

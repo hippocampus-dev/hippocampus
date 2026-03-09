@@ -1,0 +1,46 @@
+name: Dynamic runner
+permissions:
+  contents: read
+on:
+  workflow_call:
+    inputs:
+      labels:
+        required: true
+        type: string
+      fallback-runner:
+        required: true
+        type: string
+    secrets:
+      github-token:
+        required: true
+    outputs:
+      runner:
+        value: ${{ jobs.check.outputs.runner }}
+jobs:
+  check:
+    timeout-minutes: 1
+    runs-on: ubuntu-24.04
+    outputs:
+      runner: ${{ steps.check-runner.outputs.runner }}
+    steps:
+      - id: check-runner
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.github-token }}
+          script: |
+            const labels = "${{ inputs.labels }}".split(",");
+            const fallback = "${{ inputs.fallback-runner }}";
+            
+            try {
+              const { data } = await github.rest.actions.listSelfHostedRunnersForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              
+              const runner = data.runners.find(r => r.status === "online" && labels.every(label => r.labels.some(l => l.name === label)));
+              
+              const result = runner ? JSON.stringify(labels) : JSON.stringify(fallback);
+              core.setOutput("runner", result);
+            } catch (error) {
+              core.setOutput("runner", JSON.stringify(fallback));
+            }
