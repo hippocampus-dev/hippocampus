@@ -1,0 +1,35 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: fluentd-forward
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-forward
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: fluentd-aggregator-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-aggregator
+      app.kubernetes.io/component: proxy
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: fluentd-aggregator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-aggregator
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

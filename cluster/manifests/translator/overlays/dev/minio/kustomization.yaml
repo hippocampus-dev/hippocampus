@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: translator-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: translator
+      variant: utilities
+
+commonAnnotations:
+  argocd.argoproj.io/sync-wave: "-2"
+
+resources:
+  - ../../../../utilities/minio
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/service.yaml
+  - path: patches/stateful_set.yaml
+  - path: patches/vertical_pod_autoscaler.yaml

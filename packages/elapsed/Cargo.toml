@@ -1,0 +1,11 @@
+[package]
+name = "elapsed"
+version = "0.1.0"
+authors = ["kai"]
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0.127", features = ["derive"] }
+serde_json = { version = "1.0.66" }
+
+elapsed_macro = { path = "../elapsed_macro" }

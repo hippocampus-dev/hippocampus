@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:c14f4a3f1c6fcd89a0920c698d48e2d63f047aeca758b9eb982ebb9bd65c3d59
+  name: ghcr.io/hippocampus-dev/hippocampus/prometheus-metrics-proxy-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/prometheus-metrics-proxy-hook

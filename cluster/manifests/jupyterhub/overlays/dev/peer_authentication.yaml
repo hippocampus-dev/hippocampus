@@ -1,0 +1,35 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: jupyterhub-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: hub
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: jupyterhub-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: proxy
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: jupyterhub-singleuser-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: singleuser-server
+  mtls:
+    mode: STRICT

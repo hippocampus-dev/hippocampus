@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nodeport-controller
+spec:
+  issuerRef:
+    name: skaffold-nodeport-controller-selfsigned
+  dnsNames:
+    - skaffold-nodeport-controller.skaffold-nodeport-controller.svc
+    - skaffold-nodeport-controller.skaffold-nodeport-controller.svc.cluster.local

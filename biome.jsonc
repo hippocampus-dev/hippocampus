@@ -1,0 +1,36 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
+  "files": {
+    // Keep in sync with pyproject.toml [tool.ruff] exclude
+    "includes": [
+      "**",
+      "!**/.bzr/**",
+      "!**/.direnv/**",
+      "!**/.eggs/**",
+      "!**/.git/**",
+      "!**/.git-rewrite/**",
+      "!**/.hg/**",
+      "!**/.mypy_cache/**",
+      "!**/.nox/**",
+      "!**/.pants.d/**",
+      "!**/.pytype/**",
+      "!**/.ruff_cache/**",
+      "!**/.svn/**",
+      "!**/.tox/**",
+      "!**/.venv/**",
+      "!**/__pypackages__/**",
+      "!**/_build/**",
+      "!**/buck-out/**",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!**/target/**",
+      "!**/venv/**",
+      "!**/zz_generated*",
+      "!**/*.gen.*"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}

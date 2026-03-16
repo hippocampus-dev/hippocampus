@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: events-logger
+spec:
+  maxUnavailable: 1

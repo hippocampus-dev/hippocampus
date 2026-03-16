@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+typos=$(cat $1 | typos - --write-changes)
+if [ -n "$typos" ]; then
+  echo "$typos" > $1
+fi

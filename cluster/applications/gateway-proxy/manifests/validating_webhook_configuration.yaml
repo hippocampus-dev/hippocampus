@@ -1,0 +1,28 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: gateway-proxy
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: gateway-proxy
+        path: /validate
+        port: 9443
+    name: gateway-proxy.kaidotio.github.io
+    failurePolicy: Ignore
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - gateway.networking.k8s.io
+        apiVersions:
+          - v1
+        resources:
+          - gateways
+          - listenersets
+        scope: "*"
+        operations:
+          - CREATE
+          - UPDATE
