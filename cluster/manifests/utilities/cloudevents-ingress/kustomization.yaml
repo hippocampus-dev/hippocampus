@@ -8,6 +8,6 @@ resources:
 - service.yaml
 
 images:
-- digest: sha256:43919b32b0347b635bd4afc1d363ba137fdf0126e132871293e53a9e9b59e957
+- digest: sha256:0f0e0934938d41c5e3fb0fb6ed1aaf41f8915549a3ffb054fb0f549dcec32306
   name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-ingress
   newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-ingress
