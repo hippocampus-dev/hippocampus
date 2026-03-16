@@ -16,6 +16,6 @@ configMapGenerator:
   name: distribution-scheduler-config
 
 images:
-- digest: sha256:2c4fe08e476ccad447a04690c0b84d56385ab56bde7518c12bf249385bd4b65e
+- digest: sha256:b319f262c81b116d923da4ce73498fb494d7533578927913e82592d78369f042
   name: ghcr.io/hippocampus-dev/hippocampus/distribution-scheduler
   newName: ghcr.io/hippocampus-dev/hippocampus/distribution-scheduler
