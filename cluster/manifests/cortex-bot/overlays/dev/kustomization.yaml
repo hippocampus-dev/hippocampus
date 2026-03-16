@@ -29,7 +29,7 @@ images:
 - digest: sha256:39b13f531cec4fd60f1d5f2cabb08103e6b719e73d7dd162b29ec0b17d03fd89
   name: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
   newName: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
-- digest: sha256:c860211ef2817949f679be5dbcf3a51603dcb319f8167596c2ebc4cfd702c11d
+- digest: sha256:728afdd144953c63de2da5a076cb0841e085db259a81980a77b5ad8b8c55fb55
   name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
   newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
 - digest: sha256:5ebd92006c62471b2d10f8aa6fe0842be77265d0647f7d7024f0a18b974e6932
