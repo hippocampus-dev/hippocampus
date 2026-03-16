@@ -23,7 +23,7 @@ jobs:
       SERVICE_ACCOUNT: drive-sync@rich-gift-314809.iam.gserviceaccount.com
       DRIVE_FOLDER_ID: REPLACE_WITH_FOLDER_ID
     steps:
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@v3
         id: auth
         with:
           workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
