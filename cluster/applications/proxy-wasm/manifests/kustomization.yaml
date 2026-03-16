@@ -8,6 +8,6 @@ resources:
 - service.yaml
 images:
 - digest: sha256:ab631a3d75593f27d5f1c424adc55a7a927e4b156e08c770fde9420cf8ec3351
-- digest: sha256:54518ac3f5ea16d1ff788ce64527910fe55747c4e580cac5dde23849218afb56
+- digest: sha256:48c94e75eb724ec9834cf019298c351996b5f01f51804b4ca0ee7357ddcaefee
   name: ghcr.io/hippocampus-dev/hippocampus/proxy-wasm
   newName: ghcr.io/hippocampus-dev/hippocampus/proxy-wasm
