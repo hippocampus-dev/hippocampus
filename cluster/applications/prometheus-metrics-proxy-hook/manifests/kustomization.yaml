@@ -10,6 +10,6 @@ resources:
 - service.yaml
 - service_account.yaml
 images:
-- digest: sha256:c14f4a3f1c6fcd89a0920c698d48e2d63f047aeca758b9eb982ebb9bd65c3d59
+- digest: sha256:56acb3b9260e8d360f42b8297a2afbf44c8583cf7d10c8e7941b6a4f73eccc7a
   name: ghcr.io/hippocampus-dev/hippocampus/prometheus-metrics-proxy-hook
   newName: ghcr.io/hippocampus-dev/hippocampus/prometheus-metrics-proxy-hook
