@@ -9,6 +9,6 @@ resources:
 configurations:
 - kustomizeconfig.yaml
 images:
-- digest: sha256:2e57969d3a6c79996d1474e36bb69cf09eca25b5cdd4a2cc1a7b1c951d75e55e
+- digest: sha256:ba37724af5449239f0d50b8318127b36a7b96598ab745fd105aaf246f923b77b
   name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-logger
   newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-logger
