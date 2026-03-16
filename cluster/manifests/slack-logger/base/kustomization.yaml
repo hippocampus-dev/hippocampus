@@ -8,6 +8,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:e85037a573f12159c3de7a99166a3b3f1b22c9537a81a7a3e1195c132e4b3c2f
+- digest: sha256:2a28ae3b35b6fde64c80b223e53020fa5363b1ff592c75181b88b7d33abb3986
   name: ghcr.io/hippocampus-dev/hippocampus/slack-logger
   newName: ghcr.io/hippocampus-dev/hippocampus/slack-logger
