@@ -1,0 +1,23 @@
+# HACK: override the default-br-config to use Kafka located in the knative-eventing
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-br-defaults
+data:
+  default-br-config: |
+    clusterDefault:
+      brokerClass: Kafka
+      apiVersion: v1
+      kind: ConfigMap
+      name: kafka-broker-config
+      namespace: knative-eventing
+      delivery:
+        deadLetterSink:
+          ref:
+            apiVersion: messaging.knative.dev/v1beta1
+            kind: KafkaChannel
+            name: dead-letter
+            namespace: knative-eventing
+        retry: 3
+        backoffPolicy: exponential
+        backoffDelay: "PT1S"

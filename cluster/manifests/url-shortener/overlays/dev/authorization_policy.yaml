@@ -1,0 +1,44 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: url-shortener
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: url-shortener
+      app.kubernetes.io/component: ""
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - url-shortener.minikube.127.0.0.1.nip.io
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - url-shortener.kaidotio.dev
+      to:
+        - operation:
+            methods:
+              - GET
+    - from:
+        - source:
+            namespaces:
+              - cortex-bot
+              - cortex-api
+      to:
+        - operation:
+            methods:
+              - POST

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:711d90a1e4031afe1516e42f39965e4eeb6c406018b903c23e82d9464508d1d4
+  name: ghcr.io/hippocampus-dev/hippocampus/exactly-one-pod-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/exactly-one-pod-hook

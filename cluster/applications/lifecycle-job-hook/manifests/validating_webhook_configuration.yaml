@@ -1,0 +1,27 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: lifecycle-job-hook
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: lifecycle-job-hook
+        path: /validate
+        port: 9443
+    name: lifecycle-job-hook.kaidotio.github.io
+    failurePolicy: Ignore
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - batch
+        apiVersions:
+          - v1
+        resources:
+          - jobs/status
+          - cronjobs/status
+        scope: "*"
+        operations:
+          - UPDATE

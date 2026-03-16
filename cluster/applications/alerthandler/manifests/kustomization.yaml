@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- service.yaml
+
+configurations:
+- kustomizeconfig.yaml
+
+images:
+- digest: sha256:e596c54f3c1e56b00553c1d78d7352c5af31a140e5ab09e7419fc530d28b4e47
+  name: ghcr.io/hippocampus-dev/hippocampus/alerthandler
+  newName: ghcr.io/hippocampus-dev/hippocampus/alerthandler

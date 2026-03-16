@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: exactly-one-pod-hook
+  labels:
+    name: exactly-one-pod-hook
+    pod-security.kubernetes.io/enforce: restricted

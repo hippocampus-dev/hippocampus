@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: gateway-proxy
+  annotations:
+    cert-manager.io/inject-ca-from: skaffold-gateway-proxy/skaffold-gateway-proxy

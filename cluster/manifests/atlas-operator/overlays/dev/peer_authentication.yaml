@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: atlas-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: atlas-operator
+      app.kubernetes.io/component: controller-manager
+  mtls:
+    mode: STRICT

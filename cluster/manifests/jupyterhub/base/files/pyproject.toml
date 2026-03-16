@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "jupyterhub_config"
+version = "0.1.0"
+description = ""
+authors = ["Kai Aihara <kaidotio@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11,<3.12"
+
+jupyterhub = "^5.3.0"
+jupyterhub-kubespawner = "^6.2.0"
+tornado = "^6.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

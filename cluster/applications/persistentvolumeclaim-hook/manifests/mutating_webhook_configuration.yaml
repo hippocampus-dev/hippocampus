@@ -1,0 +1,35 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: persistentvolumeclaim-hook
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: persistentvolumeclaim-hook
+        path: /mutate
+        port: 9443
+    name: persistentvolumeclaim-hook.kaidotio.github.io
+    failurePolicy: Fail
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        resources:
+          - persistentvolumeclaims
+        scope: "*"
+        operations:
+          - UPDATE
+      - apiGroups:
+          - apps
+        apiVersions:
+          - v1
+        resources:
+          - statefulsets
+        scope: "*"
+        operations:
+          - UPDATE
