@@ -25,6 +25,6 @@ patches:
 - path: patches/service.yaml
 
 images:
-- digest: sha256:7b9279ec88a19ba0fd6963a845cc73765e4e603ba9ad3534699e54ffca493315
+- digest: sha256:387f94db7411d8ae23770199d9a8d9b5a9e56a659a524fb641e5de2bdbce0d81
   name: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher
   newName: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher
