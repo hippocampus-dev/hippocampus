@@ -7,6 +7,6 @@ resources:
 configurations:
 - kustomizeconfig.yaml
 images:
-- digest: sha256:931c0cfbd2edd6e45683ad18cc5ea92fa1d859d88ca8fbcc5ebac4dda3c76e0c
+- digest: sha256:c0c92202e448f8101db5559012f8aa34b7b753b71f20c14914e8a8c5ec5dc55b
   name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-relay
   newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-relay
