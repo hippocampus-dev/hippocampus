@@ -15,6 +15,6 @@ resources:
 - service_account.yaml
 - validating_webhook_configuration.yaml
 images:
-- digest: sha256:a1c405238d9b188abaf8c049086605b39adfb0b66ace08fa819b48fc1ed332a9
+- digest: sha256:c7603622e4f9ad7a4fbf22b57365b25cb819e5143a3aef4569bfc275243057c8
   name: ghcr.io/hippocampus-dev/hippocampus/gateway-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/gateway-proxy
