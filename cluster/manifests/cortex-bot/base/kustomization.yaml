@@ -7,6 +7,6 @@ resources:
 
 images:
 - digest: sha256:a0e3bf4b8e44ee694e3ca15b2bf622f39636250bfe9902f38e36dde006d1f0db
-- digest: sha256:52ee43be063f35049af12721211ad9e55d203d59defa2ca3f326a926ee3ab043
+- digest: sha256:71c22a933df7e77b8ab99b4e879d0d6fe6019be559ea56d4cb3c77babd500ecb
   name: ghcr.io/hippocampus-dev/hippocampus/cortex-bot
   newName: ghcr.io/hippocampus-dev/hippocampus/cortex-bot
