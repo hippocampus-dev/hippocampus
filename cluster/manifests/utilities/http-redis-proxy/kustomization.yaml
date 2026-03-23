@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:c44ffa5a56e9e12d4c0024fe0200f5b78064ee1625aa683f31b01e5658f02a46
+- digest: sha256:19520dc773c19019b6afd9335f2ae6dc37a3a87fff7202d73869026dc5ba0a46
   name: ghcr.io/hippocampus-dev/hippocampus/http-redis-proxy
   newName: ghcr.io/hippocampus-dev/hippocampus/http-redis-proxy
