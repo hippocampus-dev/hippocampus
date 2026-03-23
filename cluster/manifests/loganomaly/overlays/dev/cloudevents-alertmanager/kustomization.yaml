@@ -10,6 +10,6 @@ resources:
 configurations:
 - kustomizeconfig.yaml
 images:
-- digest: sha256:358e92eada302ca946a07e414ddb67ce24f227e59252f99a521d6cb15499ade6
+- digest: sha256:0743efbad58537639dbf41d0e7a15c888fc02b51a5cee1225c806541edc0edd9
   name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-alertmanager
   newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-alertmanager
