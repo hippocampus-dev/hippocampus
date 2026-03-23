@@ -9,7 +9,7 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:3fe52bbf17d8960889ce48aee791354ae99a7bca259dd08e68655062d0e6011d
+- digest: sha256:be913bc93020290c920d816046654946e8c65c7ff6900e4910ebaec83f5e8553
   name: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container
   newName: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container
 - digest: sha256:913e7699a407fc47a5bbc3da5b7f053b1242afea30ed74630eb567d895f01807
