@@ -8,6 +8,6 @@ resources:
 - service.yaml
 images:
 - digest: sha256:12072a1cfb9f6ce8424f7826358df6ba720397ffa43289421fbf59831238d92a
-- digest: sha256:8b806c42be11adaf2bf85f27ffdf01a733371b1064064daf3279c9bdd8486db9
+- digest: sha256:f23ee34523bd907ffcc0bbbb277c0ea9caf8f72d3680ce704127fdd264ecfab0
   name: ghcr.io/hippocampus-dev/hippocampus/cortex-api
   newName: ghcr.io/hippocampus-dev/hippocampus/cortex-api
