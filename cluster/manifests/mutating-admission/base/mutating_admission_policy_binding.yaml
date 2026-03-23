@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: pods.mutating.kaidotio.github.io
+spec:
+  policyName: pods.mutating.kaidotio.github.io

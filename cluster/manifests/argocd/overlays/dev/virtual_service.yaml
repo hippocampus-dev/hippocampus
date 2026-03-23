@@ -1,0 +1,39 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: argocd-server
+spec:
+  gateways:
+    - argocd-server
+  hosts:
+    - argocd.minikube.127.0.0.1.nip.io
+    - argocd.kaidotio.dev
+  http:
+  - route:
+    - destination:
+        host: argocd-server
+        port:
+          number: 80
+    retries:
+      attempts: 3
+      retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: argocd-http-redis-proxy
+spec:
+  gateways:
+    - argocd-http-redis-proxy
+  hosts:
+    - http-redis-proxy.minikube.127.0.0.1.nip.io
+    - http-redis-proxy.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: argocd-http-redis-proxy
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

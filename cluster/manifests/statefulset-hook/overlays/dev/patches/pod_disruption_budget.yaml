@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: statefulset-hook
+spec:
+  maxUnavailable: 1

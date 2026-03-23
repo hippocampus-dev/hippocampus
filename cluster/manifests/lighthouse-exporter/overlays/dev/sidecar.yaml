@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: lighthouse-exporter
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: lighthouse-exporter
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./kaidotio.github.io
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

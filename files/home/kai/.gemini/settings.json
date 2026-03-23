@@ -1,0 +1,133 @@
+{
+  "context": {
+    "fileName": "AGENTS.md"
+  },
+  "general": {
+    "previewFeatures": true
+  },
+  "ui": {
+    "theme": "Default"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
+  },
+  "hooks": {
+    "BeforeAgent": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/hooks/UserPromptSubmit.sh"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/hooks/PreToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/hooks/PostToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/hooks/Notification.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/hooks/Stop.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "notify": {
+      "command": "armyknife",
+      "args": [
+        "mcp",
+        "notify"
+      ],
+      "env": {}
+    },
+    "tmux": {
+      "command": "armyknife",
+      "args": [
+        "mcp",
+        "tmux"
+      ],
+      "env": {}
+    },
+    "gemini": {
+      "command": "armyknife",
+      "args": [
+        "mcp",
+        "gemini"
+      ],
+      "env": {}
+    },
+    "codex": {
+      "command": "armyknife",
+      "args": [
+        "mcp",
+        "codex"
+      ],
+      "env": {}
+    },
+    "claude": {
+      "command": "armyknife",
+      "args": [
+        "mcp",
+        "claude"
+      ],
+      "env": {}
+    },
+    "chrome": {
+      "command": "chrome-devtools-mcp",
+      "args": [
+        "--browserUrl",
+        "http://127.0.0.1:59222"
+      ],
+      "env": {}
+    },
+    "graphiti": {
+      "url": "http://graphiti-mcp-server.127.0.0.1.nip.io/mcp"
+    }
+  },
+  "_generated": "sync-agent-files.sh",
+  "tools": {
+    "sandbox": true
+  }
+}

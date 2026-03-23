@@ -1,0 +1,65 @@
+name: drive-sync
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  id-token: write
+  actions: write
+jobs:
+  sync:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 60
+    runs-on: [self-hosted, github-actions-runner-controller]
+    env:
+      MINIO_ENDPOINT: http://drive-sync-minio.drive-sync.svc.cluster.local:9000
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: miniominio
+      MINIO_BUCKET: drive-sync
+      WORKLOAD_IDENTITY_PROVIDER: projects/1070864848239/locations/global/workloadIdentityPools/github/providers/github
+      SERVICE_ACCOUNT: drive-sync@rich-gift-314809.iam.gserviceaccount.com
+      DRIVE_FOLDER_ID: REPLACE_WITH_FOLDER_ID
+    steps:
+      - uses: google-github-actions/auth@v3
+        id: auth
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+          token_format: access_token
+      - run: |
+          set -eo pipefail
+          curl -fsSL https://github.com/rclone/rclone/releases/download/v1.68.2/rclone-v1.68.2-linux-amd64.zip -o /tmp/rclone.zip
+          unzip -o /tmp/rclone.zip -d /tmp
+          install -m 755 /tmp/rclone-v1.68.2-linux-amd64/rclone ${{ runner.temp }}/rclone
+      - env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          set -eo pipefail
+          ${{ runner.temp }}/rclone sync "drive:" "minio:${MINIO_BUCKET}/" --config <(cat <<EOF
+          [drive]
+          type = drive
+          scope = drive.readonly
+          root_folder_id = ${DRIVE_FOLDER_ID}
+          token = {"access_token":"${ACCESS_TOKEN}","token_type":"Bearer","expiry":"$(date -u -d '+1 hour' '+%Y-%m-%dT%H:%M:%SZ')"}
+
+          [minio]
+          type = s3
+          provider = Minio
+          endpoint = ${MINIO_ENDPOINT}
+          access_key_id = ${MINIO_ACCESS_KEY}
+          secret_access_key = ${MINIO_SECRET_KEY}
+          EOF
+          )
+  rerun:
+    if: failure() && github.run_attempt == 1
+    needs: sync
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - run: gh run rerun --failed ${{ github.run_id }} --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ github.token }}

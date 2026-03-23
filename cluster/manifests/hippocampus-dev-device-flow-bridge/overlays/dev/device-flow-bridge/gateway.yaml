@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: device-flow-bridge
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - device-flow-bridge.minikube.127.0.0.1.nip.io
+        # Excluded from ext-authz: OAuth callback receives browser redirects from Slack
+        - device-flow-bridge.kaidotio.dev
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

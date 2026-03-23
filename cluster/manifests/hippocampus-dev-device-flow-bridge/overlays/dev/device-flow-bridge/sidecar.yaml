@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: device-flow-bridge
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: device-flow-bridge
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./slack.com
+        - ./hippocampus-dev-redis-haproxy-writer.hippocampus-dev-device-flow-bridge.svc.cluster.local
+        - ./hippocampus-dev-redis-haproxy-reader.hippocampus-dev-device-flow-bridge.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - pyroscope/pyroscope-distributor.pyroscope.svc.cluster.local

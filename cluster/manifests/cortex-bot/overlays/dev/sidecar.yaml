@@ -1,0 +1,47 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: cortex-bot-mc
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: cortex-bot
+      app.kubernetes.io/component: mc
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+  - captureMode: DEFAULT
+    hosts:
+    - ./cortex-bot-minio.cortex-bot.svc.cluster.local
+    - istio-system/istiod.istio-system.svc.cluster.local
+    - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: cortex-bot
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: cortex-bot
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY # Some agents request to external
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./api.openai.com
+        - ./openaipublic.blob.core.windows.net
+        - ./slack.com
+        - ./www.slack.com
+        - ./wss-primary.slack.com
+        - ./cortex-bot-redis-haproxy-reader.cortex-bot.svc.cluster.local
+        - ./cortex-bot-redis-haproxy-writer.cortex-bot.svc.cluster.local
+        - ./cortex-bot-minio.cortex-bot.svc.cluster.local
+        - grafana/grafana.grafana.svc.cluster.local
+        - embedding-retrieval/embedding-retrieval.embedding-retrieval.svc.cluster.local
+        - url-shortener/url-shortener.url-shortener.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

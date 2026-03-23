@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- cluster_role.yaml
+- gateway_class.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- issuer.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+- validating_webhook_configuration.yaml
+images:
+- digest: sha256:a1c405238d9b188abaf8c049086605b39adfb0b66ace08fa819b48fc1ed332a9
+  name: ghcr.io/hippocampus-dev/hippocampus/gateway-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/gateway-proxy

@@ -1,0 +1,9 @@
+[Unit]
+
+[Service]
+Type=oneshot
+
+ExecStart=/usr/local/bin/claude-hourly-task.sh
+TimeoutStartSec=3600
+StandardOutput=journal
+StandardError=journal

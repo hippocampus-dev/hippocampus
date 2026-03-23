@@ -1,0 +1,12 @@
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: http-kvs
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: http-kvs
+      app.kubernetes.io/component: ""
+  jwtRules:
+    - issuer: https://token.actions.githubusercontent.com
+      jwksUri: https://token.actions.githubusercontent.com/.well-known/jwks

@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tidb-stats-exporter
+spec:
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            sidecar.istio.io/inject: "true"
+          annotations:
+            sidecar.istio.io/proxyCPULimit: 1000m
+            sidecar.istio.io/proxyMemoryLimit: 1Gi
+            sidecar.istio.io/proxyCPU: 30m
+            sidecar.istio.io/proxyMemory: 64Mi
+        spec:
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+          containers:
+            - name: tidb-stats-exporter
+              env:
+                - name: TIDB_ADDRESS
+                  value: http://slack-logger-tidb.slack-logger.svc.cluster.local:10080
+                - name: TIDB_DATABASE
+                  value: slack_logger
+                - name: TIDB_TABLE
+                  value: encrypted_messages
+                - name: HTTP_KVS_URL
+                  value: http://http-kvs.http-kvs.svc.cluster.local:8080
+                - name: KEY_PREFIX
+                  value: tidb-stats
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  cpu: 1000m
+                  memory: 128Mi

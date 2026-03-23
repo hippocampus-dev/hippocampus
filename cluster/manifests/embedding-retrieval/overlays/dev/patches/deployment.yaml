@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-retrieval
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8082"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-retrieval
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: embedding-retrieval
+              app.kubernetes.io/component: ""
+      hostAliases:
+        # Use tcp-proxy
+        - ip: 127.0.0.1
+          hostnames:
+            - embedding-retrieval-qdrant
+      containers:
+        - name: embedding-retrieval
+          envFrom:
+            - secretRef:
+                name: embedding-retrieval
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:4317
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "1.0"
+            - name: OTEL_BSP_SCHEDULE_DELAY
+              value: "5000"
+            - name: OTEL_BSP_EXPORT_TIMEOUT
+              value: "30000"
+            - name: OTEL_BSP_MAX_QUEUE_SIZE
+              value: "2048"
+            - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+              value: "512"
+            - name: DATASTORE
+              value: qdrant
+            - name: QDRANT_HOST
+              value: embedding-retrieval-qdrant
+            - name: QDRANT_PORT
+              value: "6333"
+            - name: QDRANT_COLLECTION
+              value: embedding-retrieval
+            - name: QDRANT_REPLICATION_FACTOR
+              value: "3"
+            - name: OPENAI_BASE_URL
+              value: http://embedding-gateway.embedding-gateway.svc.cluster.local:8080/v1
+          resources:
+            requests:
+              cpu: 10m
+        - name: tcp-proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/tcp-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --local-address=127.0.0.1:6333
+            - --monitor-address=127.0.0.1:8081
+            - --remote-address=embedding-retrieval-qdrant.embedding-retrieval.svc.cluster.local:6333
+            - --min-idle-connections=3
+            - --max-idle-connections=10
+            - --max-idle-time=1h
+            - --max-lifetime=24h
+            - --jitter-percentage=0.1
+          resources:
+            requests:
+              cpu: 10m
+        - name: exporter-merger
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MERGER_PORT
+              value: "8082"
+            - name: MERGER_URLS
+              value: http://127.0.0.1:8080/metrics http://127.0.0.1:8081/metrics
+          ports:
+            - name: metrics
+              containerPort: 8082
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m

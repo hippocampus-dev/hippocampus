@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: redis
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: redis
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./whisper-worker-redis.whisper-worker.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: redis-haproxy
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: redis-haproxy
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./whisper-worker-redis.whisper-worker.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

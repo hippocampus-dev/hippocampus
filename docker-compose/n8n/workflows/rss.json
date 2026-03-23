@@ -1,0 +1,447 @@
+{
+  "name": "RSS Tech Feed Curation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes",
+              "value": 60
+            }
+          ]
+        },
+        "feedUrl": "https://openai.com/blog/rss.xml"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000001",
+      "name": "OpenAI RSS",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [200, 100]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes",
+              "value": 60
+            }
+          ]
+        },
+        "feedUrl": "https://blog.google/technology/ai/rss/"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Google AI RSS",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes",
+              "value": 60
+            }
+          ]
+        },
+        "feedUrl": "https://kubernetes.io/feed.xml"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000003",
+      "name": "Kubernetes RSS",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [200, 500]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes",
+              "value": 60
+            }
+          ]
+        },
+        "feedUrl": "https://istio.io/blog/feed.xml"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000004",
+      "name": "Istio RSS",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [200, 700]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes",
+              "value": 60
+            }
+          ]
+        },
+        "feedUrl": "https://blog.rust-lang.org/feed.xml"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000005",
+      "name": "Rust RSS",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [200, 900]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "unit": "minutes",
+              "value": 60
+            }
+          ]
+        },
+        "feedUrl": "https://go.dev/blog/feed.atom"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000006",
+      "name": "Go RSS",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [200, 1100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ \"model\": \"gemma3:4b\", \"messages\": [{ \"role\": \"system\", \"content\": \"You are a tech news relevance classifier. Analyze the article and respond with ONLY a JSON object: {\\\"relevant\\\": true/false, \\\"summary\\\": \\\"one-line summary in Japanese\\\"}. An article is relevant if it announces breaking changes, new major releases, deprecations, security advisories, or significant new features. Ignore minor patches, community events, case studies, and marketing content.\" }, { \"role\": \"user\", \"content\": \"Title: \" + $json.title + \"\\nContent: \" + ($json.content || $json.contentSnippet || \"\").substring(0, 1000) }], \"stream\": false, \"format\": \"json\" }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000010",
+      "name": "Ollama Classify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 600]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = JSON.parse($input.first().json.message.content);\nconst source = $('Merge').first().json;\nreturn [{ json: { ...response, title: source.title, link: source.link, source: source._feedSource || 'unknown' } }];"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000011",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 600]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-0",
+              "leftValue": "={{ $json.relevant }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000012",
+      "name": "Is Relevant",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 600]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#reminders",
+          "mode": "name"
+        },
+        "text": ":newspaper: *{{ $json.source }}*\n\n*{{ $json.title }}*\n{{ $json.summary }}\n\n{{ $json.link }}",
+        "otherOptions": {}
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000013",
+      "name": "Slack Notify",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1140, 600]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000007",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [480, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, _feedSource: 'OpenAI' } }));"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000021",
+      "name": "Tag OpenAI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, _feedSource: 'Google AI' } }));"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000022",
+      "name": "Tag Google AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, _feedSource: 'Kubernetes' } }));"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000023",
+      "name": "Tag Kubernetes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, _feedSource: 'Istio' } }));"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000024",
+      "name": "Tag Istio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, 700]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, _feedSource: 'Rust' } }));"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000025",
+      "name": "Tag Rust",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, 900]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, _feedSource: 'Go' } }));"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000026",
+      "name": "Tag Go",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [340, 1100]
+    }
+  ],
+  "connections": {
+    "OpenAI RSS": {
+      "main": [
+        [
+          {
+            "node": "Tag OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google AI RSS": {
+      "main": [
+        [
+          {
+            "node": "Tag Google AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kubernetes RSS": {
+      "main": [
+        [
+          {
+            "node": "Tag Kubernetes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Istio RSS": {
+      "main": [
+        [
+          {
+            "node": "Tag Istio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rust RSS": {
+      "main": [
+        [
+          {
+            "node": "Tag Rust",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Go RSS": {
+      "main": [
+        [
+          {
+            "node": "Tag Go",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Google AI": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Kubernetes": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Istio": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Rust": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Go": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Ollama Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Classify": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Is Relevant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Relevant": {
+      "main": [
+        [
+          {
+            "node": "Slack Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
