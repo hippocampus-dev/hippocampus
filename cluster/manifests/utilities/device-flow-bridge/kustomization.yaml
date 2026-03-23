@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:a519ada55d0563d8b3e47921576db699fedda9fef0e3fb1b33c865277d7d446d
+- digest: sha256:aecd1d8f9c0581f28f8c3bc2bb5e2f7fa8daad7ae96bd68e20b7385e6e38f5e0
   name: ghcr.io/hippocampus-dev/hippocampus/device-flow-bridge
   newName: ghcr.io/hippocampus-dev/hippocampus/device-flow-bridge
