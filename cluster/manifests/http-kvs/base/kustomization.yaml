@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:17087c6f2fe00b5378c14df1226a98e2625eb92021ff2347dfee2a6745346b48
+- digest: sha256:ca7bbf63bdf56332d0c49e6af4dd892f245d15ed8946472497290ea9369c22ff
   name: ghcr.io/hippocampus-dev/hippocampus/http-kvs
   newName: ghcr.io/hippocampus-dev/hippocampus/http-kvs
