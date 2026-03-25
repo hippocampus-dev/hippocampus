@@ -1,0 +1,44 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "paste",
+  "account_id": "e646938998c521013d47874db7e1d2d7",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "invocation_logs": true,
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true
+    }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "PASTE_KV",
+      "id": "b97fc3f78e7a4d92b77978e33fe9381e"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PASTE_BUCKET",
+      "bucket_name": "paste"
+    }
+  ],
+  "ai": {
+    "binding": "AI",
+    "remote": true
+  },
+  "routes": [
+    {
+      "pattern": "paste.kaidotio.dev",
+      "custom_domain": true
+    }
+  ]
+}

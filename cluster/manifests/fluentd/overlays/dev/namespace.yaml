@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fluentd
+  labels:
+    name: fluentd
+    # fluentd-forward uses hostPath for log collection
+    pod-security.kubernetes.io/enforce: privileged

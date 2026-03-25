@@ -1,0 +1,41 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: controller
+  labels:
+    strimzi.io/cluster: eventing
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  replicas: 1
+  roles:
+    - controller
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      memory: 256Mi
+  storage:
+    type: persistent-claim
+    size: 10Gi
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: broker
+  labels:
+    strimzi.io/cluster: eventing
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  replicas: 1
+  roles:
+    - broker
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      memory: 512Mi
+  storage:
+    type: persistent-claim
+    size: 10Gi

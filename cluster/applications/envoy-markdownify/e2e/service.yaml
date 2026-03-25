@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy-markdownify
+spec:
+  selector:
+    app.kubernetes.io/name: envoy-markdownify
+    app.kubernetes.io/component: e2e
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http
+    - name: http-base
+      port: 8081
+      protocol: TCP
+      targetPort: http-base

@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fluentd-aggregator
+spec:
+  serviceName: fluentd-aggregator
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: fluentd-aggregator
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: fluentd
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/fluentd-aggregator
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: tcp
+              containerPort: 24224
+              protocol: TCP
+            - name: metrics
+              containerPort: 24231
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: tcp
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - /mnt/liveness-probe.sh
+            initialDelaySeconds: 60
+            periodSeconds: 60 # https://github.com/kubernetes/kubernetes/issues/82440
+            successThreshold: 1
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: fluentd-aggregator
+              mountPath: /fluentd/etc/fluent.conf
+              subPath: fluentd-aggregator-fluent.conf
+              readOnly: true
+            - name: fluentd-aggregator
+              mountPath: /mnt/liveness-probe.sh
+              subPath: liveness-probe.sh
+              readOnly: true
+            - name: fluentd-aggregator
+              mountPath: /fluentd/etc/adhoc.conf
+              subPath: adhoc.conf
+              readOnly: true
+            - name: fluentd-aggregator
+              mountPath: /fluentd/etc/metrics.conf
+              subPath: metrics.conf
+              readOnly: true
+            - name: data
+              mountPath: /var/log/fluent
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: fluentd-aggregator
+          configMap:
+            name: fluentd-aggregator
+        - name: tmp
+          emptyDir:
+            medium: Memory
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

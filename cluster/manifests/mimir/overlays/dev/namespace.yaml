@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mimir
+  labels:
+    name: mimir
+    pod-security.kubernetes.io/enforce: restricted

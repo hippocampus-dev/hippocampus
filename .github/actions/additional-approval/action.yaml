@@ -1,0 +1,14 @@
+name: additional-approval
+inputs:
+  organization-token:
+    required: true
+    description: GitHub token to use for organization access
+  repository-token:
+    required: true
+    description: GitHub token to use for repository access
+  owners-file:
+    required: true
+    description: Comma-separated list of CODEOWNERS files to approve
+runs:
+  using: node20
+  main: dist/index.js

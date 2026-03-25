@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: snapshot-diff-server
+spec:
+  gateways:
+    - snapshot-diff-server
+  hosts:
+    - snapshot-diff-server.minikube.127.0.0.1.nip.io
+    - snapshot-diff-server.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: snapshot-diff-server
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

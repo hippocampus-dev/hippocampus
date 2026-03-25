@@ -1,0 +1,29 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: loganomaly-logs
+  labels:
+    strimzi.io/cluster: eventing
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  partitions: 1
+  replicas: 1
+  config:
+    retention.ms: 3600000 # 1 hour
+    segment.bytes: 1073741824 # 1 GB
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: loganomaly-events
+  labels:
+    strimzi.io/cluster: eventing
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  partitions: 1
+  replicas: 1
+  config:
+    retention.ms: 3600000 # 1 hour
+    segment.bytes: 1073741824 # 1 GB

@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tidb-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "-50"
+    argocd.argoproj.io/manifest-generate-paths: "/cluster/manifests/tidb-operator"
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: notifications
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: notifications
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:hippocampus-dev/hippocampus
+    targetRevision: main
+    path: cluster/manifests/tidb-operator/overlays/dev
+    kustomize:
+      version: custom
+      commonAnnotationsEnvsubst: true
+      commonAnnotations:
+        repository: ${ARGOCD_APP_SOURCE_REPO_URL}
+        # revision annotation is injected by https://github.com/hippocampus-dev/hippocampus/blob/main/cluster/manifests/argocd/overlays/dev/patches/deployment.yaml to support monorepo
+        #revision: ${ARGOCD_APP_REVISION}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tidb-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false
+      # CustomResourceDefinition.apiextensions.k8s.io "tidbclusters.pingcap.com" is invalid: metadata.annotations: Too long: may not be more than 262144 bytes
+      - ServerSideApply=true
