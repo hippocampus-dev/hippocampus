@@ -7,6 +7,6 @@ resources:
 - pod_disruption_budget.yaml
 - service.yaml
 images:
-- digest: sha256:181a852ea81d5b5c1b5f7820e232a3efd31859a75b59d14de052997e9bec8702
+- digest: sha256:397b7273ee003ae96fd7543e321826c69471fd714ee688d06df4cbe5c5908498
   name: ghcr.io/hippocampus-dev/hippocampus/talk
   newName: ghcr.io/hippocampus-dev/hippocampus/talk
