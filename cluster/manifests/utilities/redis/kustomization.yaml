@@ -28,7 +28,7 @@ configMapGenerator:
   options:
     immutable: true
 images:
-- digest: sha256:8e21be1e415aa1184b9266a203aaab8758cdabb6a621df3e98ebd7454cb88e67
+- digest: sha256:728afdd144953c63de2da5a076cb0841e085db259a81980a77b5ad8b8c55fb55
   name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
   newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
 - digest: sha256:97cab7320f1195ddf085fd34c115e1e489314addaa2e1d4788cd1af55c87e3dc
