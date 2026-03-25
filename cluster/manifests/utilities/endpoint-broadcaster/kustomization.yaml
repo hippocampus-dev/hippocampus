@@ -9,6 +9,6 @@ resources:
 - service_account.yaml
 
 images:
-- digest: sha256:af564ab142b092f3c5a2ce066b8b57f889a8fcf2be0969b72cac77ff01cef649
+- digest: sha256:060f3364ed143a68678890948ceff03218fa4dc4357fc9d3c07bc8a82caf7aae
   name: ghcr.io/hippocampus-dev/hippocampus/endpoint-broadcaster
   newName: ghcr.io/hippocampus-dev/hippocampus/endpoint-broadcaster
