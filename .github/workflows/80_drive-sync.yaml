@@ -1,0 +1,56 @@
+name: drive-sync
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  sync:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 60
+    runs-on: [self-hosted, github-actions-runner-controller]
+    env:
+      MINIO_ENDPOINT: http://drive-sync-minio.drive-sync.svc.cluster.local:9000
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: miniominio
+      MINIO_BUCKET: drive-sync
+      WORKLOAD_IDENTITY_PROVIDER: projects/1070864848239/locations/global/workloadIdentityPools/github/providers/github
+      SERVICE_ACCOUNT: drive-sync@rich-gift-314809.iam.gserviceaccount.com
+      DRIVE_FOLDER_ID: 1CDg4lZcyjLrLbhCiiY-tkNBTfyCrfgNT
+    steps:
+      - uses: google-github-actions/auth@v3
+        id: auth
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+          token_format: access_token
+      - run: |
+          set -eo pipefail
+          curl -fsSL https://github.com/rclone/rclone/releases/download/v1.68.2/rclone-v1.68.2-linux-amd64.zip -o ${{ runner.temp }}/rclone.zip
+          unzip -o ${{ runner.temp }}/rclone.zip -d ${{ runner.temp }}
+          install -m 755 ${{ runner.temp }}/rclone-v1.68.2-linux-amd64/rclone ${{ runner.temp }}/rclone
+      - env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          set -eo pipefail
+          RCLONE_CONFIG=${{ runner.temp }}/rclone.conf
+          cat <<EOF > "$RCLONE_CONFIG"
+          [drive]
+          type = drive
+          scope = drive.readonly
+          root_folder_id = $DRIVE_FOLDER_ID
+          token = {"access_token":"${ACCESS_TOKEN}","token_type":"Bearer","expiry":"$(date -u -d '+1 hour' '+%Y-%m-%dT%H:%M:%SZ')"}
+
+          [minio]
+          type = s3
+          provider = Minio
+          endpoint = $MINIO_ENDPOINT
+          access_key_id = $MINIO_ACCESS_KEY
+          secret_access_key = $MINIO_SECRET_KEY
+          EOF
+          ${{ runner.temp }}/rclone sync "drive:" "minio:${MINIO_BUCKET}/" --config "$RCLONE_CONFIG"

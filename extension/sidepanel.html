@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>hippocampus</title>
+    <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+    <div id="header">
+        <img src="images/icon32.png" alt="Extension" width="16" height="16">
+        <span>Chat</span>
+        <button id="new-conversation" title="New conversation">New</button>
+    </div>
+    <div id="messages"></div>
+    <div id="input-area">
+        <div id="context-chips"></div>
+        <div id="input-row">
+            <textarea id="input" placeholder="Send a message..." rows="1"></textarea>
+            <button id="send">Send</button>
+        </div>
+        <div id="input-footer">
+            <select id="model">
+                <option value="gpt-5.4">gpt-5.4</option>
+                <option value="gpt-5-mini">gpt-5-mini</option>
+            </select>
+        </div>
+    </div>
+    <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:06293eda742fd47711103eb5d09be397d7f101f0c75d1d5210e5208da629b7c3
+  name: ghcr.io/hippocampus-dev/hippocampus/device-flow-bridge
+  newName: ghcr.io/hippocampus-dev/hippocampus/device-flow-bridge

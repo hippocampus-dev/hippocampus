@@ -1,0 +1,76 @@
+name: Triage Dependabot PR
+on:
+  pull_request:
+    types:
+      - opened
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  issue-github-token:
+    if: github.repository_owner == 'kaidotio' && github.event.pull_request.user.login == 'dependabot[bot]'
+    uses: ./.github/workflows/reusable_issue-github-token.yaml
+    with:
+      profile: writer
+    secrets: inherit
+  triage:
+    needs: issue-github-token
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    environment: deployment
+    steps:
+      - run: |
+          set -eo pipefail
+
+          TOKEN=$(echo "$ENCRYPTED_TOKEN" | base64 -d | gpg -dq --batch --passphrase "$GPG_PASSPHRASE")
+          echo "::add-mask::$TOKEN"
+          export GH_TOKEN="$TOKEN"
+
+          pr_number="${{ github.event.pull_request.number }}"
+
+          title=$(gh pr view "$pr_number" --json title --jq '.title')
+
+          if [[ "$title" =~ [Bb]ump\ (.+)\ from\ (.+)\ to\ (.+)\ in ]]; then
+            dependency="${BASH_REMATCH[1]}"
+            old_version="${BASH_REMATCH[2]}"
+            new_version="${BASH_REMATCH[3]}"
+          else
+            echo "PR title does not match expected Dependabot format: $title" >&2
+            exit 1
+          fi
+
+          existing=$(gh pr view "$pr_number" --json comments --jq '[.comments[] | select(.author.login == "hippocampus-github-app[bot]") | select(.body | contains("@claude"))] | length')
+          if [ "$existing" -gt 0 ]; then
+            echo "Triage comment already exists on PR #${pr_number}, skipping"
+            exit 0
+          fi
+
+          body=$(cat <<EOS
+          @claude Please triage this Dependabot PR following the steps below:
+
+          **Dependency:** \`${dependency}\`
+          **Version:** \`${old_version}\` -> \`${new_version}\`
+
+          ## Triage Steps
+
+          1. Find the release notes or changelog for \`${dependency}\` \`${new_version}\` and check for **breaking changes** between \`${old_version}\` and \`${new_version}\`
+          2. For each changed file, read the file and verify how \`${dependency}\` is used
+          3. Search for any **other files** not changed in this PR that also reference \`${dependency}\` and verify compatibility
+          4. Take action:
+
+          | Condition | Action |
+          |-----------|--------|
+          | No breaking changes, usage is compatible | Approve the PR with \`gh pr review --approve\` and a brief summary |
+          | Breaking changes found but usage is unaffected | Approve the PR with \`gh pr review --approve\` explaining why usage is safe |
+          | Breaking changes affect usage | Fix the affected files, commit and push the changes, then comment with \`gh pr comment\` summarizing what you changed and why. Do not approve -- leave for human review |
+          EOS
+          )
+
+          gh pr comment "$pr_number" --body "$body"
+          echo "Posted triage comment on PR #${pr_number}"
+        env:
+          ENCRYPTED_TOKEN: ${{ needs.issue-github-token.outputs.encrypted_token }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

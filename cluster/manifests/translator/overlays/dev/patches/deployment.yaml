@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: translator
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8083"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: translator
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: translator
+              app.kubernetes.io/component: ""
+      containers:
+        - name: translator
+          envFrom:
+            - secretRef:
+                name: translator
+          env:
+            - name: RATE_LIMIT_PER_INTERVAL
+              value: "200000"
+            - name: SLACK_BOT_MEMBER_ID
+              value: U02CMRJA1GQ
+            - name: ALLOW_EXT_SHARED_CHANNEL
+              value: "true"
+            - name: ALLOW_RESTRICTED_USER
+              value: "true"
+            - name: ALLOW_TEAMS
+              value: "T02BY6T3YE6"
+            - name: REDIS_HOST
+              value: 127.0.0.1
+            - name: REDIS_PORT
+              value: "6379"
+            - name: URL_SHORTENER_URL
+              value: http://url-shortener.url-shortener.svc.cluster.local:8080
+            - name: S3_ENDPOINT_URL
+              value: http://translator-minio.translator.svc.cluster.local:9000
+            - name: AWS_ACCESS_KEY_ID
+              value: minio
+            - name: AWS_SECRET_ACCESS_KEY
+              value: miniominio
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-agent.otel.svc.cluster.local:4317
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "1.0"
+            - name: OTEL_BSP_SCHEDULE_DELAY
+              value: "5000"
+            - name: OTEL_BSP_EXPORT_TIMEOUT
+              value: "30000"
+            - name: OTEL_BSP_MAX_QUEUE_SIZE
+              value: "2048"
+            - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+              value: "512"
+          resources:
+            requests:
+              cpu: 10m
+        - name: redis-proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --local-address=127.0.0.1:6379
+            - --monitor-address=127.0.0.1:8082
+            - --remote-address=translator-redis-haproxy-writer.translator.svc.cluster.local:6379
+            - --reader-routing=true
+            - --reader-remote-address=translator-redis-haproxy-reader.translator.svc.cluster.local:6379
+            - --min-idle-connections=3
+            - --max-idle-connections=10
+            - --max-idle-time=1h
+            - --max-lifetime=24h
+            - --jitter-percentage=0.1
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+            - name: redis-metrics
+              containerPort: 8082
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+        - name: exporter-merger
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MERGER_PORT
+              value: "8083"
+            - name: MERGER_URLS
+              value: http://127.0.0.1:8080/metrics http://127.0.0.1:8082/metrics
+          ports:
+            - name: metrics
+              containerPort: 8083
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

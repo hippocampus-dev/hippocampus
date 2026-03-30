@@ -1,0 +1,55 @@
+name: Mirror argocd
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/99_mirror-argocd.yaml"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  id-token: write
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  mirror:
+    needs: runner
+    if: ${{ !cancelled() && needs.runner.outputs.runner }}
+    timeout-minutes: 10
+    runs-on: ${{ fromJSON(needs.runner.outputs.runner) }}
+    env:
+      IMAGE: quay.io/argoproj/argocd
+      TAG: v2.14.15
+      KUSTOMIZATION: "cluster/manifests/argocd/overlays/dev"
+    steps:
+      - run: docker login ghcr.io -u "${GITHUB_REPOSITORY_OWNER}" -p "${GITHUB_TOKEN}"
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows/bin/
+            cluster/manifests/argocd/overlays/dev/
+      - run: bash .github/workflows/bin/mirror.sh
+  scan:
+    if: ${{ !cancelled() && github.repository_owner == 'kaidotio' && needs.mirror.result == 'success' }}
+    needs: [runner, mirror]
+    uses: ./.github/workflows/reusable_scan-image.yaml
+    with:
+      image: ghcr.io/${{ github.repository }}/mirror/quay.io/argoproj/argocd:v2.14.15
+      runner: ${{ needs.runner.outputs.runner }}
+    secrets: inherit

@@ -1,0 +1,59 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: github-actions-runner-controller
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - service_entry.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/stateful_set.yaml
+  - patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --github-app-client-id=Iv23li6gN5ht5DX51aVc
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --github-app-installation-id=56701299
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --github-app-private-key=$(GITHUB_APP_PRIVATE_KEY)
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: github-actions-runner-controller
+
+generators:
+  - secrets_from_vault.yaml
+
+replacements:
+  - source:
+      fieldPath: metadata.name
+      kind: Service
+      name: github-actions-runner-controller-registry
+    targets:
+      - fieldPaths:
+          - spec.template.spec.initContainers.[name=fetch-nodeport].env.[name=SERVICE_NAME].value
+          - spec.template.spec.containers.[name=controller].env.[name=SERVICE_NAME].value
+        select:
+          kind: Deployment
+          name: github-actions-runner-controller
+
+configMapGenerator:
+  - name: registry
+    files:
+      - files/config.yml
+
+generatorOptions:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/compare-options: IgnoreExtraneous

@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: api.openai.com
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - api.openai.com
+  http:
+    - match:
+        - sourceNamespace: memory-bank
+          sourceLabels:
+            app.kubernetes.io/name: memory-bank
+            app.kubernetes.io/component: ""
+      route:
+        - destination:
+            host: memory-bank-ext-proc-proxy
+            port:
+              number: 8080

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e
+
+pactl set-sink-volume @DEFAULT_SINK@ +1%
+show-volume

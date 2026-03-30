@@ -1,0 +1,12 @@
+groups:
+  - name: etcd-quota
+    rules:
+      - alert: EtcdQuotaBackendBytesIsSaturated
+        annotations:
+          message: |
+            etcd {{ $labels.pod }} quota backend usage is {{ $value | humanizePercentage }}.
+        expr: |
+          etcd_mvcc_db_total_size_in_bytes / etcd_server_quota_backend_bytes > 0.8
+        for: 5m
+        labels:
+          severity: critical

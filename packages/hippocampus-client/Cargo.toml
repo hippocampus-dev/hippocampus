@@ -1,0 +1,14 @@
+[package]
+name = "hippocampus-client"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tonic = { version = "0.8.3" }
+prost = { version = "0.11.5" }
+
+[dev-dependencies]
+tokio = { version = "1.45.1", features = ["macros", "rt-multi-thread", "signal"] }
+
+[build-dependencies]
+tonic-build = { version = "0.8.4" }

@@ -1,0 +1,8 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: device-flow-bridge
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: device-flow-bridge

@@ -1,0 +1,15 @@
+[TokenStorage]
+kind = "File"
+
+    [TokenStorage.File]
+    path = "/var/hippocampus/tokens"
+
+    [TokenStorage.GCS]
+    bucket = "kaidotio-tokens"
+    prefix = ""
+
+[DocumentStorage]
+kind = "File"
+
+    [DocumentStorage.File]
+    path = "/var/hippocampus/documents"

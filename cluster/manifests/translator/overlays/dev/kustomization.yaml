@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: translator
+
+resources:
+- ../../base
+- horizontal_pod_autoscaler.yaml
+- job.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+- minio
+- redis
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/pod_disruption_budget.yaml
+
+generators:
+- secrets_from_vault.yaml
+images:
+- digest: sha256:1d31e25e119a355b37fca5d375deaa5299d476aab2a57cab81817d70e1227008
+  name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+  newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+- digest: sha256:cb33481950bd0e3ca7f6bb9afd81a9384322a14f047d3c12117231ab53010def
+  name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+- digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+  name: minio/mc
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/minio/mc
