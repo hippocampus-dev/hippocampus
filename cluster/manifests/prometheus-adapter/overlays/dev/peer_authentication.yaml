@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: prometheus-adapter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-adapter
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "6443":
+      mode: PERMISSIVE

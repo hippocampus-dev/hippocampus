@@ -1,0 +1,86 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: adhoc-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: adhoc
+
+resources:
+  - ../../utilities/elasticsearch
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/horizontal_pod_autoscaler.yaml
+  - path: patches/service.yaml
+  - path: patches/stateful_set.yaml
+
+configMapGenerator:
+  - name: elasticsearch
+    files:
+      - files/elasticsearch.yml
+  - name: curl
+    files:
+      - files/pipeline.yaml
+      - files/template.json
+
+replacements:
+  - source:
+      kind: StatefulSet
+      name: elasticsearch-master
+      fieldPath: metadata.annotations.NUMBER_OF_MASTERS
+    targets:
+      - select:
+          kind: Deployment
+          name: elasticsearch-ingest
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_MASTERS].value
+      - select:
+          kind: Deployment
+          name: elasticsearch-coordinating
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_MASTERS].value
+      - select:
+          kind: StatefulSet
+          name: elasticsearch-master
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_MASTERS].value
+      - select:
+          kind: StatefulSet
+          name: elasticsearch-data
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_MASTERS].value
+  - source:
+      kind: StatefulSet
+      name: elasticsearch-data
+      fieldPath: metadata.annotations.NUMBER_OF_DATAS
+    targets:
+      - select:
+          kind: Deployment
+          name: elasticsearch-ingest
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_DATAS].value
+      - select:
+          kind: Deployment
+          name: elasticsearch-coordinating
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_DATAS].value
+      - select:
+          kind: StatefulSet
+          name: elasticsearch-master
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_DATAS].value
+      - select:
+          kind: StatefulSet
+          name: elasticsearch-data
+        fieldPaths:
+          - spec.template.spec.containers.[name=elasticsearch].env.[name=NUMBER_OF_DATAS].value
+
+configurations:
+  - kustomizeconfig.yaml

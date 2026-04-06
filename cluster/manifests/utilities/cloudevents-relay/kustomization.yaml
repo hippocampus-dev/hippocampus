@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- service.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:9ea80681dfe9618b2a9c79f1343c4e4d0bf8a801b07a04521fd5e5cdf54c0b3a
+  name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-relay
+  newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-relay

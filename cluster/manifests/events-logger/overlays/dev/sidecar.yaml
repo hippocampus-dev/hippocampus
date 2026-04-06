@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: events-logger
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: events-logger
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local

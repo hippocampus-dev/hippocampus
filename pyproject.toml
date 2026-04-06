@@ -1,0 +1,74 @@
+# for workspace global venv
+[project]
+name = "hippocampus"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "playgpt",
+    "realtime-search-exporter",
+    "headless-page-renderer",
+    "cortex[agent]",
+    "bot",
+    "api",
+    "embedding-gateway",
+    "embedding-retrieval",
+
+    "memory-bank",
+    "slack-bolt-proxy",
+    "translator",
+    "slackug",
+    "whisper-worker",
+    "jupyterhub_config",
+    "notebooks",
+]
+
+[tool.ruff]
+indent-width = 4
+# Keep in sync with biome.jsonc files.includes
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "dist",
+    "node_modules",
+    "target",
+    "venv",
+    "zz_generated*",
+    "*.gen.*",
+    "proto/googleapis",
+    "cluster/applications/rust_de_llama/llama.cpp",
+]
+
+[tool.uv.sources]
+playgpt = { path = "playgpt", editable = true }
+realtime-search-exporter = { path = "cluster/applications/realtime-search-exporter", editable = true }
+headless-page-renderer = { path = "cluster/applications/headless-page-renderer", editable = true }
+cortex = { path = "cluster/applications/packages/cortex", editable = true }
+bot = { path = "cluster/applications/bot", editable = true }
+api = { path = "cluster/applications/api", editable = true }
+embedding-gateway = { path = "cluster/applications/embedding-gateway", editable = true }
+embedding-retrieval = { path = "cluster/applications/embedding-retrieval", editable = true }
+
+memory-bank = { path = "cluster/applications/memory-bank", editable = true }
+slack-bolt-proxy = { path = "cluster/applications/slack-bolt-proxy", editable = true }
+translator = { path = "cluster/applications/translator", editable = true }
+slackug = { path = "cluster/applications/slackug", editable = true }
+whisper-worker = { path = "cluster/applications/whisper-worker", editable = true }
+jupyterhub_config = { path = "cluster/manifests/jupyterhub/base/files", editable = true }
+notebooks = { path = "notebooks", editable = true }

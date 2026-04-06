@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: skaffold-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: skaffold
+
+namespace: skaffold-dedicated-container-ingress-controller
+
+resources:
+  - ../manifests
+  - namespace.yaml
+  - redis.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  # CRD does not support namePrefix
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: dedicatedcontaineringresses.skaffold.dedicated-container-ingress.kaidotio.github.io
+      - op: replace
+        path: /spec/group
+        value: skaffold.dedicated-container-ingress.kaidotio.github.io
+    target:
+      kind: CustomResourceDefinition
+      name: dedicatedcontaineringresses.dedicated-container-ingress.kaidotio.github.io
+  - patch: |
+      - op: add
+        path: /rules/0
+        value:
+          apiGroups:
+            - skaffold.dedicated-container-ingress.kaidotio.github.io
+          resources:
+            - "*"
+          verbs:
+            - "*"
+    target:
+      kind: ClusterRole
+      name: dedicated-container-ingress-controller

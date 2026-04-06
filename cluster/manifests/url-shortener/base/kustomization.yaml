@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:b64aab764b2f41fa0a77c58832a0f142a3592a3d39bb174e5c897ced0ec0162f
+  name: ghcr.io/hippocampus-dev/hippocampus/url-shortener
+  newName: ghcr.io/hippocampus-dev/hippocampus/url-shortener

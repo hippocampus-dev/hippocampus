@@ -1,0 +1,19 @@
+services:
+  pianify:
+    profiles:
+      - pianify
+    build:
+      dockerfile: Dockerfile
+      context: pianify
+    develop:
+      watch:
+        - action: rebuild
+          path: pianify/Dockerfile
+    environment:
+      SCORES_DIR: /scores
+    volumes:
+      - type: volume
+        source: pianify-scores
+        target: /scores
+    networks:
+      - internal

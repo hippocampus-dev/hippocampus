@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: dedicated-container-ingress-controller
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: dedicated-container-ingress-controller
+      app.kubernetes.io/component: ""
+  # ALLOW_ANY: reverse proxy connects to dynamically created pods by IP
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./dedicated-container-ingress-controller-redis-haproxy-writer.dedicated-container-ingress-controller.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local

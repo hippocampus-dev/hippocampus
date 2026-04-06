@@ -1,0 +1,150 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-agent
+spec:
+  podSelector:
+    matchLabels:
+      telepresence.io/workloadEnabled: "true"
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dedicated-container-ingress-controller
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: dedicated-container-ingress-controller
+      app.kubernetes.io/component: ""
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dedicated-container-ingress-controller-redis
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: dedicated-container-ingress-controller
+      app.kubernetes.io/component: redis
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: dedicated-container-ingress-controller
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: dedicated-container-ingress-controller
+              app.kubernetes.io/component: ""
+        - namespaceSelector:
+            matchLabels:
+              name: dedicated-container-ingress-controller
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: dedicated-container-ingress-controller
+              app.kubernetes.io/component: redis-haproxy
+      ports:
+        - protocol: TCP
+          port: 6379
+        # HBONE
+        - protocol: TCP
+          port: 15008
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dedicated-container-ingress-controller-redis-haproxy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: dedicated-container-ingress-controller
+      app.kubernetes.io/component: redis-haproxy
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: dedicated-container-ingress-controller
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: dedicated-container-ingress-controller
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 6380
+        - protocol: TCP
+          port: 6381
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dedicated-container-ingress-controller-redis-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+          podSelector:
+            matchLabels:
+              app: istiod
+      ports:
+        - protocol: TCP
+          port: 15012
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: otel
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: otel-agent
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 4317
