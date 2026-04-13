@@ -27,7 +27,7 @@ jobs:
       pull-requests: read
     steps:
       - id: check-previous
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const workflow_id = context.payload.workflow_run.workflow_id;
@@ -87,7 +87,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
       - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const name = "claude-auto-fix-ci";

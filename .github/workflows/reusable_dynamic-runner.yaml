@@ -38,7 +38,7 @@ jobs:
           ENCRYPTED_TOKEN: ${{ needs.issue-github-token.outputs.encrypted_token }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - id: check-runner
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{ steps.decrypt.outputs.token || github.token }}
           script: |
