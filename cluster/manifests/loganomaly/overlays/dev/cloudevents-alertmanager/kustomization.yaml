@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- service.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:6cb4b64b5c68e2c342e48df31986bfb3a6f0cd024ebcb6ef44912051efa2cd21
+  name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-alertmanager
+  newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-alertmanager

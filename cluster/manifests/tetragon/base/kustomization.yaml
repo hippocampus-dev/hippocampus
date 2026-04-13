@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://raw.githubusercontent.com/cilium/tetragon/v1.6.1/install/kubernetes/tetragon/crds-yaml/cilium.io_podinfo.yaml
+- https://raw.githubusercontent.com/cilium/tetragon/v1.6.1/install/kubernetes/tetragon/crds-yaml/cilium.io_tracingpolicies.yaml
+- https://raw.githubusercontent.com/cilium/tetragon/v1.6.1/install/kubernetes/tetragon/crds-yaml/cilium.io_tracingpoliciesnamespaced.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- daemon_set.yaml
+- deployment.yaml
+- service.yaml
+- service_account.yaml
+- tracing_policy.yaml
+
+configMapGenerator:
+- literals:
+  - enable-ancestors=true
+  - enable-cgidmap=true
+  - enable-cri=true
+  - enable-pod-info=true
+  - enable-process-cred=true
+  - enable-process-ns=true
+  - enable-tracing-policy-crd=true
+  - event-cache-retries=15
+  - event-cache-retry-delay=2
+  - health-server-address=:6789
+  - metrics-server=:2112
+  - process-cache-size=65536
+  - procfs=/procRoot
+  - server-address=
+  name: tetragon-config
+- literals:
+  - force-update-crd=true
+  name: tetragon-operator-config
+
+images:
+- digest: sha256:7522b25373b5c2344a068bac3871457ab03cd51aebdde2d1b1b6d84b6d9f88ea
+  name: quay.io/cilium/tetragon
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/cilium/tetragon
+- digest: sha256:687f7f41737a09122f060d02e7edef859ec2e10e8ceabcd059eb5e743390f66a
+  name: quay.io/cilium/tetragon-operator
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/cilium/tetragon-operator

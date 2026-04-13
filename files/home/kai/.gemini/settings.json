@@ -1,0 +1,80 @@
+{
+  "context": {
+    "fileName": "AGENTS.md"
+  },
+  "general": {
+    "previewFeatures": true
+  },
+  "ui": {
+    "theme": "Default"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
+  },
+  "hooks": {
+    "BeforeAgent": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/UserPromptSubmit.sh"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/PreToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/PostToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/Notification.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/Stop.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "_generated": "sync-agent-files.sh",
+  "tools": {
+    "sandbox": true
+  }
+}

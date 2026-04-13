@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tauri-releases
+  labels:
+    name: tauri-releases
+    # tauri-releases has a waypoint
+    pod-security.kubernetes.io/enforce: baseline

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+function usage() {
+  cat <<EOS
+Usage:
+   xdg-open URL
+EOS
+}
+
+args=()
+while (( $# )); do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*|--*)
+      echo "Unsupported flag $1" 1>&2
+      exit 1
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+url="${args[0]:-}"
+if [ -z "$url" ]; then
+  usage
+  exit 1
+fi
+
+curl -fsSL -u "$CHISEL_AUTH" --data-urlencode "url=${url}" "http://127.0.0.1:65532/v1/open" >/dev/null 2>&1

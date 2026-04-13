@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.45.0/strimzi-cluster-operator-0.45.0.yaml
+images:
+- digest: |-
+    sha256:ca3d6e3451669e4e3ce9148bdb72da4a78d9d8b76a1a0cd6e0a9290916e4bd64
+    sha256:328829a67886159943a9d9f6a2e6ca1cfffadceea48eb53451395b7e795ec17e
+  name: quay.io/strimzi/operator
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/strimzi/operator

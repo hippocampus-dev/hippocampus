@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: echoserver
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: echoserver
+    spec:
+      containers:
+        - name: echoserver
+          image: alpine/socat
+          args:
+            - -v
+            - TCP-LISTEN:9000,fork,reuseaddr
+            - EXEC:cat
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoserver
+spec:
+  selector:
+    app.kubernetes.io/name: echoserver
+  ports:
+    - name: tcp-echo
+      port: 9000
+      targetPort: 9000
+      protocol: TCP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: e2e-gateway
+spec:
+  gatewayClassName: skaffold-gateway-proxy
+  listeners:
+    - name: tcp-9000
+      port: 9000
+      protocol: TCP
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: e2e-tcproute
+spec:
+  parentRefs:
+    - name: skaffold-e2e-gateway
+      sectionName: tcp-9000
+  rules:
+    - backendRefs:
+        - name: skaffold-echoserver
+          port: 9000

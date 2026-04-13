@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://github.com/kata-containers/kata-containers/tools/packaging/kata-deploy/kata-deploy/base?ref=3.21.0
+- https://github.com/kata-containers/kata-containers/tools/packaging/kata-deploy/kata-rbac/base?ref=3.21.0
+images:
+- digest: |-
+    sha256:195a285517ea96c6c5b08bbe45dfe5a79b3cfd0ac72a4df87e96e4dba38e1bab
+    sha256:b6ed4cfae6db4390ece79a710997ea28a551eb25829cefc6cfe314b9b26e5c41
+  name: quay.io/kata-containers/kata-deploy
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/kata-containers/kata-deploy

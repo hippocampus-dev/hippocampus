@@ -1,0 +1,21 @@
+[package]
+name = "jwt"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0.127", features = ["derive"] }
+serde_json = { version = "1.0.66" }
+base64 = { version = "0.13.0" }
+rsa = { version = "0.7.0" }
+sha2 = { version = "0.10.6", features = ["oid"] }
+
+error = { path = "../error" }
+
+[dependencies.jwt_derive]
+path = "../jwt_derive"
+optional = true
+
+[features]
+default = []
+derive = ["jwt_derive"]

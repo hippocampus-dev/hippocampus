@@ -1,0 +1,114 @@
+apiVersion: dedicated-container-ingress.kaidotio.github.io/v1
+kind: DedicatedContainerIngress
+metadata:
+  name: dedicated-remotty
+spec:
+  host: dedicated-remotty.kaidotio.dev
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dedicated-remotty
+        app.kubernetes.io/component: ""
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: fuse-mount
+          restartPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/remotty
+          imagePullPolicy: IfNotPresent
+          command:
+            - fuse-placeholder
+            - -handoff
+            - /run/sock/handoff/fuse.sock
+            - /run/sock
+          startupProbe:
+            exec:
+              command:
+                - test
+                - -S
+                - /run/sock/handoff/fuse.sock
+            periodSeconds: 1
+            failureThreshold: 60
+          volumeMounts:
+            - name: sock
+              mountPath: /run/sock
+      containers:
+        - name: remotty
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+          image: ghcr.io/hippocampus-dev/hippocampus/remotty
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SOCKET_DIRECTORY
+              value: /run/sock/handoff
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: run
+              mountPath: /var/run
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: home
+              mountPath: /home/nonroot
+            - name: sock
+              mountPath: /run/sock
+            - name: fuse
+              mountPath: /mnt
+      volumes:
+        - name: fuse
+          csi:
+            driver: fuse-csi-driver.csi.kaidotio.github.io
+            volumeAttributes:
+              socketVolume: sock
+        - name: sock
+          emptyDir: {}
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: run
+          emptyDir:
+            medium: Memory
+        - name: cache
+          emptyDir:
+            medium: Memory
+        - name: home
+          emptyDir: {}

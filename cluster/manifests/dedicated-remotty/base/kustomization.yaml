@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- dedicated_container_ingress.yaml
+
+images:
+- digest: sha256:d4b6f6533a40b0ccf6751c406757e2fc0f177721b7fef511360dd35e5e0b167e
+  name: ghcr.io/hippocampus-dev/hippocampus/remotty
+  newName: ghcr.io/hippocampus-dev/hippocampus/remotty
+
+configurations:
+- kustomizeconfig.yaml

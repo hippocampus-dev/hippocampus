@@ -1,0 +1,22 @@
+services:
+  pianify:
+    profiles:
+      - pianify
+    build:
+      dockerfile: Dockerfile
+      context: pianify
+    develop:
+      watch:
+        - action: rebuild
+          path: pianify/Dockerfile
+    environment:
+      SCORES_DIR: /srv/scores
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pianify/public/scores
+        target: /srv/scores
+        read_only: true
+    networks:
+      - internal

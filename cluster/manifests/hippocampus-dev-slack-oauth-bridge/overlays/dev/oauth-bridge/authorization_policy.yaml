@@ -1,0 +1,45 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: oauth-bridge
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: oauth-bridge
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - hippocampus-dev-slack-oauth-bridge.minikube.127.0.0.1.nip.io
+            - hippocampus-dev-slack-oauth-bridge.kaidotio.dev
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - hippocampus-dev-slack-oauth-bridge-public.kaidotio.dev
+      to:
+        - operation:
+            methods:
+              - POST
+            paths:
+              - /device/code
+              - /token
+        - operation:
+            methods:
+              - GET
+            paths:
+              - /callback
+              - /authorize
+              - /.well-known/oauth-authorization-server

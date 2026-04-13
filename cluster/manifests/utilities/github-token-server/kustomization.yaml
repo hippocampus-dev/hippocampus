@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:06a073be6373272f1c5a42beb2df8e258efb080db40a0dc4b29e7e07845d6bed
+  name: ghcr.io/hippocampus-dev/hippocampus/github-token-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/github-token-server

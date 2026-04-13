@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mattermost
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: mattermost
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: mattermost
+              app.kubernetes.io/component: ""
+      initContainers:
+        - name: envsubst
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+          args:
+            - -c
+            - |
+              WEBHOOK_ID="placeholder"
+              if [ -f /mattermost/data/webhookId ]; then
+                WEBHOOK_ID=$(cat /mattermost/data/webhookId)
+              fi
+              export MATTERMOST_WEBHOOK_ID="$WEBHOOK_ID"
+              cat /mnt/configmap/nginx.conf.tmpl | sed "s/\$MATTERMOST_WEBHOOK_ID/$MATTERMOST_WEBHOOK_ID/g" > /etc/nginx/nginx.conf
+          volumeMounts:
+            - name: data
+              mountPath: /mattermost/data
+            - name: proxy-config
+              mountPath: /etc/nginx
+            - name: mattermost-proxy-config
+              mountPath: /mnt/configmap
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mattermost
+          volumeMounts:
+            - name: data
+              mountPath: /mattermost/data
+            - name: logs
+              mountPath: /mattermost/logs
+            - name: config
+              mountPath: /mattermost/config/config.json
+              subPath: config.json
+        - name: mattermost-webhook-proxy
+          volumeMounts:
+            - name: proxy-config
+              mountPath: /etc/nginx
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: mattermost-config
+        - name: mattermost-proxy-config
+          configMap:
+            name: mattermost-proxy-config
+        - name: logs
+          emptyDir: {}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

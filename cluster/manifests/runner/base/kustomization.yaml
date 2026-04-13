@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- runner.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:8d4c3f33255d5f6c72a3f9ab8e471b45f57db77212680769739b8125120fa5c3
+  name: ghcr.io/hippocampus-dev/hippocampus/runner
+  newName: ghcr.io/hippocampus-dev/hippocampus/runner

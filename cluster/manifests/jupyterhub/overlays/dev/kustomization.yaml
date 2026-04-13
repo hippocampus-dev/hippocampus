@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: jupyterhub
+
+resources:
+- ../../base
+- envoy_filter.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- resource_quota.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+- sidecar.yaml
+- telemetry.yaml
+# Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+#- virtual_service.yaml
+#- redis
+
+patches:
+- patch: |-
+    - op: remove
+      path: /spec/template/spec/containers/0/ports
+  target:
+    group: apps
+    kind: Deployment
+    name: jupyterhub-proxy
+    version: v1
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+- path: patches/stateful_set.yaml
+# Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+#- patch: |-
+#    - op: add
+#      path: /spec/template/spec/containers/0/args/-
+#      value: --storage-backend=configurable-http-proxy-redis-backend
+#  target:
+#    group: apps
+#    version: v1
+#    kind: Deployment
+#    name: proxy
+
+generators:
+- secrets_from_vault.yaml
+
+images:
+- digest: sha256:9b400396a08006b363483f9202c3f7f26301e59abb1ce44764668330e935b704
+  name: splunk/jupyterhub-istio-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/splunk/jupyterhub-istio-proxy

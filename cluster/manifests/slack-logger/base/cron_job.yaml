@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tidb-stats-exporter
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  startingDeadlineSeconds: 600
+  schedule: "0 */6 * * *"
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      completions: 1
+      parallelism: 1
+      completionMode: Indexed
+      backoffLimitPerIndex: 6
+      maxFailedIndexes: 1
+      podReplacementPolicy: Failed
+      podFailurePolicy:
+        rules:
+          - action: Ignore
+            onPodConditions:
+              - type: DisruptionTarget
+                status: "True"
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: slack-logger
+            app.kubernetes.io/component: tidb-stats-exporter
+        spec:
+          restartPolicy: Never
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: tidb-stats-exporter
+              securityContext:
+                privileged: false
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsUser: 65532
+                runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
+              image: ghcr.io/hippocampus-dev/hippocampus/ephemeral-container
+              imagePullPolicy: IfNotPresent
+              command:
+                - sh
+                - -c
+              args:
+                - |
+                  set -eu
+                  STATS=$(curl -sf "${TIDB_ADDRESS}/stats/dump/${TIDB_DATABASE}/${TIDB_TABLE}")
+                  STATUS=$(curl -sf "${TIDB_ADDRESS}/status")
+                  DATE=$(date -u +%Y-%m-%d)
+                  BODY=$(jq -n \
+                    --arg exported_at "$(date -u +%FT%TZ)" \
+                    --argjson tidb_status "$STATUS" \
+                    --argjson stats "$STATS" \
+                    '{exported_at: $exported_at, tidb_status: $tidb_status, stats: $stats}')
+                  curl -sf -X POST "${HTTP_KVS_URL}/${KEY_PREFIX}/${TIDB_DATABASE}/${TIDB_TABLE}/${DATE}" -d "$BODY"
+                  curl -sf -X POST "${HTTP_KVS_URL}/${KEY_PREFIX}/${TIDB_DATABASE}/${TIDB_TABLE}/latest" -d "$BODY"

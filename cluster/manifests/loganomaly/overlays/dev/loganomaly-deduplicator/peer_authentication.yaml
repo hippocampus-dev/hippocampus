@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loganomaly-deduplicator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loganomaly-deduplicator
+  mtls:
+    mode: STRICT
