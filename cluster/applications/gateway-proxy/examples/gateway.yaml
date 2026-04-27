@@ -1,0 +1,9 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: example-gateway
+spec:
+  gatewayClassName: gateway-proxy
+  allowedListeners:
+    namespaces:
+      from: Same

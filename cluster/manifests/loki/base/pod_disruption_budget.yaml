@@ -1,0 +1,79 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: distributor
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: query-frontend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-query-scheduler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: query-scheduler
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: querier
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: ingester
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-index-gateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: index-gateway
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-ruler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: ruler
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: loki-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: proxy

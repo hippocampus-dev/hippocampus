@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -e
+
+import png:- | xclip -selection clipboard -t image/png

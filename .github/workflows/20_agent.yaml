@@ -1,0 +1,51 @@
+name: agent
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/20_agent.yaml"
+      - "agent/**"
+      - "!**/*.md"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  deployments: write
+  id-token: write
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  deploy:
+    needs: runner
+    if: ${{ !cancelled() && needs.runner.outputs.runner }}
+    timeout-minutes: 10
+    runs-on: ${{ fromJSON(needs.runner.outputs.runner) }}
+    environment: deployment
+    steps:
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            agent/
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: agent/package-lock.json
+      - run: npm ci
+        working-directory: agent
+      - run: npm run deploy
+        working-directory: agent
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

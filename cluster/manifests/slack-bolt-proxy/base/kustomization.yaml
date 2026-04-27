@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- pod_disruption_budget.yaml
+images:
+- digest: sha256:295bc675bd20e56046f5481eca66f923709624fd78f0e5869a29b63079a7f889
+  name: ghcr.io/hippocampus-dev/hippocampus/slack-bolt-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/slack-bolt-proxy

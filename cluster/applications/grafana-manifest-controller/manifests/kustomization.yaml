@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: grafana-manifest-controller
+
+resources:
+- service_account.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- role.yaml
+- role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- crd
+
+images:
+- digest: sha256:a3bc6e70bf5656167a62cc9442092e57d0f5e9f65b527a479d5b867b53b44bd1
+  name: ghcr.io/hippocampus-dev/hippocampus/grafana-manifest-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/grafana-manifest-controller

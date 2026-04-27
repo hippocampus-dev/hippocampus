@@ -1,0 +1,110 @@
+name: bakery
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/00_bakery.yaml"
+      - "cluster/applications/bakery/**"
+      - "!**/*.md"
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
+  id-token: write
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  publish:
+    needs: runner
+    if: ${{ !cancelled() && needs.runner.outputs.runner }}
+    timeout-minutes: 10
+    runs-on: ${{ fromJSON(needs.runner.outputs.runner) }}
+    env:
+      IMAGE: bakery
+      KUSTOMIZATION: cluster/manifests/bakery/base
+    steps:
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/
+            cluster/applications/bakery/
+            cluster/manifests/bakery/base/
+      - uses: actions/cache@v5
+        with:
+          path: ${{ runner.temp }}/.cache/docker-build/bakery
+          key: ${{ runner.os }}-bakery-docker-${{ hashFiles('cluster/applications/bakery/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-bakery-docker-
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "DOCKER_CONFIG=${{ runner.temp }}/.docker" >> $GITHUB_ENV
+      - uses: ./.github/actions/setup-docker
+      - run: |
+          set -eo pipefail
+          IMAGE_PATH="${GITHUB_REPOSITORY}/${IMAGE}"
+          GHCR_IMAGE="ghcr.io/${IMAGE_PATH}"
+          TAG="${GITHUB_REF##*/}"
+          opt=""
+          if [ -d "${{ runner.temp }}/.cache/docker-build/bakery" ]; then
+            opt="--cache-from type=local,src=${{ runner.temp }}/.cache/docker-build/bakery"
+          else
+            opt="--cache-from type=registry,ref=${GHCR_IMAGE}:cache"
+          fi
+          (
+            cd cluster/applications/bakery
+
+            docker buildx build --output "type=docker,name=${GHCR_IMAGE}:${TAG},push=false" ${opt} --cache-to "type=local,mode=max,dest=${{ runner.temp }}/.cache/docker-build/bakery" --cache-to "type=registry,ref=${GHCR_IMAGE}:cache,mode=max" .
+          )
+          DIGEST=$(docker push "${GHCR_IMAGE}:${TAG}" | grep -Eo "sha256:[a-f0-9]{64}")
+
+          if [ -n "$KUSTOMIZATION" ]; then
+            git config --global user.email "kaidotio@gmail.com"
+            git config --global user.name "kaidotio"
+            branch="${IMAGE}"
+            git checkout -b "${branch}"
+
+            IFS_BAK=$IFS
+            IFS=,
+            targets=($KUSTOMIZATION)
+            IFS=$IFS_BAK
+            for target in "${targets[@]}"; do
+              (
+                cd "${target}"
+                kustomize edit set image "${GHCR_IMAGE}=${GHCR_IMAGE}@${DIGEST}"
+              )
+            done
+
+            git add "${targets[@]}"
+            if git commit -m "Deploy ${IMAGE}"; then
+              git fetch origin ${{ github.ref_name }}
+              git rebase origin/${{ github.ref_name }}
+              git diff --quiet "origin/${{ github.ref_name }}..${branch}" && exit 0
+              git push -f origin "${branch}"
+              if [ $(gh pr list --head "${branch}" --json id | jq '. | length') -eq 0 ]; then
+                gh pr create --title "Update ${IMAGE}" --body "${GHCR_IMAGE}@${DIGEST}" --head "${branch}"
+              fi
+            fi
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  scan:
+    if: ${{ !cancelled() && github.repository_owner == 'kaidotio' && needs.publish.result == 'success' }}
+    needs: [runner, publish]
+    uses: ./.github/workflows/reusable_scan-image.yaml
+    with:
+      image: ghcr.io/${{ github.repository }}/bakery:${{ github.ref_name }}
+      runner: ${{ needs.runner.outputs.runner }}
+    secrets: inherit

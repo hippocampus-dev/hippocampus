@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-controller.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-broker.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-channel.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-sink.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-source.yaml
+images:
+- digest: sha256:d32d63b8782be2ae3655233367393556cee1fd3d1335fe1b449789e3fee8c268
+  name: gcr.io/knative-releases/knative-kafka-broker-dispatcher-loom
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative-kafka-broker-dispatcher-loom

@@ -1,0 +1,187 @@
+name: Auto Fix CI Failures
+on:
+  workflow_run:
+    workflows:
+      - "*"
+    types:
+      - completed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  auto-fix:
+    if: |
+      github.repository_owner == 'kaidotio' &&
+      github.event.workflow_run.actor.login == 'kaidotio' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.name != 'Auto Fix CI Failures' &&
+      !startsWith(github.event.workflow_run.head_branch, 'claude/auto-fix-ci-')
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      actions: write
+      issues: write
+      pull-requests: read
+    steps:
+      - id: check-previous
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const workflow_id = context.payload.workflow_run.workflow_id;
+            const current_run_id = context.payload.workflow_run.id;
+            const branch = context.payload.workflow_run.head_branch;
+
+            const fixBranch = `claude/auto-fix-ci-${workflow_id}-${branch}`;
+            const { data: fixBranchPRs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              head: `${context.repo.owner}:${fixBranch}`,
+            });
+            if (fixBranchPRs.length > 0) {
+              core.setOutput("should_run", "false");
+              return;
+            }
+
+            const { data: branchData } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow_id,
+              branch: branch,
+              per_page: 5,
+            });
+
+            const previous_branch_run = branchData.workflow_runs.find(run => run.id !== current_run_id && run.conclusion !== null);
+
+            if (previous_branch_run) {
+              core.setOutput("should_run", previous_branch_run.conclusion === "success" ? "true" : "false");
+              return;
+            }
+
+            const { data: allData } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow_id,
+              per_page: 5,
+            });
+
+            const previous_all_run = allData.workflow_runs.find(run => run.id !== current_run_id && run.conclusion !== null);
+
+            if (!previous_all_run) {
+              core.setOutput("should_run", "true");
+              return;
+            }
+
+            core.setOutput("should_run", previous_all_run.conclusion === "success" ? "true" : "false");
+      - if: steps.check-previous.outputs.should_run == 'true' && github.event.workflow_run.run_attempt == 1
+        id: rerun
+        run: |
+          if gh run rerun --failed ${{ github.event.workflow_run.id }} --repo ${{ github.repository }}; then
+            echo "rerun_accepted=true" >> $GITHUB_OUTPUT
+          else
+            echo "rerun_accepted=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const name = "claude-auto-fix-ci";
+
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name,
+              });
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name,
+                color: "0e8a16",
+                description: "Issues created by claude-auto-fix-ci",
+              });
+            }
+      - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
+        run: git config --global submodule.recurse false
+      - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
+        id: branch
+        run: |
+          set -eo pipefail
+          git fetch origin ${{ github.event.workflow_run.head_branch }}
+
+          BRANCH_NAME=claude/auto-fix-ci-${{ github.event.workflow_run.workflow_id }}-${{ github.event.workflow_run.head_branch }}
+
+          git config --global user.name "kaidotio"
+          git config --global user.email "kaidotio@gmail.com"
+
+          git checkout -b "$BRANCH_NAME"
+
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
+        run: |
+          set -eo pipefail
+          mkdir -p ${{ runner.temp }}/claude-home
+          cp files/home/kai/.config/claudex/config/CLAUDE.ci.md ${{ runner.temp }}/claude-home/CLAUDE.md
+          cp files/home/kai/.config/claudex/config/CLAUDE.important.md ${{ runner.temp }}/claude-home/CLAUDE.important.md
+          cp files/home/kai/.config/claudex/config/CLAUDE.general.md ${{ runner.temp }}/claude-home/CLAUDE.general.md
+          cp -r files/home/kai/.config/claudex/config/agents ${{ runner.temp }}/claude-home/agents
+      - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
+        uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: hippocampus-github-app
+          additional_permissions: |
+            actions: read
+          prompt: |
+            # Task
+
+            Fix CI failures for workflow ${{ github.event.workflow_run.id }} on branch ${{ github.event.workflow_run.head_branch }}.
+
+            ## Objectives
+
+            1. Identify the root cause of CI failures
+            2. Implement minimal fixes to resolve the failures
+            3. Ensure changes are safe and do not introduce new issues
+
+            ## Process
+
+            - Use `gh run view ${{ github.event.workflow_run.id }} --log-failed` to get failure details
+            - Read the build configuration (Dockerfile, Makefile, workflow yaml, etc.) of the failed step before forming a hypothesis
+            - Make targeted fixes to resolve the specific failures
+            - Verify the fix addresses the root cause
+            - If you need to create an issue, first use `gh issue list --state open --label claude-auto-fix-ci` to find candidate open issues
+            - If an existing open issue clearly has the same root cause and the same fix target, add a comment to that issue with the workflow name, branch, CI failure URL, and any new diagnosis instead of creating a duplicate issue
+            - If no existing open issue clearly matches, create a new issue and add the label `claude-auto-fix-ci`
+            - Commit changes and push to the current branch
+            - Create a pull request targeting ${{ github.event.workflow_run.head_branch }}
+            - Include the original CI failure URL in the PR body: ${{ github.event.workflow_run.html_url }}
+
+            ## Important
+
+            - Make minimal changes necessary to fix the CI
+            - Never weaken lint rules, skip tests, or remove validation to make CI pass
+            - If unsure about the root cause after diagnosis, do NOT create a PR — instead create an issue with the diagnosis so far
+            - Only comment on an existing issue when the root cause and fix target clearly match. If you are unsure, create a new issue instead
+            - Do not refactor or improve unrelated code
+            - Ensure all changes are safe and reversible
+            - Always create a PR with a descriptive title and summary of fixes
+          show_full_output: true
+          claude_args: |
+            --system-prompt "出力結果は日本語でお願いします。"
+            --allowedTools "Task,Glob,Grep,LS,Read,Edit,MultiEdit,Write,TodoRead,TodoWrite,WebSearch,WebFetch,Bash(find:*),Bash(ls:*),Bash(grep:*),Bash(git:*),Bash(gh:*),Bash(kustomize:*)"
