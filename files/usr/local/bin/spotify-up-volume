@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+SPOTIFY_OAUTH_BRIDGE_URL="https://hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev"
+SPOTIFY_SCOPE="user-read-playback-state user-modify-playback-state"
+VOLUME_STEP=1
+
+token=$(armyknife oauth device --url "$SPOTIFY_OAUTH_BRIDGE_URL" --client-id "spotify" --scope "$SPOTIFY_SCOPE")
+
+state_json=$(curl -fsSL -H "Authorization: Bearer $token" "https://api.spotify.com/v1/me/player")
+
+if [ -z "$state_json" ]; then
+  exit 1
+fi
+
+current_volume=$(echo "$state_json" | jq -re '.device.volume_percent')
+new_volume=$(( current_volume + VOLUME_STEP ))
+if [ "$new_volume" -gt 100 ]; then
+  new_volume=100
+fi
+
+curl -fsSL -X PUT -H "Authorization: Bearer $token" "https://api.spotify.com/v1/me/player/volume?volume_percent=${new_volume}" -o /dev/null
+notify-send "Spotify Volume" "${new_volume}%"

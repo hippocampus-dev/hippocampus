@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: embedding-retrieval
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-retrieval
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

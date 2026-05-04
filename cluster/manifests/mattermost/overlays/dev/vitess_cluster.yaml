@@ -1,0 +1,76 @@
+apiVersion: planetscale.com/v2
+kind: VitessCluster
+metadata:
+  name: mattermost
+  annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=false
+spec:
+  updateStrategy:
+    type: Immediate
+  images:
+    vtctld: ghcr.io/hippocampus-dev/hippocampus/mirror/vitess/lite:v23.0.3
+    vtgate: ghcr.io/hippocampus-dev/hippocampus/mirror/vitess/lite:v23.0.3
+    vttablet: ghcr.io/hippocampus-dev/hippocampus/mirror/vitess/lite:v23.0.3
+    vtbackup: ghcr.io/hippocampus-dev/hippocampus/mirror/vitess/lite:v23.0.3
+    mysqld:
+      mysql80Compatible: ghcr.io/hippocampus-dev/hippocampus/mirror/vitess/lite:v23.0.3
+    # Workaround for v2.17.0-rc1 + InPlacePodVerticalScaling: empty image short-circuits exporter container in pkg/operator/vttablet/pod.go
+    #mysqldExporter: ghcr.io/hippocampus-dev/hippocampus/mirror/prom/mysqld-exporter:v0.16.0
+  globalLockserver:
+    etcd:
+      extraLabels:
+        app: mattermost-vitess-etcd
+      dataVolumeClaimTemplate:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  cells:
+    - name: zone1
+      gateway:
+        replicas: 1
+        extraLabels:
+          app: mattermost-vitess-gateway
+        authentication:
+          static:
+            secret:
+              name: mattermost
+              key: users.json
+  vitessDashboard:
+    replicas: 1
+    extraLabels:
+      app: mattermost-vitess-dashboard
+    cells:
+      - zone1
+    extraFlags:
+      security_policy: read-only
+  keyspaces:
+    - name: mattermost
+      turndownPolicy: Immediate
+      partitionings:
+        - equal:
+            parts: 1
+            shardTemplate:
+              databaseInitScriptSecret:
+                name: mattermost
+                key: init_db.sql
+              tabletPools:
+                - name: ""
+                  cell: zone1
+                  type: replica
+                  replicas: 3
+                  extraLabels:
+                    app: mattermost-vitess-pool
+                  vttablet:
+                    extraFlags:
+                      db_charset: utf8mb4
+                    resources: {}
+                  mysqld:
+                    resources: {}
+                  dataVolumeClaimTemplate:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 10Gi

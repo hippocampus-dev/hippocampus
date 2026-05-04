@@ -1,0 +1,9 @@
+[Unit]
+
+[Service]
+Type=oneshot
+
+ExecStart=/usr/local/bin/claude-daily-task.sh
+TimeoutStartSec=10800
+StandardOutput=journal
+StandardError=journal

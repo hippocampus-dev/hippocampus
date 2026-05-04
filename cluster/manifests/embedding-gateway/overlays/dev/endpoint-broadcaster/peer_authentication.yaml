@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: endpoint-broadcaster
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: endpoint-broadcaster
+  mtls:
+    mode: STRICT

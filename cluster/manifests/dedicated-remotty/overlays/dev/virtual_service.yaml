@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: dedicated-remotty
+spec:
+  gateways:
+    - dedicated-remotty
+  hosts:
+    - dedicated-remotty.minikube.127.0.0.1.nip.io
+    - dedicated-remotty.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: dedicated-container-ingress-controller.dedicated-container-ingress-controller.svc.cluster.local
+            port:
+              number: 8000
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

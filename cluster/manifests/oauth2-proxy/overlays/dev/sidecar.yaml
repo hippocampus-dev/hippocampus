@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: oauth2-proxy
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: oauth2-proxy
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./github.com
+        - ./api.github.com
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

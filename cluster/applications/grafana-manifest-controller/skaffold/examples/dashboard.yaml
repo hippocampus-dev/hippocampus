@@ -1,0 +1,83 @@
+apiVersion: skaffold.grafana-manifest.kaidotio.github.io/v1
+kind: Dashboard
+metadata:
+  name: example-dashboard
+  namespace: skaffold-grafana-manifest-controller
+spec:
+  folder: "Infrastructure"
+  jsonnet: |
+    local g = import "github.com/grafana/grafonnet/gen/grafonnet-v10.4.0/main.libsonnet";
+    local common = import "common.libsonnet";
+
+    local cpuQuery = 'sum(rate(container_cpu_usage_seconds_total{container!=""}[$__range]))';
+    local memoryQuery = 'sum(container_memory_usage_bytes{container!=""})';
+    local podsQuery = 'sum(kube_pod_status_phase{phase="Running"})';
+
+    local cpuPanel =
+        g.panel.timeSeries.new("CPU Usage")
+        + g.panel.timeSeries.panelOptions.withGridPos(w=12, h=8)
+        + g.panel.timeSeries.standardOptions.withUnit("short")
+        + g.panel.timeSeries.queryOptions.withTargets([
+            g.query.prometheus.new("Prometheus", cpuQuery)
+            + g.query.prometheus.withLegendFormat("CPU"),
+        ]);
+
+    local memoryPanel =
+        g.panel.timeSeries.new("Memory Usage")
+        + g.panel.timeSeries.panelOptions.withGridPos(w=12, h=8)
+        + g.panel.timeSeries.standardOptions.withUnit("bytes")
+        + g.panel.timeSeries.queryOptions.withTargets([
+            g.query.prometheus.new("Prometheus", memoryQuery)
+            + g.query.prometheus.withLegendFormat("Memory"),
+        ]);
+
+    local gaugesPanel =
+        g.panel.gauge.new("Resource Utilization")
+        + g.panel.gauge.panelOptions.withGridPos(w=24, h=8)
+        + g.panel.gauge.standardOptions.withUnit("percentunit")
+        + g.panel.gauge.standardOptions.withMin(0)
+        + g.panel.gauge.standardOptions.withMax(1)
+        + g.panel.gauge.standardOptions.thresholds.withMode("absolute")
+        + g.panel.gauge.standardOptions.thresholds.withSteps([
+            g.panel.gauge.standardOptions.threshold.step.withColor("green") + g.panel.gauge.standardOptions.threshold.step.withValue(null),
+            g.panel.gauge.standardOptions.threshold.step.withColor("yellow") + g.panel.gauge.standardOptions.threshold.step.withValue(0.7),
+            g.panel.gauge.standardOptions.threshold.step.withColor("red") + g.panel.gauge.standardOptions.threshold.step.withValue(0.9),
+        ])
+        + g.panel.gauge.queryOptions.withTargets([
+            g.query.prometheus.new("Prometheus", cpuQuery + ' / sum(kube_pod_all_container_resource_requests{resource="cpu",unit="core"})')
+            + g.query.prometheus.withLegendFormat("CPU Requests %")
+            + g.query.prometheus.withInstant(true),
+            g.query.prometheus.new("Prometheus", memoryQuery + ' / sum(kube_pod_all_container_resource_requests{resource="memory",unit="byte"})')
+            + g.query.prometheus.withLegendFormat("Memory Requests %")
+            + g.query.prometheus.withInstant(true),
+        ]);
+
+    local podsPanel =
+        g.panel.stat.new("Running Pods")
+        + g.panel.stat.panelOptions.withGridPos(w=12, h=4)
+        + g.panel.stat.standardOptions.withUnit("short")
+        + g.panel.stat.queryOptions.withTargets([
+            g.query.prometheus.new("Prometheus", podsQuery)
+            + g.query.prometheus.withInstant(true),
+        ]);
+
+    g.dashboard.new("Example Dashboard")
+    + g.dashboard.withUid("example-dashboard")
+    + g.dashboard.time.withFrom(value="now-1h")
+    + g.dashboard.withTimezone("browser")
+    + g.dashboard.withRefresh("30s")
+    + g.dashboard.graphTooltip.withSharedCrosshair()
+    + g.dashboard.withAnnotations([
+        common.alertAnnotation,
+    ])
+    + g.dashboard.withPanels(std.flattenArrays([
+        [
+            g.panel.row.new("Overview") + g.panel.row.withCollapsed(false),
+            gaugesPanel,
+            podsPanel,
+        ],
+        g.util.grid.makeGrid([
+            cpuPanel,
+            memoryPanel,
+        ], panelWidth=12, panelHeight=8),
+    ]))

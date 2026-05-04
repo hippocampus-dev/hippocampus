@@ -1,0 +1,41 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {}
+      http: {}
+
+processors:
+  batch: {}
+
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki]
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      attributes:
+        session_id: ""
+      resource:
+        "service.name": "service_name"
+  prometheus:
+    endpoint: 0.0.0.0:8889

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kata-deploy
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      priorityClassName: system-node-critical
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containers:
+        - name: kube-kata
+          env:
+            # Override upstream default; each shim extracts artifacts to host tmpfs which cannot be reclaimed without swap
+            - name: SHIMS
+              value: qemu

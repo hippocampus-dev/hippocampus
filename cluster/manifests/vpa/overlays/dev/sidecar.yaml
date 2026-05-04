@@ -1,0 +1,57 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: vpa-admission-controller
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: admission-controller
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: vpa-recommender
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: recommender
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - mimir/mimir-proxy.mimir.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: vpa-updater
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: updater
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

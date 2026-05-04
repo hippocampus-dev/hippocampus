@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: knative-eventing
+
+resources:
+  - ../../base
+  - ../../../../applications/cloudevents-logger/manifests
+  - kafka.yaml
+  - kafka_channel.yaml
+  - kafka_node_pool.yaml
+  - kafka_sink.yaml
+  - kafka_source.yaml
+  - kafka_topic.yaml
+  - subscription.yaml
+
+patches:
+  - path: patches/config_map.yaml
+  - path: patches/deployment.yaml
+  - path: patches/stateful_set.yaml
+
+images:
+  - name: gcr.io/knative-releases/knative-kafka-broker-receiver-loom
+    newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative-kafka-broker-receiver-loom
+    digest: sha256:9e53b3766b3d3cf7267e462e8f094c2bb1bdb743563ccb1b33f8242be7c585ff
+  - name: gcr.io/knative-releases/knative-kafka-broker-dispatcher-loom
+    newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative-kafka-broker-dispatcher-loom
+    digest: sha256:480b14f601b7495b5355bad3ad7cc28f4d8dbb828e71a6aac7f434fc9d08a6c9

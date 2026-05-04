@@ -1,0 +1,185 @@
+#!/usr/bin/env -S bash -l
+
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+if [ ! -f ~/.minikube/x86_64.iso ]; then
+  d=$(mktemp -d --tmpdir=/var/tmp)
+  trap 'sudo rm -rf "$d"' EXIT
+  minikube_version=$(minikube version | head -n1 | awk '{print $NF}')
+  git clone https://github.com/kubernetes/minikube.git -b "$minikube_version" --single-branch --depth 1 "$d"
+  cd "$d"
+
+  # minikube < v1.37.0 defaults to 5.x kernel, apply kernel version patches
+  if [ "$minikube_version" != "v1.37.0" ] && [ "$(printf '%s\n' "v1.37.0" "$minikube_version" | sort -V | head -n1)" = "$minikube_version" ]; then
+    if [ "$MINIKUBE_KERNEL_VERSION" == "6.1" ]; then
+      sed -ri 's/KERNEL_VERSION \?= (.+)/KERNEL_VERSION ?= 6.1.108/g' Makefile
+      sed -ri 's/BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="(.+)"/BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.1.108"/g' deploy/iso/minikube-iso/configs/minikube_x86_64_defconfig
+      sed -ri 's/BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_(.+)=y/BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_1=y/g' deploy/iso/minikube-iso/configs/minikube_x86_64_defconfig
+
+      sed -ri 's|HYPERV_DAEMONS_SITE = https://www.kernel.org/pub/linux/kernel/v[0-9].x|HYPERV_DAEMONS_SITE = https://www.kernel.org/pub/linux/kernel/v6.x|g' deploy/iso/minikube-iso/arch/x86_64/package/hyperv-daemons/hyperv-daemons.mk
+    elif [ "$MINIKUBE_KERNEL_VERSION" == "6.6" ]; then
+      sed -ri 's/KERNEL_VERSION \?= (.+)/KERNEL_VERSION ?= 6.6.49/g' Makefile
+      sed -ri 's/BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="(.+)"/BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.49"/g' deploy/iso/minikube-iso/configs/minikube_x86_64_defconfig
+      sed -ri 's/BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_(.+)=y/BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_6=y/g' deploy/iso/minikube-iso/configs/minikube_x86_64_defconfig
+
+      sed -ri 's|HYPERV_DAEMONS_SITE = https://www.kernel.org/pub/linux/kernel/v[0-9].x|HYPERV_DAEMONS_SITE = https://www.kernel.org/pub/linux/kernel/v6.x|g' deploy/iso/minikube-iso/arch/x86_64/package/hyperv-daemons/hyperv-daemons.mk
+
+      # https://github.com/torvalds/linux/commit/82b0945ce2c2d636d5e893ad50210875c929f257
+      sed -ri 's/hv_fcopy_daemon( \\\)?$/hv_fcopy_uio_daemon\1/g' deploy/iso/minikube-iso/arch/x86_64/package/hyperv-daemons/hyperv-daemons.mk
+    else
+      sed -ri 's/KERNEL_VERSION \?= (.+)/KERNEL_VERSION ?= 5.15.166/g' Makefile
+      sed -ri 's/BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="(.+)"/BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="5.15.166"/g' deploy/iso/minikube-iso/configs/minikube_x86_64_defconfig
+      sed -ri 's/BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_(.+)=y/BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_15=y/g' deploy/iso/minikube-iso/configs/minikube_x86_64_defconfig
+    fi
+  fi
+
+  if [ -n "$MINIKUBE_CONTAINERD_VERSION" ]; then
+    sed -ri "s/CONTAINERD_BIN_VERSION = .+/CONTAINERD_BIN_VERSION = ${MINIKUBE_CONTAINERD_VERSION}/g" \
+      deploy/iso/minikube-iso/arch/x86_64/package/containerd-bin/containerd-bin.mk
+  fi
+
+  # https://github.com/torvalds/linux/blob/v6.10/kernel/trace/Kconfig#L766
+  echo "CONFIG_FUNCTION_ERROR_INJECTION=y" >> deploy/iso/minikube-iso/board/minikube/x86_64/linux_x86_64_defconfig
+  echo "CONFIG_BPF_KPROBE_OVERRIDE=y" >> deploy/iso/minikube-iso/board/minikube/x86_64/linux_x86_64_defconfig
+
+  GOOS=linux GOARCH=amd64 go build -o out/auto-pause-amd64 cmd/auto-pause/auto-pause.go
+  make buildroot-image
+  make out/minikube-x86_64.iso
+  mv out/minikube-amd64.iso ~/.minikube/x86_64.iso
+fi
+
+mkdir -p ~/.minikube/files/var/lib/kubelet
+[ -f ~/.docker/config.json ] && cp ~/.docker/config.json ~/.minikube/files/var/lib/kubelet/config.json
+
+mkdir -p ~/.minikube/files/etc/ssl/certs
+if [ ! -f ~/.minikube/files/etc/ssl/certs/encryption.yaml ]; then
+  cat <<EOS | sudo tee ~/.minikube/files/etc/ssl/certs/encryption.yaml > /dev/null
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+  - resources:
+      - secrets
+    providers:
+      - secretbox:
+          keys:
+            - name: key
+              secret: $(head -c 32 /dev/urandom | base64 -w0)
+      - identity: {}
+EOS
+fi
+
+if [ ! -f ~/.minikube/files/etc/ssl/certs/audit-policy.yaml ]; then
+  cat <<EOS | sudo tee ~/.minikube/files/etc/ssl/certs/audit-policy.yaml > /dev/null
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  - level: Metadata
+EOS
+fi
+
+if [ ! -f /var/lib/libvirt/network/mk-minikube.xml ]; then
+  cat <<EOS | sudo tee /var/lib/libvirt/network/mk-minikube.xml > /dev/null
+<network connections='1'>
+  <name>mk-minikube</name>
+  <uuid>77e603d8-7747-451e-8391-13bb31022974</uuid>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='virbr1' stp='on' delay='0'/>
+  <mac address='52:54:00:21:3e:cb'/>
+  <dns enable='no'/>
+  <ip address='192.168.39.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.39.2' end='192.168.39.253'/>
+    </dhcp>
+  </ip>
+</network>
+EOS
+fi
+sudo virsh net-define /var/lib/libvirt/network/mk-minikube.xml
+
+RUNTIME_OPTION="--kubernetes-version=v1.32.0 --container-runtime=containerd"
+CNI_OPTION="--cni=false --force --extra-config=kubeadm.skip-phases=addon/kube-proxy"
+FEATURE_GATE_OPTION="--feature-gates=HPAScaleToZero=true,MutatingAdmissionPolicy=true,InPlacePodVerticalScaling=true,ResourceHealthStatus=true,JobSuccessPolicy=true,MaxUnavailableStatefulSet=true --extra-config=apiserver.runtime-config=admissionregistration.k8s.io/v1alpha1=true"
+AUDIT_OPTION="--extra-config=apiserver.audit-policy-file=/etc/ssl/certs/audit-policy.yaml --extra-config=apiserver.audit-log-path=-"
+EVICTION_OPTION="--extra-config=kubelet.eviction-soft='memory.available<10%' --extra-config=kubelet.eviction-soft-grace-period='memory.available=1m' --extra-config=kubelet.eviction-hard='memory.available<5%'"
+IMAGE_PULL_OPTION="--extra-config=kubelet.serialize-image-pulls=false"
+# NOTE: Pay attention to /proc/sys/kernel/pid_max when changing kubelet.max-pods
+RESOURCE_OPTION="--extra-config=kubelet.max-pods=500 --cpus=16 --memory=64g --disk-size=300g --extra-config=kubelet.system-reserved=cpu=500m,memory=1Gi,ephemeral-storage=10Gi,pid=1000 --extra-config=kubelet.container-log-max-size=1Mi --extra-config=kubelet.container-log-max-files=2"
+ENCRYPTION_OPTION="--extra-config=apiserver.encryption-provider-config=/etc/ssl/certs/encryption.yaml"
+APF_OPTIONS="--extra-config=apiserver.max-mutating-requests-inflight=200 --extra-config=apiserver.max-requests-inflight=400"
+DISABLE_LEADER_ELECT_OPTION="--extra-config=controller-manager.leader-elect=false --extra-config=scheduler.leader-elect=false"
+IMAGE_GC_OPTION="--extra-config=kubelet.image-gc-high-threshold=80 --extra-config=kubelet.image-gc-low-threshold=70"
+POD_GC_OPTION="--extra-config=controller-manager.terminated-pod-gc-threshold=100"
+SCRAPE_OPTION="--extra-config=controller-manager.bind-address=0.0.0.0 --extra-config=scheduler.bind-address=0.0.0.0"
+
+OPTION="--vm-driver=kvm2 $RUNTIME_OPTION $CNI_OPTION $FEATURE_GATE_OPTION $AUDIT_OPTION $EVICTION_OPTION $IMAGE_PULL_OPTION $RESOURCE_OPTION $ENCRYPTION_OPTION $APF_OPTIONS $DISABLE_LEADER_ELECT_OPTION $IMAGE_GC_OPTION $POD_GC_OPTION $SCRAPE_OPTION --extra-config=kubelet.housekeeping-interval=15s --iso-url=file:///home/${USER}/.minikube/x86_64.iso"
+
+# NOTE: Disable btrfs CoW so rawdisk inherits NoCow.
+mkdir -p ~/.minikube/machines
+chattr +C ~/.minikube/machines
+
+started_at=$(date +%s)
+
+trap 'minikube ssh -- "sudo systemctl stop kubelet && sudo systemctl stop containerd && sync" 2>/dev/null; exit 0' TERM
+
+if ! TMPDIR=/var/tmp timeout --foreground 600 minikube start $OPTION; then
+  if minikube ssh -- "sudo journalctl -u kubelet -u containerd -b --since=@${started_at} --no-pager | awk '/failed to (rename|mount).*snapshot/{found=1} END{exit !found}'" 2>/dev/null; then
+    minikube ssh -- "sudo systemctl stop kubelet && sudo systemctl stop containerd && sudo pkill -9 -f '[c]ontainerd-shim-runc-v2' && sudo rm -f /var/lib/containerd/io.containerd.metadata.v1.bolt/meta.db && sudo rm -rf /var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/*"
+    started_at=$(date +%s)
+    TMPDIR=/var/tmp minikube start $OPTION
+  else
+    exit 1
+  fi
+fi
+
+if minikube ssh -- "sudo journalctl -u kubelet -u containerd -b --since=@${started_at} --no-pager | grep -qE 'failed to (rename|mount).*snapshot'" 2>/dev/null; then
+  minikube ssh -- "sudo systemctl stop kubelet && sudo systemctl stop containerd && sudo pkill -9 -f '[c]ontainerd-shim-runc-v2' && sudo rm -f /var/lib/containerd/io.containerd.metadata.v1.bolt/meta.db && sudo rm -rf /var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/*"
+  minikube ssh -- "sudo systemctl start containerd"
+  minikube ssh -- "sudo systemctl start kubelet"
+fi
+
+minikube ssh -- "sudo sed -i 's/^shutdownGracePeriod: .*/shutdownGracePeriod: 120s/' /var/lib/kubelet/config.yaml && sudo sed -i 's/^shutdownGracePeriodCriticalPods: .*/shutdownGracePeriodCriticalPods: 30s/' /var/lib/kubelet/config.yaml"
+
+minikube ssh -- "sudo systemctl restart kubelet"
+
+if minikube ssh -- "sudo grep -q 'listen-metrics-urls' /etc/kubernetes/manifests/etcd.yaml" 2>/dev/null; then
+  minikube ssh -- "sudo sed -i 's/- --listen-metrics-urls=.*/- --listen-metrics-urls=http:\/\/0.0.0.0:2381/' /etc/kubernetes/manifests/etcd.yaml"
+else
+  minikube ssh -- "sudo sed -i '/- --data-dir=\/var\/lib\/minikube\/etcd/a\    - --listen-metrics-urls=http:\/\/0.0.0.0:2381' /etc/kubernetes/manifests/etcd.yaml"
+fi
+if minikube ssh -- "sudo grep -q 'quota-backend-bytes' /etc/kubernetes/manifests/etcd.yaml" 2>/dev/null; then
+  minikube ssh -- "sudo sed -i 's/- --quota-backend-bytes=.*/- --quota-backend-bytes=8589934592/' /etc/kubernetes/manifests/etcd.yaml"
+else
+  minikube ssh -- "sudo sed -i '/- --data-dir=\/var\/lib\/minikube\/etcd/a\    - --quota-backend-bytes=8589934592' /etc/kubernetes/manifests/etcd.yaml"
+fi
+
+scope=$(systemctl list-units --type=scope --plain --no-legend 'machine-*minikube*' | awk '{print $1}' | head -n 1)
+if [ -n "$scope" ]; then
+  sudo systemctl edit --runtime --stdin minikube.service <<EOS
+[Unit]
+After=${scope}
+EOS
+
+  # MemoryLow covers guest RAM (64G) plus QEMU/KVM overhead (~4G); MemorySwapMax=0 hard-disables swap since MemoryLow is only best-effort.
+  sudo systemctl set-property --runtime "$scope" MemoryLow=68G MemorySwapMax=0
+fi
+
+until minikube kubectl -- get --raw /readyz > /dev/null 2>&1; do
+  sleep 5
+done
+
+minikube kubectl -- wait --for=condition=Ready node/minikube --timeout=300s
+
+# https://docs.cilium.io/en/stable/installation/taints/
+minikube kubectl -- taint nodes minikube node.cilium.io/agent-not-ready=true:NoExecute --overwrite
+
+if minikube kubectl -- get ValidatingAdmissionPolicy temporary.validating.kaidotio.github.io 2> /dev/null; then
+  minikube kubectl -- delete ValidatingAdmissionPolicy temporary.validating.kaidotio.github.io
+fi
+if minikube kubectl -- get ValidatingAdmissionPolicyBinding temporary.validating.kaidotio.github.io 2> /dev/null; then
+  minikube kubectl -- delete ValidatingAdmissionPolicyBinding temporary.validating.kaidotio.github.io
+fi

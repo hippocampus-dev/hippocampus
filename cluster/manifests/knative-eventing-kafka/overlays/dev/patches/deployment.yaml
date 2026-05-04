@@ -1,0 +1,418 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-controller
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "9090"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-controller
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-broker-receiver
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "9090"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-broker-receiver
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-broker-receiver
+      initContainers:
+        # Import the cluster CA into the JVM truststore so OIDC discovery can fetch the non-public JWKS at kubernetes.default.svc.
+        - name: import-kubernetes-ca
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 1001
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: gcr.io/knative-releases/knative-kafka-broker-receiver-loom
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              install -m 644 /etc/pki/java/cacerts /run/truststore/cacerts
+              keytool -importcert -trustcacerts -noprompt \
+                -file /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+                -keystore /run/truststore/cacerts \
+                -alias kubernetes \
+                -storepass changeit
+          volumeMounts:
+            - name: truststore
+              mountPath: /run/truststore
+      containers:
+        - name: kafka-broker-receiver
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: -XX:+CrashOnOutOfMemoryError -Djavax.net.ssl.trustStore=/run/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit
+          # Override upstream defaults (requests: cpu 200m, memory 450Mi)
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          volumeMounts:
+            - name: truststore
+              mountPath: /run/truststore
+              readOnly: true
+      volumes:
+        - name: truststore
+          # medium: Memory omitted: tmpfs fsGroup ownership does not apply on Kubernetes 1.32 + containerd 2.2.1, causing Permission denied for UID 1001
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-channel-receiver
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "9090"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-channel-receiver
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-channel-receiver
+      initContainers:
+        - name: import-kubernetes-ca
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 1001
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: gcr.io/knative-releases/knative-kafka-broker-receiver-loom
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              install -m 644 /etc/pki/java/cacerts /run/truststore/cacerts
+              keytool -importcert -trustcacerts -noprompt \
+                -file /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+                -keystore /run/truststore/cacerts \
+                -alias kubernetes \
+                -storepass changeit
+          volumeMounts:
+            - name: truststore
+              mountPath: /run/truststore
+      containers:
+        - name: kafka-channel-receiver
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: -XX:+CrashOnOutOfMemoryError -Djavax.net.ssl.trustStore=/run/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit
+          # Override upstream defaults (requests: cpu 200m, memory 450Mi)
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          volumeMounts:
+            - name: truststore
+              mountPath: /run/truststore
+              readOnly: true
+      volumes:
+        - name: truststore
+          # medium: Memory omitted: tmpfs fsGroup ownership does not apply on Kubernetes 1.32 + containerd 2.2.1, causing Permission denied for UID 1001
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-webhook-eventing
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "9090"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-webhook-eventing
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-webhook-eventing
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-sink-receiver
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "9090"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-sink-receiver
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-eventing
+              app.kubernetes.io/component: kafka-sink-receiver
+      initContainers:
+        - name: import-kubernetes-ca
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 1001
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: gcr.io/knative-releases/knative-kafka-broker-receiver-loom
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              install -m 644 /etc/pki/java/cacerts /run/truststore/cacerts
+              keytool -importcert -trustcacerts -noprompt \
+                -file /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+                -keystore /run/truststore/cacerts \
+                -alias kubernetes \
+                -storepass changeit
+          volumeMounts:
+            - name: truststore
+              mountPath: /run/truststore
+      containers:
+        - name: kafka-sink-receiver
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: -XX:+CrashOnOutOfMemoryError -Djavax.net.ssl.trustStore=/run/truststore/cacerts -Djavax.net.ssl.trustStorePassword=changeit
+          # Override upstream defaults (requests: cpu 200m, memory 450Mi)
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          volumeMounts:
+            - name: truststore
+              mountPath: /run/truststore
+              readOnly: true
+      volumes:
+        - name: truststore
+          # medium: Memory omitted: tmpfs fsGroup ownership does not apply on Kubernetes 1.32 + containerd 2.2.1, causing Permission denied for UID 1001
+          emptyDir: {}
