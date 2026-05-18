@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:83ef0e3ab69570367f14be0be1f3276f438b134dde30a3281468523073cc4b1b
+  name: prom/statsd-exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/prom/statsd-exporter

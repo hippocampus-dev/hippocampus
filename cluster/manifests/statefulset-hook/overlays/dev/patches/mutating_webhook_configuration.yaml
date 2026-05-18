@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: statefulset-hook
+  annotations:
+    cert-manager.io/inject-ca-from: statefulset-hook/statefulset-hook

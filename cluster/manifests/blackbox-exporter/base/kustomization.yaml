@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- config_map.yaml
+- deployment.yaml
+- service.yaml
+images:
+- digest: sha256:67847e8aaec3c4852a2c7d84d5344e7931521962988c48df00cd980cd1b490a2
+  name: quay.io/prometheus/blackbox-exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/prometheus/blackbox-exporter

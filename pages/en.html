@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resume</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css">
+    <style>
+        body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+            background-color: #ffffff;
+        }
+        @media (max-width: 767px) {
+            body {
+                padding: 15px;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0d1117;
+            }
+        }
+        @media print {
+            body {
+                max-width: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="markdown-body">
+<h1 id="kai-aihara">Kai Aihara</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Role</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Software Engineer</td>
+<td>Tokyo, Japan</td>
+</tr>
+</tbody>
+</table>
+<h2 id="summary">Summary</h2>
+<p>Joined LIFULL Co., Ltd. as a new graduate in April 2015.</p>
+<p>While working as an Individual Contributor in the Platform
+Engineering and Site Reliability Engineering domains, I also serve as
+the sole Senior Principal Engineer, responsible for technical strategy
+planning, company-wide system architecture, and PSIRT.</p>
+<p>Launched a Kubernetes-based internal PaaS team in 2018 and have been
+leading it to this day.</p>
+<h2 id="work-experience">Work Experience</h2>
+<h3 id="lifull-co.-ltd.">LIFULL Co., Ltd.</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Role</th>
+<th>Location</th>
+<th>Period</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Senior Principal Engineer</td>
+<td>Tokyo, Japan</td>
+<td>Apr. 2015 - Present</td>
+</tr>
+</tbody>
+</table>
+<p>I have consistently worked in the Platform Engineering domain to
+deliver scalable impact in realizing the corporate message “Make all
+LIFEs FULL.”</p>
+<p>Immediately after joining as a new graduate in 2015, I was assigned
+to a team handling AWS migration accompanying Microservices
+transformation. I led zero-downtime migrations of numerous web servers
+and data stores, as well as the architectural renewal of Solr, the
+full-text search engine that forms the core of the business.</p>
+<p>Concerned about the reinvention of the wheel caused by Microservices
+transformation, I proposed the adoption of a Kubernetes-based PaaS that
+I had been developing as a hobby, launched the team in 2018, and have
+been growing it as a platform that extends beyond Kubernetes to this
+day.</p>
+<ul>
+<li>Launch, development, and technical management of internal PaaS team
+<ul>
+<li>From the team’s launch in 2018 to the present, I have served as Tech
+Lead, handling not only development but also member training and team
+building, managing everything except people management such as
+performance reviews</li>
+<li>Since 2020, we have been accepting members from the Sapporo
+development site, establishing a remote work environment as a
+multi-location team with Tokyo</li>
+<li>Related outputs
+<ul>
+<li><a
+href="https://www.docswell.com/s/LIFULL/5QL3JZ-LIFULL%E3%81%AE%E5%85%A8%E7%A4%BE%E3%82%A2%E3%83%95%E3%82%9A%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%9F%E8%A1%8C%E5%9F%BA%E7%9B%A4%20KEEL%20%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">About
+LIFULL’s Company-wide Application Execution Platform KEEL</a></li>
+</ul></li>
+</ul></li>
+<li>Development and operation of KEEL, a Kubernetes-based internal PaaS
+<ul>
+<li>Built on multi-tenant, single-cluster Kubernetes aimed at cost
+optimization through resource consolidation, adopted service mesh with
+Istio since version 0.2.0, and supports serverless workloads with
+Knative</li>
+<li>Equipped with an observability platform using Prometheus, Thanos,
+Grafana Loki, Fluentd, Grafana Tempo, and Pyroscope, with Spinnaker
+adopted for deployment</li>
+<li>Related outputs
+<ul>
+<li><a
+href="https://www.lifull.blog/entry/2018/12/16/235900">Introducing Istio
+to Production (2018/12/16)</a></li>
+<li><a href="https://www.lifull.blog/entry/2020/08/03/113000">Summary of
+Kubernetes Ecosystem Supporting LIFULL 2020 Edition
+(2020/08/03)</a></li>
+</ul></li>
+</ul></li>
+<li>Development of general-purpose AI agent implementation for product
+integration and LLMOps
+<ul>
+<li>At the release timing of gpt-3.5-turbo, I proactively developed a
+general-purpose AI agent implementing what is now known as an Agent
+Loop, anticipating future product integration and LLMOps as a
+platform</li>
+<li>Simultaneously released an internal general-purpose chatbot using
+this agent, which, along with deployment to group companies, <a
+href="https://lifull.com/news/39363/">achieved 82% employee usage rate
+and 42,000 hours of work time reduction as of October 2024</a></li>
+<li>Widely used by products due to rate limiting, robust error handling,
+and comprehensive observability</li>
+<li>Related outputs
+<ul>
+<li><a href="https://www.lifull.blog/entry/2023/11/16/170000">Developing
+an Infinitely Scalable General-purpose AI (Tentative) Without Using
+OpenAI Assistants API (2023/11/16)</a></li>
+<li><a href="https://www.lifull.blog/entry/2025/05/08/170000">Running
+MCP Servers Relatively Safely (2025/05/08)</a></li>
+</ul></li>
+</ul></li>
+<li>Development of code generator to realize PaaS experience
+<ul>
+<li>By entering required fields for Custom Resource Definition and
+executing, automatically generates everything needed for application
+development cycle including not only Kubernetes Manifests but also
+operational documentation, various GitHub Actions, monitoring settings,
+dashboards, and deployment settings including Content Trust for J-SOX
+compliance</li>
+<li>As a code generator, it can opt-in to repositories not using
+Kubernetes, and has been deployed to all actively developed internal
+repositories to reuse the Content Trust mechanism and various GitHub
+Actions, maintaining all repositories in a healthy state through
+self-update functionality</li>
+<li>Related outputs
+<ul>
+<li><a href="https://www.lifull.blog/entry/2021/03/30/100000">Getting a
+Production Ready Environment on Kubernetes with a Single Command
+(2021/03/30)</a></li>
+</ul></li>
+</ul></li>
+<li>Development of boilerplate for developing CloudNative web
+applications
+<ul>
+<li>Provides boilerplates for Go, TypeScript, and Python equipped with
+OpenTelemetry, Graceful Shutdown, structured logging, profiling, and
+optimal Dockerfiles to support platform users</li>
+<li>Combined with the aforementioned code generator, using the
+boilerplate enables setup in 5 minutes</li>
+<li>Over 90% of new development repositories use these boilerplates</li>
+</ul></li>
+<li>Provision of fully-managed Kafka/Redis/memcached/Qdrant clusters
+<ul>
+<li>Provides frequently used data stores from applications as SaaS
+within the Kubernetes cluster, allowing users to provision these data
+stores by simply adding a few lines of configuration to the
+aforementioned code generator</li>
+<li>Related outputs
+<ul>
+<li><a href="https://www.lifull.blog/entry/2023/07/05/090000">Platform
+Engineering Approach for Promoting LLM Utilization (2023/07/05)</a></li>
+</ul></li>
+</ul></li>
+<li>Platform feature expansion through Kubernetes Operator, Prometheus
+Exporter, proxy-wasm, and middleware development
+<ul>
+<li>In addition to standard features like Kubernetes Operator for
+realizing so-called Preview Environments, implemented various software
+including authorization mechanisms with proxy-wasm and Linux kernel
+layer metrics collection with eBPF, proactively addressing developer
+needs</li>
+<li>Expanded platform functionality broadly beyond Kubernetes, including
+reducing communication costs outside the Kubernetes cluster through TCP
+Proxy development for route optimization</li>
+<li>Related outputs
+<ul>
+<li><a
+href="https://www.lifull.blog/entry/2024/09/03/070000">Implementing a
+Small Route Optimization Middleware to Reduce All Inter-AZ Communication
+(2024/09/03)</a></li>
+<li><a href="https://www.lifull.blog/entry/2023/11/21/170000">eBPF
+Filling the Observability Gaps in Kubernetes Clusters
+(2023/11/21)</a></li>
+<li><a href="https://www.lifull.blog/entry/2020/06/03/080000">Automation
+with GitHub Actions Self-hosted Runners on Kubernetes
+(2020/06/03)</a></li>
+</ul></li>
+</ul></li>
+<li>Migration and migration support for all applications except those
+scheduled for deprecation to internal PaaS
+<ul>
+<li>Related outputs
+<ul>
+<li><a href="https://www.lifull.blog/entry/2019/12/16/000000">How LIFULL
+Migrated (Almost) All Major Services to Kubernetes (2019/12/16)</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</body>
+</html>

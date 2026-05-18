@@ -1,0 +1,7 @@
+domain: general
+descriptors:
+- key: User-Agent
+  value: ^.*[Bb]ot.*$
+  rate_limit:
+    unit: second
+    requests_per_unit: 4

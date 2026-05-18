@@ -1,0 +1,99 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: activator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: activator
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: autoscaler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: autoscaler
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: controller
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: webhook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: webhook
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

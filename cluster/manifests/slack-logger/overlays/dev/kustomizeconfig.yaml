@@ -1,0 +1,33 @@
+nameReference:
+  - version: v1
+    kind: ConfigMap
+    fieldSpecs:
+      - path: spec/dir/configMapRef/name
+        group: db.atlasgo.io
+        version: v1alpha1
+        kind: AtlasMigration
+      - path: spec/schema/configMapKeyRef/name
+        group: db.atlasgo.io
+        version: v1alpha1
+        kind: AtlasSchema
+  - version: v1
+    kind: Secret
+    fieldSpecs:
+      - path: spec/credentials/passwordFrom/secretKeyRef/name
+        group: db.atlasgo.io
+        version: v1alpha1
+        kind: AtlasMigration
+      - path: spec/credentials/passwordFrom/secretKeyRef/name
+        group: db.atlasgo.io
+        version: v1alpha1
+        kind: AtlasSchema
+      - path: spec/passwordSecret
+        group: pingcap.com
+        version: v1alpha1
+        kind: TidbInitializer
+
+images:
+  - path: spec/image
+    group: pingcap.com
+    version: v1alpha1
+    kind: TidbInitializer

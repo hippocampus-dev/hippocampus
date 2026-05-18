@@ -1,0 +1,33 @@
+https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/f03de327dd89b501a01da37fc5240cf4fdba85a1/v1-5-pruned-emaonly.safetensors
+  out=models/Stable-diffusion/v1-5-pruned-emaonly.safetensors
+https://huggingface.co/stabilityai/sd-vae-ft-ema-original/resolve/e21db4dc8d4f2675c2ffef479c4c893e83bceada/vae-ft-ema-560000-ema-pruned.safetensors
+  out=models/VAE/vae-ft-ema-560000-ema-pruned.safetensors
+  
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11e_sd15_ip2p.pth
+  out=models/ControlNet/control_v11e_sd15_ip2p.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11e_sd15_shuffle.pth
+  out=models/ControlNet/control_v11e_sd15_shuffle.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11f1e_sd15_tile.pth
+  out=models/ControlNet/control_v11f1e_sd15_tile.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11f1p_sd15_depth.pth
+  out=models/ControlNet/control_v11f1p_sd15_depth.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_canny.pth
+  out=models/ControlNet/control_v11p_sd15_canny.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_inpaint.pth
+  out=models/ControlNet/control_v11p_sd15_inpaint.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_lineart.pth
+  out=models/ControlNet/control_v11p_sd15_lineart.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_mlsd.pth
+  out=models/ControlNet/control_v11p_sd15_mlsd.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_normalbae.pth
+  out=models/ControlNet/control_v11p_sd15_normalbae.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_openpose.pth
+  out=models/ControlNet/control_v11p_sd15_openpose.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_scribble.pth
+  out=models/ControlNet/control_v11p_sd15_scribble.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_seg.pth
+  out=models/ControlNet/control_v11p_sd15_seg.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15_softedge.pth
+  out=models/ControlNet/control_v11p_sd15_softedge.pth
+https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/69fc48b9cbd98661f6d0288dc59b59a5ccb32a6b/control_v11p_sd15s2_lineart_anime.pth
+  out=models/ControlNet/control_v11p_sd15s2_lineart_anime.pth

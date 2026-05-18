@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: cloudevents-ingress
+spec:
+  gateways:
+    - memory-bank-cloudevents-ingress
+  hosts:
+    - async-memory-bank.minikube.127.0.0.1.nip.io
+    - async-memory-bank.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: memory-bank-cloudevents-ingress.memory-bank.svc.cluster.local
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

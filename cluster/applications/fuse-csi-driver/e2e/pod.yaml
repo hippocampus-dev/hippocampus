@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fuse-csi-driver-e2e
+spec:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  initContainers:
+    - name: fuse-daemon
+      restartPolicy: Always
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        readOnlyRootFilesystem: true
+        runAsUser: 65532
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      image: ghcr.io/hippocampus-dev/hippocampus/fuse-csi-driver-e2e:e2e
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          exec fuser /run/sock rclone mount2 :local:/tmp/backing '{}' --vfs-cache-mode off --allow-non-empty
+      volumeMounts:
+        - name: sock
+          mountPath: /run/sock
+        - name: backing
+          mountPath: /tmp/backing
+  containers:
+    - name: writer
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        readOnlyRootFilesystem: true
+        runAsUser: 65532
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      image: busybox:stable
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          echo e2e > /tmp/backing/test.txt
+      volumeMounts:
+        - name: backing
+          mountPath: /tmp/backing
+    - name: reader
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        readOnlyRootFilesystem: true
+        runAsUser: 65532
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      image: busybox:stable
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          i=0
+          while [ $i -lt 30 ]; do
+            content=$(timeout 5 cat /mnt/test.txt 2>/dev/null)
+            if [ "$content" = "e2e" ]; then
+              echo "PASS"
+              exit 0
+            fi
+            i=$((i + 1))
+            sleep 1
+          done
+          echo "FAIL" >&2
+          exit 1
+      volumeMounts:
+        - name: fuse
+          mountPath: /mnt
+  restartPolicy: Never
+  volumes:
+    - name: fuse
+      csi:
+        driver: fuse-csi-driver.csi.kaidotio.github.io
+        volumeAttributes:
+          socketVolume: sock
+    - name: sock
+      emptyDir:
+        medium: Memory
+    - name: backing
+      emptyDir:
+        medium: Memory

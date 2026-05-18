@@ -1,0 +1,22 @@
+apiVersion: skaffold/v4beta9
+kind: Config
+build:
+  tagPolicy:
+    inputDigest: {}
+  artifacts:
+    - image: ghcr.io/hippocampus-dev/hippocampus/fuse-csi-driver
+      context: ..
+      docker:
+        dockerfile: Dockerfile
+    - image: ghcr.io/hippocampus-dev/hippocampus/fuse-csi-driver-e2e
+      context: ..
+      docker:
+        dockerfile: e2e/Dockerfile
+  local:
+    useBuildkit: true
+manifests:
+  kustomize:
+    paths:
+      - .
+deploy:
+  kubectl: {}

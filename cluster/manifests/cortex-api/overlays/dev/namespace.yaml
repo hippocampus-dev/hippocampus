@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cortex-api
+  labels:
+    name: cortex-api
+    # cortex-api has a waypoint
+    pod-security.kubernetes.io/enforce: baseline

@@ -1,0 +1,14 @@
+{
+  "name": "hippocampus",
+  "private": true,
+  "scripts": {
+    "premarp:dev": "find slides/images -type f -exec mogrify -strip {} +",
+    "marp:dev": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/*.md --watch",
+    "premarp:build": "find slides/images -type f -exec mogrify -strip {} +",
+    "marp:build": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/*.md"
+  },
+  "devDependencies": {
+    "@types/k6": "^0.51.0",
+    "@marp-team/marp-cli": "^3.4.0"
+  }
+}

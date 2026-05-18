@@ -1,0 +1,29 @@
+version: 2
+builds:
+  - id: insight
+    main: dummy.go
+    binary: insight
+    goos:
+      - linux
+    goarch:
+      - amd64
+    hooks:
+      post: bash goreleaser.sh insight
+  - id: l7sniff
+    main: dummy.go
+    binary: l7sniff
+    goos:
+      - linux
+    goarch:
+      - amd64
+    hooks:
+      post: bash goreleaser.sh l7sniff
+
+changelog:
+  disable: true
+
+checksum:
+  split: true
+
+archives:
+  - format: binary

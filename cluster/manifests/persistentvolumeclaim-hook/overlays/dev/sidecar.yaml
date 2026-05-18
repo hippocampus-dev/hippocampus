@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: persistentvolumeclaim-hook
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: persistentvolumeclaim-hook
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - cert-manager/cert-manager-webhook.cert-manager.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

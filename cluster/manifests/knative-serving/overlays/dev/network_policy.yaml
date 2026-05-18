@@ -1,0 +1,136 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-agent
+spec:
+  podSelector:
+    matchLabels:
+      telepresence.io/workloadEnabled: "true"
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kube-apiserver-webhook
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: webhook
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kube-apiserver-net-istio-webhook
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: net-istio
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: autoscaler
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: autoscaler
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: activator
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: activator
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: activator
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: autoscaler
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: cluster-local-gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: knative-serving
+              app.kubernetes.io/component: net-istio
+    - from:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              security.istio.io/tlsMode: istio
+      ports:
+        - protocol: TCP
+          port: 8012

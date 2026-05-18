@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: connectracer
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: connectracer
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

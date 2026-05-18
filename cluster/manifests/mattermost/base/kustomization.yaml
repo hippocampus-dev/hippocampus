@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+images:
+- digest: sha256:22e0ec13c0db6b3e1ba3280e831fc50ba7bffe58e81f31670a64b1afede247bc
+  name: alpine
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/alpine
+- digest: sha256:21509567c2a04274422a27663f3ab3573b84f45fbe70cadbe0e513ffee0d9402
+  name: mattermost/mattermost-team-edition
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/mattermost/mattermost-team-edition
+- name: nginx
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/nginx
+  newTag: 1.27.3-bookworm

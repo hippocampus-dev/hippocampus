@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: proxy-wasm
+spec:
+  gateways:
+    - proxy-wasm
+  hosts:
+    - proxy-wasm.minikube.127.0.0.1.nip.io
+    - proxy-wasm.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: proxy-wasm
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: atlas-operator
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  - path: patches/pod_disruption_budget.yaml
+
+images:
+- name: arigaio/atlas-operator
+  newTag: v0.7.11

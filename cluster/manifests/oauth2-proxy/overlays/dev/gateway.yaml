@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: oauth2-proxy
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - oauth2-proxy.kaidotio.dev
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

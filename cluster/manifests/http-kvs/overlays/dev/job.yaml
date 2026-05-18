@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: http-kvs-mc
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # minio, redis + 1
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 6
+  podFailurePolicy:
+    rules:
+      - action: FailJob
+        onExitCodes:
+          operator: In
+          values:
+            - 127
+      - action: Ignore
+        onPodConditions:
+          - type: DisruptionTarget
+            status: "True"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: http-kvs
+        app.kubernetes.io/component: mc
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      restartPolicy: Never
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mc
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: minio/mc
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MC_HOST_minio
+              value: http://minio:miniominio@http-kvs-minio.http-kvs.svc.cluster.local:9000
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              set -e
+
+              mc mb -p minio/http-kvs
+              curl -fsSL -X POST http://127.0.0.1:15020/quitquitquit
+          volumeMounts:
+            - name: mc
+              mountPath: /.mc
+      volumes:
+        - name: mc
+          emptyDir:
+            medium: Memory

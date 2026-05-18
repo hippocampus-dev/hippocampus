@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta9
+kind: Config
+build:
+  tagPolicy:
+    inputDigest: {}
+  artifacts:
+    - image: ghcr.io/hippocampus-dev/hippocampus/envoy-markdownify
+      context: .
+      docker:
+        dockerfile: Dockerfile
+  local:
+    useBuildkit: true
+manifests:
+  kustomize:
+    paths:
+      - skaffold

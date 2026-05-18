@@ -1,0 +1,119 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: eventing-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: eventing-controller
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: eventing-webhook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: eventing-webhook
+  mtls:
+    mode: PERMISSIVE # AdmissionWebhook
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-broker-dispatcher
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-broker-dispatcher
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-broker-receiver
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-broker-receiver
+  mtls:
+    mode: PERMISSIVE # receiver
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-channel-dispatcher
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-channel-dispatcher
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-channel-receiver
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-channel-receiver
+  mtls:
+    mode: PERMISSIVE # receiver
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-controller
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-sink-receiver
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-sink-receiver
+  mtls:
+    mode: PERMISSIVE # receiver
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-source-dispatcher
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-source-dispatcher
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kafka-eventing-webhook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-eventing
+      app.kubernetes.io/component: kafka-eventing-webhook
+  mtls:
+    mode: PERMISSIVE # AdmissionWebhook

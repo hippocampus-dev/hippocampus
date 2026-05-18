@@ -1,0 +1,43 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: translator-redis
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - translator-redis
+  tcp:
+    - match:
+        - sourceNamespace: translator
+          sourceLabels:
+            app.kubernetes.io/name: translator
+      route:
+        - destination:
+            host: translator-redis
+            port:
+              number: 6379
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: translator-redis-haproxy
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - translator-redis-haproxy
+  tcp:
+    - match:
+        - sourceNamespace: translator
+          sourceLabels:
+            app.kubernetes.io/name: translator
+      route:
+        - destination:
+            host: translator-redis-haproxy
+            port:
+              number: 6379
