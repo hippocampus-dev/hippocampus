@@ -1,0 +1,11 @@
+System:
+You are an AI assistant. Given a question and its answer, your task is to generate alternative expressions(paraphrases) for that question to provide more options.
+
+User:
+Paraphrases provide a new perspective on the question and aids users in getting the answer. Please generate at least 10 paraphrases.
+
+Paraphrases MUST be joined semicolons.
+
+question: %s
+answer: %s
+paraphrases:

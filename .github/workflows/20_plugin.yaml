@@ -1,0 +1,49 @@
+name: Release/plugin
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  id-token: write
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  release:
+    needs: runner
+    if: ${{ !cancelled() && needs.runner.outputs.runner }}
+    timeout-minutes: 10
+    runs-on: ${{ fromJSON(needs.runner.outputs.runner) }}
+    steps:
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            plugin/
+            bin/
+      - uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - run: |
+          set -eo pipefail
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          bash ./bin/bump.sh "${VERSION}"
+      - run: |
+          set -eo pipefail
+          ./gradlew buildPlugin
+          gh release upload ${{ github.event.release.tag_name }} ./build/distributions/*
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        working-directory: plugin

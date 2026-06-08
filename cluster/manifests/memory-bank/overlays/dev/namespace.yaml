@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: memory-bank
+  labels:
+    name: memory-bank
+    # memory-bank uses nfs
+    pod-security.kubernetes.io/enforce: baseline
+    bindings.knative.dev/include: "true"

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant
+spec:
+  selector:
+    app.kubernetes.io/component: qdrant
+  ports:
+    - name: http
+      port: 6333
+      protocol: TCP
+      targetPort: http
+    - name: grpc
+      port: 6334
+      protocol: TCP
+      targetPort: grpc
+    - name: grpc-p2p
+      port: 6335
+      protocol: TCP
+      targetPort: grpc-p2p

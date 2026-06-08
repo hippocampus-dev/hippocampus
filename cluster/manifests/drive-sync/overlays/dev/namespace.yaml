@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: drive-sync
+  labels:
+    name: drive-sync
+    pod-security.kubernetes.io/enforce: restricted

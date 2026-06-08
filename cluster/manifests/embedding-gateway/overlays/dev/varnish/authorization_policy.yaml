@@ -1,0 +1,30 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: varnish
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: varnish
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - embedding-gateway
+            principals:
+              - cluster.local/ns/embedding-gateway/sa/embedding-gateway-ext-proc-proxy
+      to:
+        - operation:
+            notMethods:
+              - PURGE
+    - from:
+        - source:
+            namespaces:
+              - embedding-gateway
+            principals:
+              - cluster.local/ns/embedding-gateway/sa/embedding-gateway-endpoint-broadcaster
+      to:
+        - operation:
+            methods:
+              - PURGE

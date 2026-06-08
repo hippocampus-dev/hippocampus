@@ -1,0 +1,27 @@
+* text=auto eol=lf
+
+**/*/kustomization.yaml merge=union
+
+.junie/guidelines.md.enc diff=armyknife_rails_credentials
+.private/subscriptions.md.enc diff=armyknife_rails_credentials
+.private/accounts.md.enc diff=armyknife_rails_credentials
+.private/devices.md.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui-forge/extensions/Config-Presets/config-img2img.json.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui-forge/extensions/Config-Presets/config-txt2img.json.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui-forge/downloader/links.txt.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui-forge/styles.csv.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui/downloader/links.txt.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui/extensions/Config-Presets/config-img2img.json.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui/extensions/Config-Presets/config-txt2img.json.enc diff=armyknife_rails_credentials
+docker-compose/stable-diffusion-webui/styles.csv.enc diff=armyknife_rails_credentials
+docker-compose/comfyui/downloader/links.txt.enc diff=armyknife_rails_credentials
+docker-compose/comfyui/workflows/flux.1.s.json.enc diff=armyknife_rails_credentials
+docker-compose/comfyui/workflows/flux.1.d.json.enc diff=armyknife_rails_credentials
+docker-compose/comfyui/workflows/flux.1.d.lora.json.enc diff=armyknife_rails_credentials
+docker-compose/comfyui/workflows/wan2.1.i2v.480p.json.enc diff=armyknife_rails_credentials
+docker-compose/comfyui/workflows/wan2.1.i2v.720p.json.enc diff=armyknife_rails_credentials
+docker-compose/comfyui/workflows/wan2.1.t2v.json.enc diff=armyknife_rails_credentials
+files/home/kai/.config/claudex/CLAUDE.md.enc diff=armyknife_rails_credentials
+/opt/hippocampus/config/credentials.yml.enc diff=armyknife_rails_credentials
+.pppoe/1.filter.enc diff=armyknife_rails_credentials
+.pppoe/2.filter.enc diff=armyknife_rails_credentials

@@ -1,0 +1,21 @@
+commonLabels:
+  - group: security.istio.io
+    version: v1
+    kind: AuthorizationPolicy
+    path: spec/selector/matchLabels
+  - group: security.istio.io
+    version: v1
+    kind: PeerAuthentication
+    path: spec/selector/matchLabels
+  - group: security.istio.io
+    version: v1
+    kind: RequestAuthentication
+    path: spec/selector/matchLabels
+  - group: networking.istio.io
+    version: v1
+    kind: Sidecar
+    path: spec/workloadSelector/labels
+  - group: telemetry.istio.io
+    version: v1
+    kind: Telemetry
+    path: spec/selector/matchLabels

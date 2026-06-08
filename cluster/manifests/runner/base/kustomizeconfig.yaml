@@ -1,0 +1,19 @@
+nameReference:
+  - group: ""
+    version: v1
+    kind: Secret
+    fieldSpecs:
+      - path: spec/tokenSecretKeyRef/name
+        group: github-actions-runner.kaidotio.github.io
+        version: v1
+        kind: Runner
+      - path: spec/template/spec/volumes/secret/secretName
+        group: github-actions-runner.kaidotio.github.io
+        version: v1
+        kind: Runner
+
+images:
+  - path: spec/image
+    group: github-actions-runner.kaidotio.github.io
+    version: v1
+    kind: Runner

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyterhub-hub
+spec:
+  selector:
+    app.kubernetes.io/name: jupyterhub
+    app.kubernetes.io/component: hub
+  ports:
+    - name: http
+      port: 8081
+      protocol: TCP
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyterhub-proxy
+spec:
+  selector:
+    app.kubernetes.io/name: jupyterhub
+    app.kubernetes.io/component: proxy
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http
+    - name: http-api
+      port: 8000
+      protocol: TCP
+      targetPort: api

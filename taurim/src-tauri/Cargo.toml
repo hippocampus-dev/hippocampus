@@ -1,0 +1,23 @@
+[workspace]
+
+[package]
+name = "taurim"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+tauri-plugin-gemini = { path = "crates/tauri-plugin-gemini" }
+tauri-plugin-timer = { path = "crates/tauri-plugin-timer" }
+tauri-plugin-speech = { path = "crates/tauri-plugin-speech" }
+
+[lib]
+name = "taurim_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

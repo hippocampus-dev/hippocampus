@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: skaffold-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: skaffold
+
+namespace: skaffold-distribution-scheduler
+
+resources:
+  - ../manifests
+  - namespace.yaml
+
+patches:
+  - path: patches/deployment.yaml
+
+configMapGenerator:
+  - behavior: replace
+    name: distribution-scheduler-config
+    files:
+      - files/config.yaml

@@ -1,0 +1,28 @@
+name: Claude Usage
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  claude:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, local]
+    env:
+      LC_NUMERIC: en_US.UTF-8
+    steps:
+      - run: |
+          set -eo pipefail
+          daily=$(cat ~/.config/claudex/config/projects/**/*.jsonl | jq -r 'select(.type == "assistant" and .message.usage.input_tokens != null and (.timestamp | strptime("%Y-%m-%dT%H:%M:%S.%GZ") | mktime > now - 86400*1)) | .message.usage | ((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) + (.output_tokens // 0))' | awk '{ sum += $1 } END { print sum }')
+          weekly=$(cat ~/.config/claudex/config/projects/**/*.jsonl | jq -r 'select(.type == "assistant" and .message.usage.input_tokens != null and (.timestamp | strptime("%Y-%m-%dT%H:%M:%S.%GZ") | mktime > now - 86400*7)) | .message.usage | ((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) + (.output_tokens // 0))' | awk '{ sum += $1 } END { print sum }')
+          monthly=$(cat ~/.config/claudex/config/projects/**/*.jsonl | jq -r 'select(.type == "assistant" and .message.usage.input_tokens != null and (.timestamp | strptime("%Y-%m-%dT%H:%M:%S.%GZ") | mktime > now - 86400*30)) | .message.usage | ((.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0) + (.output_tokens // 0))' | awk '{ sum += $1 } END { print sum }')
+
+          echo "- Daily: $(printf "%'d" ${daily}) tokens" >> $GITHUB_STEP_SUMMARY
+          echo "- Weekly: $(printf "%'d" ${weekly}) tokens" >> $GITHUB_STEP_SUMMARY
+          echo "- Monthly: $(printf "%'d" ${monthly}) tokens" >> $GITHUB_STEP_SUMMARY

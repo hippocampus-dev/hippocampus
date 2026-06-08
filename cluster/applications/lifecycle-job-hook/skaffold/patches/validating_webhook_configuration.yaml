@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: lifecycle-job-hook
+  annotations:
+    cert-manager.io/inject-ca-from: skaffold-lifecycle-job-hook/skaffold-lifecycle-job-hook

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: jupyterhub
+spec:
+  hard:
+    limits.cpu: "32"
+    requests.cpu: "32"
+    limits.memory: 64Gi
+    requests.memory: 64Gi
+    # https://kubernetes.io/docs/concepts/policy/resource-quotas/#resource-quota-for-extended-resources
+    requests.nvidia.com/gpu: "1"
+    services.loadbalancers: "0"

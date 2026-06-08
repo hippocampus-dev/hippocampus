@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+state_file="${XDG_RUNTIME_DIR:-/tmp}/easyeffects-bypass"
+
+if [ -f "${state_file}" ] && [ "$(cat "${state_file}")" = "1" ]; then
+  easyeffects -b 2
+  echo "2" > "${state_file}"
+  notify-send "EasyEffects" "Effects enabled"
+else
+  easyeffects -b 1
+  echo "1" > "${state_file}"
+  notify-send "EasyEffects" "Effects bypassed"
+fi

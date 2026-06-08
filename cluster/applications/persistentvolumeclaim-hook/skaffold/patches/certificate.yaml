@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: persistentvolumeclaim-hook
+spec:
+  issuerRef:
+    name: skaffold-persistentvolumeclaim-hook-selfsigned
+  dnsNames:
+    - skaffold-persistentvolumeclaim-hook.skaffold-persistentvolumeclaim-hook.svc
+    - skaffold-persistentvolumeclaim-hook.skaffold-persistentvolumeclaim-hook.svc.cluster.local

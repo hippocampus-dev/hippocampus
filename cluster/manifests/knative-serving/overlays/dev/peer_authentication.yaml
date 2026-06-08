@@ -1,0 +1,48 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: activator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: activator
+  mtls:
+    mode: PERMISSIVE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: autoscaler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: autoscaler
+  mtls:
+    mode: PERMISSIVE
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: knative-serving
+      app.kubernetes.io/component: controller
+  mtls:
+    mode: STRICT
+# Already defined in net-istio.yaml
+#---
+#apiVersion: security.istio.io/v1
+#kind: PeerAuthentication
+#metadata:
+#  name: webhook
+#spec:
+#  selector:
+#    matchLabels:
+#      app.kubernetes.io/name: knative-serving
+#      app.kubernetes.io/component: webhook
+#  mtls:
+#    mode: STRICT # AdmissionWebhook

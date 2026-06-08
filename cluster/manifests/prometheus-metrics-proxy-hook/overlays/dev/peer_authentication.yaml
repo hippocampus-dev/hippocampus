@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: prometheus-metrics-proxy-hook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-metrics-proxy-hook
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9443":
+      mode: PERMISSIVE # AdmissionWebhook

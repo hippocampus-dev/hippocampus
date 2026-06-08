@@ -1,0 +1,66 @@
+# Hippocampus Server Configuration Example
+#
+# This configuration file uses internally tagged enums for storage backends.
+# Each section specifies its type via the "kind" field, with additional
+# fields specific to that backend type.
+
+# Token Storage Configuration
+# Options: "File", "SQLite" (with sqlite feature), "GCS" (with gcs feature), "Cassandra" (with cassandra feature)
+[TokenStorage]
+kind = "File"
+path = "/var/hippocampus/tokens"
+
+# SQLite example:
+# [TokenStorage]
+# kind = "SQLite"
+# path = "/var/hippocampus/tokens.db"
+
+# GCS example (requires gcs feature):
+# [TokenStorage]
+# kind = "GCS"
+# bucket = "my-bucket"
+# prefix = "tokens"
+# service_account_key_path = "/path/to/service-account-key.json"
+
+# Cassandra example (requires cassandra feature):
+# [TokenStorage]
+# kind = "Cassandra"
+# address = "127.0.0.1:9042"
+
+# Document Storage Configuration
+# Options: "File", "SQLite" (with sqlite feature)
+[DocumentStorage]
+kind = "File"
+path = "/var/hippocampus/documents"
+
+# SQLite example:
+# [DocumentStorage]
+# kind = "SQLite"
+# path = "/var/hippocampus/documents.db"
+
+# Tokenizer Configuration
+# Options: "Lindera", "Whitespace", "Wasm" (with wasm feature)
+[Tokenizer]
+kind = "Lindera"
+
+# Whitespace example:
+# [Tokenizer]
+# kind = "Whitespace"
+
+# Wasm example (requires wasm feature):
+# [Tokenizer]
+# kind = "Wasm"
+# path = "/path/to/tokenizer.wasm"
+
+# Schema Configuration
+[Schema]
+
+[[Schema.fields]]
+name = "content"
+type = "string"
+indexed = true
+
+[[Schema.fields]]
+name = "title"
+type = "string"
+indexed = false
