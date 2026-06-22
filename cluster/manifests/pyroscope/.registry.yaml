@@ -1,0 +1,356 @@
+name: pyroscope
+namespace: pyroscope
+components:
+  - name: pyroscope-distributor
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: distributor
+      app.kubernetes.io/name: pyroscope
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-distributor
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-distributor%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=deployment&var-workload=pyroscope-distributor
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-distributor
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-distributor
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-distributor
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: distributor
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope
+  - name: pyroscope-query-frontend
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: query-frontend
+      app.kubernetes.io/name: pyroscope
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-query-frontend
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-query-frontend%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=deployment&var-workload=pyroscope-query-frontend
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-query-frontend
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-query-frontend
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-query-frontend
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: query-frontend
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope
+  - name: pyroscope-query-scheduler
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: query-scheduler
+      app.kubernetes.io/name: pyroscope
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-query-scheduler
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-query-scheduler%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=deployment&var-workload=pyroscope-query-scheduler
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-query-scheduler
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-query-scheduler
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-query-scheduler
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: query-scheduler
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope
+  - name: pyroscope-querier
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: querier
+      app.kubernetes.io/name: pyroscope
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-querier
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-querier%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=deployment&var-workload=pyroscope-querier
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-querier
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-querier
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-querier
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: querier
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope
+  - name: pyroscope-compactor
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: compactor
+      app.kubernetes.io/name: pyroscope
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-compactor
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-compactor%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=statefulset&var-workload=pyroscope-compactor
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-compactor
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-compactor
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-compactor
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: compactor
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope
+  - name: pyroscope-ingester
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: ingester
+      app.kubernetes.io/name: pyroscope
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-ingester
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-ingester%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=statefulset&var-workload=pyroscope-ingester
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-ingester
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-ingester
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-ingester
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: ingester
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope
+  - name: pyroscope-store-gateway
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: store-gateway
+      app.kubernetes.io/name: pyroscope
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-store-gateway
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-store-gateway%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=statefulset&var-workload=pyroscope-store-gateway
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-store-gateway
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-store-gateway
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-store-gateway
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: store-gateway
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope
+  - name: pyroscope-minio
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: minio
+      app.kubernetes.io/name: pyroscope
+      variant: utilities
+    logs:
+      grouping: kubernetes.pyroscope.pyroscope-minio
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.pyroscope.pyroscope-minio%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=pyroscope&var-workload_type=statefulset&var-workload=pyroscope-minio
+      labelSets:
+        - labels:
+            destination_service_name: pyroscope-minio
+            destination_service_namespace: pyroscope
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: pyroscope-minio
+            source_workload_namespace: pyroscope
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: pyroscope
+            workload: pyroscope-minio
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: minio
+            app_kubernetes_io_name: pyroscope
+            namespace: pyroscope

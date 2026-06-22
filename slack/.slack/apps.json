@@ -1,0 +1,11 @@
+{
+  "apps": {
+    "T02BY6T3YE6": {
+      "app_id": "A06BAGM1C6L",
+      "IsDev": false,
+      "team_domain": "aiharafamily",
+      "team_id": "T02BY6T3YE6"
+    }
+  },
+  "default": "aiharafamily"
+}

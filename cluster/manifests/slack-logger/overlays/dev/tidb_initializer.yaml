@@ -1,0 +1,17 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TidbInitializer
+metadata:
+  name: slack-logger
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  image: tnir/mysqlclient
+  cluster:
+    namespace: slack-logger
+    name: slack-logger
+  initSql: |-
+    CREATE DATABASE IF NOT EXISTS slack_logger CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+    GRANT ALL ON slack_logger.* TO 'slack_user'@'%';
+    FLUSH PRIVILEGES;
+    SET GLOBAL tidb_slow_log_threshold = 300;
+  passwordSecret: slack-logger

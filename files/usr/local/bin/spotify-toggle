@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+SPOTIFY_OAUTH_BRIDGE_URL="https://hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev"
+SPOTIFY_SCOPE="user-read-playback-state user-modify-playback-state"
+
+token=$(armyknife oauth device --url "$SPOTIFY_OAUTH_BRIDGE_URL" --client-id "spotify" --scope "$SPOTIFY_SCOPE")
+
+state_json=$(curl -fsSL -H "Authorization: Bearer $token" "https://api.spotify.com/v1/me/player")
+
+if [ -z "$state_json" ]; then
+  echo "No active Spotify device" >&2
+  exit 1
+fi
+
+is_playing=$(echo "$state_json" | jq -r '.is_playing')
+
+if [ "$is_playing" = "true" ]; then
+  curl -fsSL -X PUT -H "Authorization: Bearer $token" "https://api.spotify.com/v1/me/player/pause" -o /dev/null
+  notify-send "Spotify" "Paused"
+else
+  curl -fsSL -X PUT -H "Authorization: Bearer $token" "https://api.spotify.com/v1/me/player/play" -o /dev/null
+  notify-send "Spotify" "Resumed"
+fi

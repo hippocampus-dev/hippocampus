@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: drive-sync
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: drive-sync
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

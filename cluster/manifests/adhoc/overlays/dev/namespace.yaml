@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: adhoc
+  labels:
+    name: adhoc
+    pod-security.kubernetes.io/enforce: restricted

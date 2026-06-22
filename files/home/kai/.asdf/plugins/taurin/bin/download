@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+mkdir -p "${ASDF_DOWNLOAD_PATH}"
+
+function get_arch() {
+  uname | tr "[:upper:]" "[:lower:]"
+}
+
+function get_cpu() {
+  local machine_hardware_name="${ASDF_TAURIN_OVERWRITE_ARCH:-$(uname -m)}"
+
+  case "${machine_hardware_name}" in
+    x86_64)
+      local cpu_type="amd64"
+      ;;
+    aarch64 | arm64)
+      local cpu_type="aarch64"
+      ;;
+    *)
+      local cpu_type="${machine_hardware_name}"
+      ;;
+  esac
+
+  echo "${cpu_type}"
+}
+
+function get_extension() {
+  local platform="$(get_arch)"
+
+  case "${platform}" in
+    linux)
+      echo "AppImage"
+      ;;
+    darwin)
+      echo "dmg"
+      ;;
+    *)
+      echo "asdf-taurin: Unsupported platform: ${platform}" >&2
+      echo ""
+      ;;
+  esac
+}
+
+function get_download_url() {
+  local version="${1}"
+  local product="${2}"
+  local cpu="$(get_cpu)"
+  local extension="$(get_extension)"
+
+  if [ -z "${extension}" ]; then
+    return
+  fi
+
+  # Verify release exists before constructing URL
+  local release_url="https://api.github.com/repos/hippocampus-dev/hippocampus/releases/tags/v${version}"
+  if ! curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "${release_url}" >/dev/null 2>&1; then
+    echo "asdf-taurin: Release v${version} not found. Create a GitHub Release first." >&2
+    echo ""
+    return
+  fi
+
+  local asset="${product}_${version}_${cpu}.${extension}"
+  echo "https://github.com/hippocampus-dev/hippocampus/releases/download/v${version}/${asset}"
+}
+
+function get_asset_url() {
+  local version="${1}"
+  local product="${2}"
+  local cpu="$(get_cpu)"
+  local extension="$(get_extension)"
+
+  if [ -z "${extension}" ]; then
+    return
+  fi
+
+  local release_url="https://api.github.com/repos/hippocampus-dev/hippocampus/releases/tags/v${version}"
+  local release_json
+  release_json="$(curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "${release_url}" 2>/dev/null)" || {
+    echo "asdf-taurin: Release v${version} not found. Create a GitHub Release first." >&2
+    echo ""
+    return
+  }
+
+  local asset="${product}_${version}_${cpu}.${extension}"
+  local asset_id
+  asset_id="$(echo "${release_json}" | asset="${asset}" perl -MJSON::PP -le '
+    my $input = do { local $/; <STDIN> };
+    my $json = decode_json($input);
+    foreach my $asset (@{$json->{assets}}) {
+      print $asset->{id} if $asset->{name} eq $ENV{asset};
+    }
+  ')"
+
+  if [ -z "${asset_id}" ]; then
+    echo "asdf-taurin: Asset not found: ${asset} in release v${version}" >&2
+    echo ""
+    return
+  fi
+
+  echo "https://api.github.com/repos/hippocampus-dev/hippocampus/releases/assets/${asset_id}"
+}
+
+opts=("-fsSL")
+if [ -n "$GITHUB_TOKEN" ]; then
+  opts+=("-H" "Authorization: token ${GITHUB_TOKEN}")
+fi
+
+private=false
+visibility="$(curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hippocampus-dev/hippocampus | awk -F'"' '/"visibility":/ {print $4}')"
+if [ "${visibility}" = "private" ]; then
+  private=true
+fi
+
+products=("taurin")
+
+for product in "${products[@]}"; do
+  if [ "${private}" == "true" ]; then
+    asset_url="$(get_asset_url "${ASDF_INSTALL_VERSION}" "${product}")"
+    if [ -z "${asset_url}" ]; then
+      echo -e "asdf-taurin: Asset not found for ${product} v${ASDF_INSTALL_VERSION}" >&2
+      exit 1
+    fi
+    if curl "${opts[@]}" -H "Accept: application/octet-stream" "${asset_url}" -C - -o "${ASDF_DOWNLOAD_PATH}/${product}"; then
+      chmod +x "${ASDF_DOWNLOAD_PATH}/${product}"
+    else
+      echo -e "asdf-taurin: Could not download ${asset_url}" >&2
+      exit 1
+    fi
+  else
+    download_url="$(get_download_url "${ASDF_INSTALL_VERSION}" "${product}")"
+    if [ -z "${download_url}" ]; then
+      echo -e "asdf-taurin: Asset not found for ${product} v${ASDF_INSTALL_VERSION}" >&2
+      exit 1
+    fi
+    if curl "${opts[@]}" "${download_url}" -C - -o "${ASDF_DOWNLOAD_PATH}/${product}"; then
+      chmod +x "${ASDF_DOWNLOAD_PATH}/${product}"
+    else
+      echo -e "asdf-taurin: Could not download ${download_url}" >&2
+      exit 1
+    fi
+  fi
+done

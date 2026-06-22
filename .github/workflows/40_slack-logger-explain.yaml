@@ -1,0 +1,101 @@
+name: Test/slack-logger/explain
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_slack-logger-explain.yaml"
+      - "cluster/applications/slack-logger/queries/**"
+      - "cluster/applications/slack-logger/schema.hcl"
+      - "cluster/applications/slack-logger/migrations/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  explain:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    env:
+      TIDB_DATABASE: slack_logger
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            cluster/applications/slack-logger/
+      - run: git config --global submodule.recurse false
+      - run: |
+          set -eo pipefail
+
+          docker run -d --name tidb -p 4000:4000 -p 10080:10080 -v ${{ runner.temp }}/tidb-stats:/tmp/tidb-stats pingcap/tidb:v8.5.0
+          for i in $(seq 1 30); do
+            mysql -h 127.0.0.1 -P 4000 -u root -e "SELECT 1" 2>/dev/null && break
+            sleep 1
+          done
+          mysql -h 127.0.0.1 -P 4000 -u root -e "SELECT 1" || { echo "::error::TiDB failed to start"; exit 1; }
+          mysql -h 127.0.0.1 -P 4000 -u root -e "CREATE DATABASE IF NOT EXISTS ${TIDB_DATABASE}"
+          for migration in cluster/applications/slack-logger/migrations/*.sql; do
+            mysql -h 127.0.0.1 -P 4000 -u root "${TIDB_DATABASE}" < "$migration"
+          done
+
+          ID_TOKEN=$(curl -fsSL -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=http-kvs-public.kaidotio.dev" | jq -re .value)
+          echo "::add-mask::$ID_TOKEN"
+          HTTP_CODE=$(curl -sSL -w "%{http_code}" -o ${{ runner.temp }}/tidb-stats/envelope.json -H "Authorization: Bearer $ID_TOKEN" "https://http-kvs-public.kaidotio.dev/tidb-stats/slack_logger/encrypted_messages/latest")
+          if [ "$HTTP_CODE" = "200" ]; then
+            jq '.stats' ${{ runner.temp }}/tidb-stats/envelope.json > ${{ runner.temp }}/tidb-stats/stats.json
+            mysql -h 127.0.0.1 -P 4000 -u root -e "LOAD STATS '/tmp/tidb-stats/stats.json'"
+            echo "## EXPLAIN Results" >> $GITHUB_STEP_SUMMARY
+            echo "**Statistics loaded:** Yes" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::warning::production statistics not available (HTTP ${HTTP_CODE})"
+            echo "## EXPLAIN Results" >> $GITHUB_STEP_SUMMARY
+            echo "**Statistics loaded:** No" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          MYSQL="mysql -h 127.0.0.1 -P 4000 -u root ${TIDB_DATABASE}"
+
+          explain() {
+            echo "### $1" >> $GITHUB_STEP_SUMMARY
+            echo '```sql' >> $GITHUB_STEP_SUMMARY
+            echo "$2" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            ${MYSQL} -e "EXPLAIN $2" >> $GITHUB_STEP_SUMMARY 2>&1 || echo "::warning::EXPLAIN failed for $1"
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          }
+
+          query_name=""
+          query_sql=""
+          process_query() {
+            if [[ -n "$query_name" && -n "$query_sql" ]]; then
+              sql=$(echo "$query_sql" | sed "s/sqlc\.narg('[^']*')/NULL/g" | sed "s/?/'1'/g" | sed 's/;[[:space:]]*$//')
+              explain "$query_name" "$sql"
+            fi
+          }
+          while IFS= read -r line || [[ -n "$line" ]]; do
+            if [[ "$line" =~ ^--\ name:\ ([^ ]+) ]]; then
+              process_query
+              query_name="${BASH_REMATCH[1]}"
+              query_sql=""
+            elif [[ -n "$query_name" && -n "$line" ]]; then
+              if [[ -n "$query_sql" ]]; then
+                query_sql+=" $line"
+              else
+                query_sql="$line"
+              fi
+            fi
+          done < <(cat cluster/applications/slack-logger/queries/*.sql)
+          process_query
+      - if: always()
+        run: docker stop tidb

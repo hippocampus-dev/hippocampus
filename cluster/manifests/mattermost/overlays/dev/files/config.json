@@ -1,0 +1,108 @@
+{
+  "ServiceSettings": {
+    "SiteURL": "",
+    "ListenAddress": ":8065",
+    "ConnectionSecurity": "",
+    "EnableIncomingWebhooks": true,
+    "EnableOutgoingWebhooks": true,
+    "EnableCommands": true,
+    "EnablePostUsernameOverride": false,
+    "EnablePostIconOverride": false,
+    "EnableBotAccountCreation": false,
+    "EnableUserAccessTokens": false,
+    "EnableOAuthServiceProvider": false,
+    "EnableLinkPreviews": false,
+    "EnableTesting": false,
+    "EnableDeveloper": false,
+    "EnableSecurityFixAlert": true,
+    "EnableMultifactorAuthentication": false,
+    "SessionLengthWebInHours": 720,
+    "SessionLengthMobileInHours": 720,
+    "SessionLengthSSOInHours": 720,
+    "ReadTimeout": 300,
+    "WriteTimeout": 300,
+    "MaximumLoginAttempts": 10,
+    "Forward80To443": false,
+    "WebserverMode": "gzip"
+  },
+  "TeamSettings": {
+    "SiteName": "Mattermost",
+    "MaxUsersPerTeam": 50000,
+    "EnableOpenServer": true,
+    "EnableTeamCreation": true,
+    "EnableUserCreation": true,
+    "RestrictDirectMessage": "any",
+    "MaxChannelsPerTeam": 50000,
+    "MaxNotificationsPerChannel": 1000,
+    "UserStatusAwayTimeout": 300
+  },
+  "SqlSettings": {
+    "DriverName": "mysql",
+    "DataSource": "mattermost:mattermost@tcp(mattermost-vitess.mattermost.svc.cluster.local:3306)/mattermost?charset=utf8mb4,utf8&readTimeout=30s&writeTimeout=30s",
+    "DataSourceReplicas": [],
+    "DataSourceSearchReplicas": [],
+    "MaxIdleConns": 20,
+    "MaxOpenConns": 35,
+    "QueryTimeout": 30,
+    "ConnMaxLifetimeMilliseconds": 3600000,
+    "ConnMaxIdleTimeMilliseconds": 300000,
+    "Trace": false
+  },
+  "LogSettings": {
+    "EnableConsole": true,
+    "ConsoleLevel": "INFO",
+    "ConsoleJson": true,
+    "EnableFile": false,
+    "FileLevel": "INFO",
+    "EnableWebhookDebugging": true
+  },
+  "FileSettings": {
+    "DriverName": "local",
+    "Directory": "./data/",
+    "EnableFileAttachments": true,
+    "MaxFileSize": 52428800
+  },
+  "EmailSettings": {
+    "EnableSignUpWithEmail": true,
+    "EnableSignInWithEmail": true,
+    "EnableSignInWithUsername": true,
+    "SendEmailNotifications": false,
+    "RequireEmailVerification": false,
+    "FeedbackName": "",
+    "FeedbackEmail": "",
+    "SMTPServer": "",
+    "SMTPPort": "",
+    "ConnectionSecurity": "",
+    "SendPushNotifications": false
+  },
+  "PrivacySettings": {
+    "ShowEmailAddress": true,
+    "ShowFullName": true
+  },
+  "PluginSettings": {
+    "Enable": true,
+    "EnableUploads": true,
+    "Directory": "./plugins",
+    "ClientDirectory": "./client/plugins"
+  },
+  "PasswordSettings": {
+    "MinimumLength": 5,
+    "Lowercase": false,
+    "Number": false,
+    "Uppercase": false,
+    "Symbol": false
+  },
+  "LocalizationSettings": {
+    "DefaultServerLocale": "en",
+    "DefaultClientLocale": "en",
+    "AvailableLocales": ""
+  },
+  "RateLimitSettings": {
+    "Enable": false,
+    "PerSec": 10,
+    "MaxBurst": 100,
+    "MemoryStoreSize": 10000,
+    "VaryByRemoteAddr": true,
+    "VaryByHeader": ""
+  }
+}

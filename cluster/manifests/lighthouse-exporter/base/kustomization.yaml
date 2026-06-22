@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- service.yaml
+images:
+- digest: sha256:75035126bf1635933ffe7187b352062f185526a6c6187fde099e4c87dbad8b03
+  name: ghcr.io/hippocampus-dev/hippocampus/lighthouse-exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/lighthouse-exporter

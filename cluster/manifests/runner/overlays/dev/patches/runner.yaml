@@ -1,0 +1,30 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: Runner
+metadata:
+  name: runner
+spec:
+  #tokenSecretKeyRef:
+  #  name: runner
+  #  key: GITHUB_TOKEN
+  #appSecretRef:
+  #  name: runner
+  builderContainerSpec:
+    volumeMounts:
+      - name: docker-config
+        mountPath: /kaniko/.docker
+        readOnly: true
+  template:
+    metadata:
+      labels:
+        istio.io/dataplane-mode: ambient
+        # Istio Telemetry and AuthorizationPolicy cannot log https traffic
+        "policy.cilium.io/l7-visibility": "true"
+    spec:
+      serviceAccountName: runner
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: runner
+            items:
+              - key: DOCKER_CONFIG_JSON
+                path: config.json

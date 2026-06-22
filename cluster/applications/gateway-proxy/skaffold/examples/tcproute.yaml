@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: e2e-tcproute
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: skaffold-e2e-listenerset
+      sectionName: tcp-9000
+  rules:
+    - backendRefs:
+        - name: skaffold-echoserver
+          port: 9000

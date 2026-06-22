@@ -1,0 +1,13 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: jupyterhub-hub
+spec:
+  maxUnavailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: jupyterhub-proxy
+spec:
+  maxUnavailable: 1

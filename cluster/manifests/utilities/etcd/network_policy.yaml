@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  # kustomize does not support NetworkPolicy ingress merge
+  name: etcd-peer
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: etcd
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: etcd
+      ports:
+        - protocol: TCP
+          port: 2380

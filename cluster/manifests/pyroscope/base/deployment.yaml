@@ -1,0 +1,275 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyroscope-distributor
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: distributor
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: distributor
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/pyroscope
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=distributor
+            - -config.file=/mnt/pyroscope.yaml
+            - -config.expand-env=true
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http2
+              containerPort: 4040
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http2
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyroscope-query-frontend
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-frontend
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: query-frontend
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/pyroscope
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=query-frontend
+            - -config.file=/mnt/pyroscope.yaml
+            - -config.expand-env=true
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http2
+              containerPort: 4040
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http2
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyroscope-query-scheduler
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-scheduler
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: query-scheduler
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/pyroscope
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=query-scheduler
+            - -config.file=/mnt/pyroscope.yaml
+            - -config.expand-env=true
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http2
+              containerPort: 4040
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http2
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyroscope-querier
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: querier
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/part-of: memberlist
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: querier
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: grafana/pyroscope
+          imagePullPolicy: IfNotPresent
+          args:
+            - -target=querier
+            - -config.file=/mnt/pyroscope.yaml
+            - -config.expand-env=true
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: http2
+              containerPort: 4040
+              protocol: TCP
+            - name: gossip
+              containerPort: 7946
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http2
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3

@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: prometheus
+
+resources:
+  - ../../base
+  - gateway.yaml
+  - namespace.yaml
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+  - virtual_service.yaml
+
+patches:
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/service.yaml
+  - path: patches/stateful_set.yaml
+
+replacements:
+  - source:
+      kind: StatefulSet
+      name: prometheus
+      fieldPath: spec.replicas
+    targets:
+      - select:
+          kind: StatefulSet
+          name: prometheus
+        fieldPaths:
+          - spec.template.spec.initContainers.[name=config-generator].env.[name=REPLICAS].value

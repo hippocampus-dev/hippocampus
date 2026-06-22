@@ -1,0 +1,174 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: pyroscope-distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: distributor
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: pyroscope-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: querier
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: pyroscope-query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-frontend
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: pyroscope-query-scheduler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-scheduler
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: pyroscope-compactor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: compactor
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: pyroscope-index-gateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: index-gateway
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: pyroscope-ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: ingester
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

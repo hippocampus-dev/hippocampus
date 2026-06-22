@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+if (( $# )); then
+  exec /usr/bin/env "$@"
+fi
+
+output=$(/usr/bin/env)
+
+shopt -s nullglob
+for f in ~/.secrets/*; do
+  output=${output//$(cat "$f")/[REDACTED]}
+done
+shopt -u nullglob
+
+echo "$output"

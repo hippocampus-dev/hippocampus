@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: vitess-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vitess-operator
+      app.kubernetes.io/component: ""

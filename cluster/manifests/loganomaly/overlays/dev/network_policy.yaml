@@ -1,0 +1,193 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-agent
+spec:
+  podSelector:
+    matchLabels:
+      telepresence.io/workloadEnabled: "true"
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: loganomaly-deduplicator
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: loganomaly-deduplicator
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: cluster-local-gateway
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app: activator
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app: autoscaler
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: loganomaly-adapter
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: loganomaly-adapter
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: cluster-local-gateway
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app: activator
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app: autoscaler
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudevents-alertmanager
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudevents-alertmanager
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: cluster-local-gateway
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app: activator
+      ports:
+        - protocol: TCP
+          port: 8012
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: knative-serving
+          podSelector:
+            matchLabels:
+              app: autoscaler
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: loganomaly-redis-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: redis
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+          podSelector:
+            matchLabels:
+              app: istiod
+      ports:
+        - protocol: TCP
+          port: 15012
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: otel
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: otel-agent
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 4317
