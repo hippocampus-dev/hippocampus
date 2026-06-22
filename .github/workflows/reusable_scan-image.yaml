@@ -52,7 +52,7 @@ jobs:
           name: ${{ env.SBOM_NAME }}
           path: ${{ runner.temp }}/sbom.cyclonedx.json
           retention-days: 90
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github/scripts/submit-dependency-snapshot.sh

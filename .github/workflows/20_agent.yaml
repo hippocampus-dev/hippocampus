@@ -34,7 +34,7 @@ jobs:
       - if: contains(needs.runner.outputs.runner, 'local')
         run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
       - run: git config --global submodule.recurse false
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             agent/

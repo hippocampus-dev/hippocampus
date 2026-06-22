@@ -86,7 +86,7 @@ jobs:
       - run: git config --global submodule.recurse false
       - if: contains(inputs.runs-on, 'local')
         run: echo "DOCKER_CONFIG=${{ runner.temp }}/.docker" >> $GITHUB_ENV
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             cluster/applications/snapshot-controller/.github/actions/

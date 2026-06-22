@@ -18,7 +18,7 @@ jobs:
     outputs:
       has_new_packages: ${{ steps.check.outputs.has_new_packages }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - run: git config --global submodule.recurse false
       - run: git fetch --depth=1 origin ${{ github.event.before }}
       - id: check
@@ -38,7 +38,7 @@ jobs:
       id-token: write
       actions: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Configure Codex
         run: |
           set -eo pipefail

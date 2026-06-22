@@ -112,7 +112,7 @@ jobs:
               });
             }
       - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
       - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'

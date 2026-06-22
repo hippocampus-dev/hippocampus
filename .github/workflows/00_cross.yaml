@@ -26,7 +26,7 @@ jobs:
       IMAGE: cross/x86_64-unknown-linux-gnu
       KUSTOMIZATION: ""
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github/
@@ -96,7 +96,7 @@ jobs:
       IMAGE: cross/x86_64-unknown-linux-musl
       KUSTOMIZATION: ""
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github/

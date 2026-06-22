@@ -27,7 +27,7 @@ jobs:
       id-token: write
       actions: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - run: |
           set -eo pipefail
           mkdir -p ${{ runner.temp }}/claude-home

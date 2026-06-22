@@ -23,7 +23,7 @@ jobs:
       GOPATH: /tmp/go
       GOBIN: /tmp/build-tools/bin
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .idea/crd/

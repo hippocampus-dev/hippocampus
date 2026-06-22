@@ -31,7 +31,7 @@ jobs:
       pull-requests: write
     steps:
       - run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - run: git config --global submodule.recurse false
       - run: git submodule update --init proto/googleapis
       - run: |

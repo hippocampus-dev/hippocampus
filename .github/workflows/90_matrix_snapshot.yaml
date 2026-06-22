@@ -18,7 +18,7 @@ jobs:
     outputs:
       include: ${{ steps.load.outputs.include }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github/workflows/90_matrix_snapshot/
@@ -64,7 +64,7 @@ jobs:
     outputs:
       issue-url: ${{ steps.create-issue.outputs.issue-url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github/
@@ -97,7 +97,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.load.outputs.include) }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github/
