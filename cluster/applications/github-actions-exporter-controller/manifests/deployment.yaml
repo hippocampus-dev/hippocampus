@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-actions-exporter-controller
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: github-actions-exporter-controller
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: github-actions-exporter-controller
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: github-actions-exporter-controller
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/github-actions-exporter-controller
+          imagePullPolicy: IfNotPresent
+          args:
+            - --enable-leader-election
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
+            - name: probe
+              containerPort: 8081
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: probe
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3

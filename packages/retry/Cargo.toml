@@ -1,0 +1,8 @@
+[package]
+name = "retry"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.45.1", features = ["time"] }
+rand = { version = "0.9.0" }

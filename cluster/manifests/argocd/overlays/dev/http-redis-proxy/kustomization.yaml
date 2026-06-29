@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: argocd-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: argocd
+      variant: utilities
+
+resources:
+  - ../../../../utilities/http-redis-proxy
+  - authorization_policy.yaml
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  - path: patches/horizontal_pod_autoscaler.yaml
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/service.yaml

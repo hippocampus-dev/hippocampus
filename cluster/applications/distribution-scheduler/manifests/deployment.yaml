@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distribution-scheduler
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: distribution-scheduler
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: distribution-scheduler
+      automountServiceAccountToken: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: distribution-scheduler
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/distribution-scheduler
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config=/etc/scheduler/config.yaml
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: https
+              containerPort: 10259
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            failureThreshold: 24
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          # distribution-scheduler implements lameduck
+          #lifecycle:
+          #  preStop:
+          #    exec:
+          #      command: ["sleep", "3"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/scheduler
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: distribution-scheduler-config

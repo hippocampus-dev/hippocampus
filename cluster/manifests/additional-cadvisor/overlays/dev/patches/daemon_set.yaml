@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: additional-cadvisor
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1

@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: url-shortener
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: url-shortener
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - http-kvs/http-kvs.http-kvs.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

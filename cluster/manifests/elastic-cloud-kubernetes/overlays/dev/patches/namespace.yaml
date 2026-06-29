@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: elastic-system
+  labels:
+    name: elastic-system
+    # elastic-cloud-kubernetes creates pods without restricted security contexts
+    pod-security.kubernetes.io/enforce: baseline

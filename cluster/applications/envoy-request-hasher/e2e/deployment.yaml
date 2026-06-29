@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-request-hasher
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: envoy-request-hasher
+      app.kubernetes.io/component: e2e
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:v1.31.7
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: http-base
+              containerPort: 8081
+              protocol: TCP
+          volumeMounts:
+            - name: envoy
+              mountPath: /etc/envoy
+        - name: envoy-request-hasher
+          image: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher
+          args:
+            - --address=0.0.0.0:50051
+            - --enable-body-hash
+            - --enable-path-hash
+            - --enable-url-hash
+          ports:
+            - name: grpc
+              containerPort: 50051
+              protocol: TCP
+        - name: httpbin
+          image: kennethreitz/httpbin:latest
+      volumes:
+        - name: envoy
+          configMap:
+            name: envoy

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: url-shortener
+spec:
+  selector:
+    app.kubernetes.io/name: url-shortener
+    app.kubernetes.io/component: ""
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http

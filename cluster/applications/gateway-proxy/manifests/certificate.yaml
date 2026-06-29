@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gateway-proxy
+spec:
+  secretName: gateway-proxy-certs
+  issuerRef:
+    name: gateway-proxy-selfsigned

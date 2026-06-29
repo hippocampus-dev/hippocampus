@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statsd-exporter
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/component: statsd-exporter
+  template:
+    metadata:
+      labels:
+        <<: *labels
+        app.kubernetes.io/component: statsd-exporter
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: statsd-exporter
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: prom/statsd-exporter
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: tcp
+              containerPort: 9125
+              protocol: TCP
+            - name: udp
+              containerPort: 9125
+              protocol: UDP
+            - name: metrics
+              containerPort: 9102
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /-/healthy
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3

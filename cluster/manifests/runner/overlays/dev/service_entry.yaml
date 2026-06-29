@@ -1,0 +1,175 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: github.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - github.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: api.github.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - api.github.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: objects.githubusercontent.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - objects.githubusercontent.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: auth.docker.io
+spec:
+  exportTo:
+    - .
+  hosts:
+    - auth.docker.io
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: production.cloudflare.docker.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - production.cloudflare.docker.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: actions-results-receiver-production.githubapp.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - actions-results-receiver-production.githubapp.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: results-receiver.actions.githubusercontent.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - results-receiver.actions.githubusercontent.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: vstoken.actions.githubusercontent.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - vstoken.actions.githubusercontent.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: wildcard.blob.core.windows.ne
+spec:
+  exportTo:
+    - .
+  hosts:
+    - "*.blob.core.windows.net"
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: wildcard.actions.githubusercontent.com
+spec:
+  exportTo:
+      - .
+  hosts:
+    - "*.actions.githubusercontent.com"
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: NONE
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: archive.ubuntu.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - archive.ubuntu.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: http
+      number: 80
+      protocol: HTTP
+  resolution: DNS

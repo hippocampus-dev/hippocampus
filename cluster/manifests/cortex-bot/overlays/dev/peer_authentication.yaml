@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cortex-bot
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cortex-bot
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

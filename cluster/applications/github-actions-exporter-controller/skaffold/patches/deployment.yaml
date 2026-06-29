@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-actions-exporter-controller
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: github-actions-exporter-controller
+          image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+          env:
+            - name: VARIANT
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['variant']
+          volumeMounts:
+            # delve uses /home/nonroot/.config for storing delve configuration
+            - name: tmp
+              mountPath: /home/nonroot/.config
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

@@ -1,0 +1,10 @@
+[Unit]
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+Restart=on-failure
+
+User=kai
+ExecStart=/usr/local/bin/sync.sh

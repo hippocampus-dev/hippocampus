@@ -1,0 +1,16 @@
+[models."gemma-3-4b-it-Q4_K_M.gguf"]
+n_ctx = 4096
+n_parallel = 4
+n_batch = 512
+n_ubatch = 512
+n_gpu_layers = 999
+stop_sequences = ["<end_of_turn>", "<start_of_turn>"]
+
+[models."gemma-3-4b-it-Q4_K_M.gguf".prompt_format]
+user_prefix = "<start_of_turn>user\n"
+user_suffix = "<end_of_turn>\n"
+assistant_prefix = "<start_of_turn>model\n"
+assistant_suffix = "<end_of_turn>\n"
+system_prefix = "<start_of_turn>system\n"
+system_suffix = "<end_of_turn>\n"
+add_generation_prompt = "<start_of_turn>model\n"

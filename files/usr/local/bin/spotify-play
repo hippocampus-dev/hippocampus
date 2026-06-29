@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+SPOTIFY_OAUTH_BRIDGE_URL="https://hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev"
+SPOTIFY_SCOPE="user-read-playback-state user-modify-playback-state"
+
+function usage() {
+  cat <<EOS
+Usage:
+   spotify-play [uri]
+
+Arguments:
+   uri    Spotify URI (spotify:track:..., spotify:playlist:...) or URL
+
+Options:
+   -h, --help   Show this help
+EOS
+}
+
+args=()
+while (( $# )); do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*|--*)
+      echo "Unsupported flag $1" 1>&2
+      exit 1
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+track_uri="${args[0]:-}"
+
+if [ -z "$track_uri" ]; then
+  echo "URI required" 1>&2
+  usage
+  exit 1
+fi
+
+case "$track_uri" in
+  https://open.spotify.com/track/*)
+    track_id="${track_uri#https://open.spotify.com/track/}"
+    track_id="${track_id%%\?*}"
+    track_uri="spotify:track:${track_id}"
+    ;;
+  https://open.spotify.com/playlist/*)
+    playlist_id="${track_uri#https://open.spotify.com/playlist/}"
+    playlist_id="${playlist_id%%\?*}"
+    track_uri="spotify:playlist:${playlist_id}"
+    ;;
+  https://open.spotify.com/album/*)
+    album_id="${track_uri#https://open.spotify.com/album/}"
+    album_id="${album_id%%\?*}"
+    track_uri="spotify:album:${album_id}"
+    ;;
+esac
+
+token=$(armyknife oauth device --url "$SPOTIFY_OAUTH_BRIDGE_URL" --client-id "spotify" --scope "$SPOTIFY_SCOPE")
+
+devices_json=$(curl -fsSL -H "Authorization: Bearer $token" "https://api.spotify.com/v1/me/player/devices")
+
+device_count=$(echo "$devices_json" | jq -r '.devices | length')
+
+if [ "$device_count" -eq 0 ]; then
+  echo "No active Spotify devices found. Open Spotify on a device first." 1>&2
+  exit 1
+elif [ "$device_count" -eq 1 ]; then
+  device_id=$(echo "$devices_json" | jq -re '.devices[0].id')
+  device_name=$(echo "$devices_json" | jq -re '.devices[0].name')
+else
+  selection=$(echo "$devices_json" | jq -r '.devices[] | "\(.id)\t\(.name) [\(.type)]"' | fzf --with-nth=2.. --delimiter=$'\t') || exit 0
+  device_id=$(echo "$selection" | cut -f1)
+  device_name=$(echo "$selection" | cut -f2-)
+  device_name="${device_name% \[*\]}"
+fi
+
+case "$track_uri" in
+  spotify:track:*)
+    body=$(jq -rn --arg uri "$track_uri" '{"uris": [$uri]}')
+    ;;
+  *)
+    body=$(jq -rn --arg uri "$track_uri" '{"context_uri": $uri}')
+    ;;
+esac
+curl -fsSL -X PUT -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "$body" "https://api.spotify.com/v1/me/player/play?device_id=${device_id}" -o /dev/null
+
+echo "Playing ${track_uri} on ${device_name}"

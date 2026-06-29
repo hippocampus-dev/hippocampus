@@ -1,0 +1,5 @@
+[Service]
+Type=oneshot
+Restart=on-failure
+
+ExecStart=/usr/local/bin/backup.sh
