@@ -44,7 +44,7 @@ jobs:
             cluster/applications/chrome-devtools-protocol-server/
             cluster/manifests/cortex-api/overlays/dev/
             cluster/manifests/cortex-bot/overlays/dev/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/chrome-devtools-protocol-server
           key: ${{ runner.os }}-chrome-devtools-protocol-server-docker-${{ hashFiles('cluster/applications/chrome-devtools-protocol-server/Dockerfile') }}

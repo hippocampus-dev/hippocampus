@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/whisper-worker/
             cluster/manifests/whisper-worker/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/whisper-worker
           key: ${{ runner.os }}-whisper-worker-docker-${{ hashFiles('cluster/applications/whisper-worker/Dockerfile') }}

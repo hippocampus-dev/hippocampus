@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/kube-crud/
             cluster/manifests/kube-crud/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/kube-crud
           key: ${{ runner.os }}-kube-crud-docker-${{ hashFiles('cluster/applications/kube-crud/Dockerfile') }}

@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/cloudevents-ingress/
             cluster/manifests/utilities/cloudevents-ingress/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/cloudevents-ingress
           key: ${{ runner.os }}-cloudevents-ingress-docker-${{ hashFiles('cluster/applications/cloudevents-ingress/Dockerfile') }}

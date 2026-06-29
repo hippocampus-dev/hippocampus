@@ -44,7 +44,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/prometheus-metrics-proxy-hook/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/prometheus-metrics-proxy-hook
           key: ${{ runner.os }}-prometheus-metrics-proxy-hook-docker-${{ hashFiles('cluster/applications/prometheus-metrics-proxy-hook/Dockerfile') }}

@@ -44,7 +44,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/events-logger/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/events-logger
           key: ${{ runner.os }}-events-logger-docker-${{ hashFiles('cluster/applications/events-logger/Dockerfile') }}

@@ -44,7 +44,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/fuse-csi-driver/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/fuse-csi-driver
           key: ${{ runner.os }}-fuse-csi-driver-docker-${{ hashFiles('cluster/applications/fuse-csi-driver/Dockerfile') }}

@@ -39,13 +39,13 @@ jobs:
           cache: npm
           cache-dependency-path: taurin/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-taurin-cargo-${{ hashFiles('taurin/src-tauri/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-taurin-cargo-
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: taurin/src-tauri/target
           key: ${{ runner.os }}-taurin-target-${{ hashFiles('taurin/src-tauri/**/*.rs') }}

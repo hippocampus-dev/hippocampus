@@ -45,7 +45,7 @@ jobs:
             .github/
             cluster/applications/envoy-request-hasher/
             cluster/manifests/embedding-gateway/overlays/dev/ext-proc-proxy/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/envoy-request-hasher
           key: ${{ runner.os }}-envoy-request-hasher-docker-${{ hashFiles('cluster/applications/envoy-request-hasher/Dockerfile') }}

@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/spotify-mcp-server/
             cluster/manifests/spotify-mcp-server/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/spotify-mcp-server
           key: ${{ runner.os }}-spotify-mcp-server-docker-${{ hashFiles('cluster/applications/spotify-mcp-server/Dockerfile') }}

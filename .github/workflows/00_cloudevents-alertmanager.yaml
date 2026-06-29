@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/cloudevents-alertmanager/
             cluster/manifests/loganomaly/overlays/dev/cloudevents-alertmanager/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/cloudevents-alertmanager
           key: ${{ runner.os }}-cloudevents-alertmanager-docker-${{ hashFiles('cluster/applications/cloudevents-alertmanager/Dockerfile') }}

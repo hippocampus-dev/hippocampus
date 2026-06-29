@@ -46,7 +46,7 @@ jobs:
             cluster/manifests/cortex-api/base/
       - if: ${{ !contains(needs.runner.outputs.runner, 'local') }}
         run: bash .github/scripts/cleanup.sh
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/cortex-api
           key: ${{ runner.os }}-cortex-api-docker-${{ hashFiles('cluster/applications/api/Dockerfile') }}

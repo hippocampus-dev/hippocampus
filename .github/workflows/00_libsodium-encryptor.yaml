@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/libsodium-encryptor/
             cluster/manifests/libsodium-encryptor/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/libsodium-encryptor
           key: ${{ runner.os }}-libsodium-encryptor-docker-${{ hashFiles('cluster/applications/libsodium-encryptor/Dockerfile') }}

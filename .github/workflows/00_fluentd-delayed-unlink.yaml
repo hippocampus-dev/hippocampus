@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/fluentd-delayed-unlink/
             cluster/manifests/fluentd-delayed-unlink/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/fluentd-delayed-unlink
           key: ${{ runner.os }}-fluentd-delayed-unlink-docker-${{ hashFiles('cluster/applications/fluentd-delayed-unlink/Dockerfile') }}

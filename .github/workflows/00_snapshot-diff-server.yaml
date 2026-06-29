@@ -45,7 +45,7 @@ jobs:
             .github/
             cluster/applications/snapshot-controller/
             cluster/manifests/snapshot-diff-server/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/snapshot-controller
           key: ${{ runner.os }}-snapshot-controller-docker-${{ hashFiles('cluster/applications/snapshot-controller/Dockerfile') }}
