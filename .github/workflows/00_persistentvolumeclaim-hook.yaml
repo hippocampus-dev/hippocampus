@@ -44,7 +44,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/persistentvolumeclaim-hook/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/persistentvolumeclaim-hook
           key: ${{ runner.os }}-persistentvolumeclaim-hook-docker-${{ hashFiles('cluster/applications/persistentvolumeclaim-hook/Dockerfile') }}

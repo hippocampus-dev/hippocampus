@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/cloudevents-relay/
             cluster/manifests/utilities/cloudevents-relay/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/cloudevents-relay
           key: ${{ runner.os }}-cloudevents-relay-docker-${{ hashFiles('cluster/applications/cloudevents-relay/Dockerfile') }}

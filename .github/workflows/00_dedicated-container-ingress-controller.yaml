@@ -44,7 +44,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/dedicated-container-ingress-controller/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/dedicated-container-ingress-controller
           key: ${{ runner.os }}-dedicated-container-ingress-controller-docker-${{ hashFiles('cluster/applications/dedicated-container-ingress-controller/Dockerfile') }}

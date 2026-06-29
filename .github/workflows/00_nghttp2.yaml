@@ -42,7 +42,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/nghttp2/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/nghttp2
           key: ${{ runner.os }}-nghttp2-docker-${{ hashFiles('cluster/applications/nghttp2/Dockerfile') }}

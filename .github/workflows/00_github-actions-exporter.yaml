@@ -42,7 +42,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/github-actions-exporter/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/github-actions-exporter
           key: ${{ runner.os }}-github-actions-exporter-docker-${{ hashFiles('cluster/applications/github-actions-exporter/Dockerfile') }}

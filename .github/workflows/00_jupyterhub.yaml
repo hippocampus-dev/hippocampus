@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/jupyterhub/
             cluster/manifests/jupyterhub/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/jupyterhub
           key: ${{ runner.os }}-jupyterhub-docker-${{ hashFiles('cluster/applications/jupyterhub/Dockerfile') }}

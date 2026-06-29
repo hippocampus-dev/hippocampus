@@ -46,7 +46,7 @@ jobs:
             cluster/applications/loganomaly/
             cluster/manifests/loganomaly/overlays/dev/loganomaly-deduplicator/
             cluster/manifests/loganomaly/overlays/dev/loganomaly-adapter/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/loganomaly
           key: ${{ runner.os }}-loganomaly-docker-${{ hashFiles('cluster/applications/loganomaly/Dockerfile') }}

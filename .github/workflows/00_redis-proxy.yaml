@@ -45,7 +45,7 @@ jobs:
             cluster/manifests/cortex-api/overlays/dev/
             cluster/manifests/cortex-bot/overlays/dev/
             cluster/manifests/translator/overlays/dev/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/redis-proxy
           key: ${{ runner.os }}-redis-proxy-docker-${{ hashFiles('cluster/applications/redis-proxy/Dockerfile') }}

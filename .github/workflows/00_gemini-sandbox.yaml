@@ -42,7 +42,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/gemini-sandbox/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/gemini-sandbox
           key: ${{ runner.os }}-gemini-sandbox-docker-${{ hashFiles('cluster/applications/gemini-sandbox/Dockerfile') }}

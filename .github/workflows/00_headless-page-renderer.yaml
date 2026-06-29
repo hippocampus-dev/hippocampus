@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/headless-page-renderer/
             cluster/manifests/grafana/overlays/dev/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/headless-page-renderer
           key: ${{ runner.os }}-headless-page-renderer-docker-${{ hashFiles('cluster/applications/headless-page-renderer/Dockerfile') }}

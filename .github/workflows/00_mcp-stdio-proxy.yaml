@@ -42,7 +42,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/mcp-stdio-proxy/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/mcp-stdio-proxy
           key: ${{ runner.os }}-mcp-stdio-proxy-docker-${{ hashFiles('cluster/applications/mcp-stdio-proxy/Dockerfile') }}

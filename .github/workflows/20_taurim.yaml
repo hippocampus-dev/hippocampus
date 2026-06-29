@@ -34,13 +34,13 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-taurim-cargo-${{ hashFiles('taurim/src-tauri/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-taurim-cargo-
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: taurim/src-tauri/target
           key: ${{ runner.os }}-taurim-target-${{ hashFiles('taurim/src-tauri/**/*.rs') }}

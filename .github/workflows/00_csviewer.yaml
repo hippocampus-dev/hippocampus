@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/csviewer/
             cluster/manifests/csviewer/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/csviewer
           key: ${{ runner.os }}-csviewer-docker-${{ hashFiles('cluster/applications/csviewer/Dockerfile') }}

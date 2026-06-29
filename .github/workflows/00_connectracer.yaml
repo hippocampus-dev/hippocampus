@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/connectracer/
             cluster/manifests/connectracer/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/connectracer
           key: ${{ runner.os }}-connectracer-docker-${{ hashFiles('cluster/applications/connectracer/Dockerfile') }}

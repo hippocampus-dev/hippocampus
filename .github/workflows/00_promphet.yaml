@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/promphet/
             cluster/manifests/promphet/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/promphet
           key: ${{ runner.os }}-promphet-docker-${{ hashFiles('cluster/applications/promphet/Dockerfile') }}

@@ -44,7 +44,7 @@ jobs:
           sparse-checkout: |
             .github/
             cluster/applications/statefulset-hook/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/statefulset-hook
           key: ${{ runner.os }}-statefulset-hook-docker-${{ hashFiles('cluster/applications/statefulset-hook/Dockerfile') }}

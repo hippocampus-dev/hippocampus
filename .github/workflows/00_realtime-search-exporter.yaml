@@ -43,7 +43,7 @@ jobs:
             .github/
             cluster/applications/realtime-search-exporter/
             cluster/manifests/realtime-search-exporter/base/
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/.cache/docker-build/realtime-search-exporter
           key: ${{ runner.os }}-realtime-search-exporter-docker-${{ hashFiles('cluster/applications/realtime-search-exporter/Dockerfile') }}
