@@ -81,7 +81,7 @@ jobs:
           bash ./bin/bump.sh "${VERSION}"
       - run: npm ci
         working-directory: taurin
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
