@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: k6-operator
+spec:
+  maxUnavailable: 1

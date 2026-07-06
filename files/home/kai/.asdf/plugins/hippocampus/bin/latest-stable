@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+ENTRYPOINT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+"${ENTRYPOINT}/list-all" | tail -n1

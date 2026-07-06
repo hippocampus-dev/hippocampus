@@ -1,0 +1,84 @@
+kind: CustomResourceStateMetrics
+spec:
+  resources:
+    - groupVersionKind:
+        group: messaging.knative.dev
+        kind: KafkaChannel
+        version: v1
+      labelsFromPath:
+        name:
+          - metadata
+          - name
+        namespace:
+          - metadata
+          - namespace
+      metrics:
+        - name: status_condition
+          help: "Custom resource status condition"
+          each:
+            type: Gauge
+            gauge:
+              path:
+                - status
+                - conditions
+              labelsFromPath:
+                type:
+                  - type
+                reason:
+                  - reason
+              valueFrom:
+                - status
+    - groupVersionKind:
+        group: internal.kafka.eventing.knative.dev
+        kind: ConsumerGroup
+        version: v1alpha1
+      labelsFromPath:
+        name:
+          - metadata
+          - name
+        namespace:
+          - metadata
+          - namespace
+      metrics:
+        - name: status_condition
+          help: "Custom resource status condition"
+          each:
+            type: Gauge
+            gauge:
+              path:
+                - status
+                - conditions
+              labelsFromPath:
+                type:
+                  - type
+                reason:
+                  - reason
+              valueFrom:
+                - status
+    - groupVersionKind:
+        group: kafka.strimzi.io
+        kind: Kafka
+        version: v1beta2
+      labelsFromPath:
+        name:
+          - metadata
+          - name
+        namespace:
+          - metadata
+          - namespace
+      metrics:
+        - name: status_condition
+          help: "Custom resource status condition"
+          each:
+            type: Gauge
+            gauge:
+              path:
+                - status
+                - conditions
+              labelsFromPath:
+                type:
+                  - type
+                reason:
+                  - reason
+              valueFrom:
+                - status

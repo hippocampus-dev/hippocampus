@@ -1,0 +1,55 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: skaffold-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: skaffold
+
+namespace: skaffold-github-actions-runner-controller
+
+resources:
+  - ../manifests
+  - namespace.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  # CRD does not support namePrefix
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: runners.skaffold.github-actions-runner.kaidotio.github.io
+      - op: replace
+        path: /spec/group
+        value: skaffold.github-actions-runner.kaidotio.github.io
+    target:
+      kind: CustomResourceDefinition
+      name: runners.github-actions-runner.kaidotio.github.io
+  - patch: |
+      - op: add
+        path: /rules/0
+        value:
+          apiGroups:
+            - skaffold.github-actions-runner.kaidotio.github.io
+          resources:
+            - "*"
+          verbs:
+            - "*"
+    target:
+      kind: ClusterRole
+      name: github-actions-runner-controller
+
+replacements:
+  - source:
+      fieldPath: metadata.name
+      kind: Service
+      name: github-actions-runner-controller-registry
+    targets:
+      - fieldPaths:
+          - spec.template.spec.initContainers.[name=fetch-nodeport].env.[name=SERVICE_NAME].value
+          - spec.template.spec.containers.[name=controller].env.[name=SERVICE_NAME].value
+        select:
+          kind: Deployment
+          name: github-actions-runner-controller

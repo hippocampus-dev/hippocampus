@@ -1,0 +1,109 @@
+---
+description: Upgrade library version with breaking changes handling
+argument-hint: <library>@<version|latest>
+allowed-tools: Read, Edit, Glob, Grep, Bash(cargo:*), Bash(uv:*), Bash(go:*), Bash(make:*), WebSearch, WebFetch
+---
+
+Upgrade a library to a specific version with full breaking changes handling.
+
+## Arguments
+
+- `$ARGUMENTS`: `<library-name>@<version>` or `<library-name>@latest`
+  - Examples: `tokio@1.40.0`, `pydantic@latest`, `gin@1.10.0`
+  - `latest` resolves to the newest stable version via appropriate source (crates.io, PyPI, pkg.go.dev)
+
+## Current Project Files
+
+### Rust Dependencies (Cargo.toml)
+!`find . -name "Cargo.toml" -type f 2>/dev/null | head -20`
+
+### Python Dependencies (pyproject.toml with UV)
+!`find . -name "pyproject.toml" -type f 2>/dev/null | head -20`
+
+### Go Dependencies (go.mod)
+!`find . -name "go.mod" -type f 2>/dev/null | head -20`
+
+## Upgrade Procedure
+
+Follow these steps in order:
+
+### Step 1: Parse Arguments
+
+Parse `$ARGUMENTS` to extract:
+- Library name
+- Target version
+
+### Step 2: Detect Language and Locate Files
+
+Search dependency files to determine:
+1. Which language the library belongs to (Rust/Python/Go)
+2. Which files contain this dependency
+3. Current version being used
+
+Use these patterns:
+- **Rust**: Search `Cargo.toml` for the library name in `[dependencies]`
+- **Python**: Search `pyproject.toml` for the library in `[project.dependencies]` or `[tool.uv.dependencies]`
+- **Go**: Search `go.mod` for the module path
+
+### Step 3: Fetch Release Notes and Breaking Changes
+
+**CRITICAL**: Before making any code changes, you MUST:
+
+1. Search for the library's official release notes or changelog
+2. Identify ALL breaking changes between current and target versions
+3. Document migration requirements
+
+Common sources:
+- GitHub releases page
+- CHANGELOG.md in repository
+- Official documentation migration guides
+
+### Step 4: Update Version in Dependency Files
+
+Modify the appropriate dependency files:
+- **Rust**: Update version in `Cargo.toml`
+- **Python**: Update version in `pyproject.toml`
+- **Go**: Update version in `go.mod`
+
+### Step 5: Apply Breaking Changes
+
+For each breaking change identified:
+1. Search codebase for affected patterns using `Grep`
+2. Update code to use new APIs
+3. Handle deprecated features
+
+**CRITICAL - Minimal Changes Only**:
+
+- If a line compiles without changes, do not touch it
+- Do NOT refactor, simplify, or "improve" code beyond what the upgrade requires
+
+### Step 6: Verify Compilation/Tests
+
+**CRITICAL**: Verify the update works:
+
+- **Rust**: Run `cargo check` and `cargo test` in affected directories
+- **Python**: Run `uv sync` and `uv run python -c "import <library>"`
+- **Go**: Run `go mod tidy` and `go build ./...`
+
+Fix any compilation errors before proceeding.
+
+### Step 7: Review Diff
+
+Run `git diff` and verify every change is required by the upgrade. Revert unnecessary changes.
+
+### Step 8: Propagate Lock File Updates
+
+Run the appropriate update script to propagate changes:
+
+- **Rust**: `./bin/cargo-update.sh`
+- **Python (UV)**: `./bin/uv-update.sh`
+- **Python (Poetry)**: `./bin/poetry-update.sh`
+- **Go**: `./bin/gomod-update.sh`
+
+## Output Format
+
+Report the following:
+1. Files modified
+2. Breaking changes addressed
+3. Compilation/test status
+4. Any remaining manual steps required

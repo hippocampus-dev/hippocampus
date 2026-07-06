@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: at-least-semaphore-pod-hook
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: at-least-semaphore-pod-hook
+      app.kubernetes.io/component: ""

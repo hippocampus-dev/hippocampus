@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pushgateway
+spec:
+  selector:
+    app.kubernetes.io/name: pushgateway
+    app.kubernetes.io/component: ""
+  ports:
+    - name: http
+      port: 9091
+      protocol: TCP
+      targetPort: http

@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: elastic-operator
+spec:
+  selector:
+    matchLabels:
+      control-plane: elastic-operator
+  mtls:
+    mode: STRICT

@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+    "packages/header-debugger"
+]
+
+[profile.release]
+strip = "symbols"
+lto = true
+panic = "abort"

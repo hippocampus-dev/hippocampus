@@ -1,0 +1,20 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: http-redis-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: http-redis-proxy
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      to:
+        - operation:
+            methods:
+              - PURGE

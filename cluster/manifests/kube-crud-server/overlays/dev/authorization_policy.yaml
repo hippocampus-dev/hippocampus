@@ -1,0 +1,34 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: kube-crud-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-crud-server
+      app.kubernetes.io/component: ""
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - kube-crud-server.kaidotio.dev
+        - key: request.headers[x-auth-request-user]
+          values:
+            - kaidotio
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - kube-crud-server.minikube.127.0.0.1.nip.io

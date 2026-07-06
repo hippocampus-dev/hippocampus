@@ -1,0 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - destination_rule.yaml
+  - vertical_pod_autoscaler.yaml

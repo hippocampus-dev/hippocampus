@@ -1,0 +1,86 @@
+multitenancy_enabled: false
+
+pyroscopedb:
+  data_path: /var/pyroscope
+  max_block_duration: 1h
+  min_free_disk_gb: 1
+  min_disk_available_percentage: 10
+  enforcement_interval: 10m
+
+compactor:
+  data_dir: /var/pyroscope/compactor
+  downsampler_enabled: true
+  max_opening_blocks_concurrency: 1
+  sharding_ring:
+    kvstore:
+      store: memberlist
+
+ingester:
+  lifecycler:
+    ring:
+      kvstore:
+        store: memberlist
+      replication_factor: 1
+    num_tokens: 512
+    tokens_file_path: /var/pyroscope/tokens
+
+memberlist:
+  abort_if_cluster_join_fails: false
+  join_members:
+    - pyroscope-gossip-ring.pyroscope.svc.cluster.local.
+
+store_gateway:
+  sharding_ring:
+    kvstore:
+      store: memberlist
+    replication_factor: 1
+    tokens_file_path: /var/pyroscope/tokens
+  bucket_store:
+    sync_dir: /var/pyroscope/sync
+    sync_interval: 15m
+    tenant_sync_concurrency: 10
+    meta_sync_concurrency: 20
+    ignore_blocks_within: 5h # *query_store_after - 1
+
+frontend:
+  scheduler_worker_concurrency: 5
+  grpc_client_config:
+    max_recv_msg_size: &max_recv_msg_size 419430400
+    max_send_msg_size: &max_send_msg_size 419430400
+
+frontend_worker:
+  max_concurrent: 10
+  grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+querier:
+  query_store_after: &query_store_after 6h
+
+query_scheduler:
+  max_outstanding_requests_per_tenant: 1000
+  grpc_client_config:
+    max_recv_msg_size: *max_recv_msg_size
+    max_send_msg_size: *max_send_msg_size
+
+limits:
+  split_queries_by_interval: 24h
+  ingestion_rate_mb: 4
+  ingestion_burst_size_mb: 2
+  max_label_name_length: 1024
+  max_label_value_length: 2048
+  max_label_names_per_series: 128
+  max_query_parallelism: 32
+  compactor_blocks_retention_period: 7d
+
+storage:
+  backend: s3
+  s3:
+    endpoint: pyroscope-minio.pyroscope.svc.cluster.local:9000
+    bucket_name: pyroscope
+    access_key_id: minio
+    secret_access_key: miniominio
+    insecure: true
+
+analytics:
+  reporting_enabled: false

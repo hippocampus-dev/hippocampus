@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: anonymous-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: anonymous-proxy
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8080":
+      mode: PERMISSIVE # RequestAuthentication

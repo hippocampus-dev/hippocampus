@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qdrant
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 30m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "6333"
+        prometheus.io/path: /metrics
+        traffic.sidecar.istio.io/excludeOutboundPorts: "6335"
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: qdrant
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: qdrant
+      containers:
+        - name: qdrant
+          env:
+            - name: RUN_MODE
+              value: development
+          volumeMounts:
+            - name: qdrant
+              mountPath: /working/config
+              readOnly: true
+            - name: storage
+              mountPath: /qdrant/storage
+            - name: snapshots
+              mountPath: /qdrant/snapshots
+      volumes:
+        - name: qdrant
+          configMap:
+            name: qdrant
+        - name: snapshots
+          #persistentVolumeClaim:
+          #  claimName: qdrant-snapshots
+          emptyDir:
+            medium: Memory
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

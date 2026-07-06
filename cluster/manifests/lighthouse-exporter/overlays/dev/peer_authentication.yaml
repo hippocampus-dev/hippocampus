@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: lighthouse-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lighthouse-exporter
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

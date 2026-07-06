@@ -1,0 +1,12 @@
+{
+  "name": "chrome-devtools-protocol-server-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "^1.57.0"
+  },
+  "scripts": {
+    "test": "node index.mjs"
+  }
+}
