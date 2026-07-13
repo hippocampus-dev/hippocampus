@@ -1,0 +1,45 @@
+<idea-plugin>
+    <id>io.github.kaidotio.hippocampus</id>
+    <name>hippocampus</name>
+    <vendor email="kaidotio@gmail.com">Kai Aihara</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <resource-bundle>messages.MyBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Encrypted"
+                  implementationClass="io.github.kaidotio.hippocampus.filetype.EncryptedFileType"
+                  fieldName="INSTANCE"
+                  extensions="enc"/>
+
+        <lang.parserDefinition language="Filter"
+                               implementationClass="io.github.kaidotio.hippocampus.language.FilterParserDefinition"/>
+
+        <fileType name="Filter"
+                  implementationClass="io.github.kaidotio.hippocampus.filetype.FilterFileType"
+                  fieldName="INSTANCE"
+                  language="Filter"
+                  extensions="filter"/>
+
+        <fileTypeDetector implementation="io.github.kaidotio.hippocampus.filetype.FilterFileTypeDetector"/>
+
+        <fileEditorProvider implementation="io.github.kaidotio.hippocampus.editor.EncryptedFileEditorProvider"/>
+
+        <fileDocumentSynchronizationVetoer implementation="io.github.kaidotio.hippocampus.listeners.EncryptedFileSaveListener"/>
+
+        <lang.syntaxHighlighterFactory language="Filter"
+                                       implementationClass="io.github.kaidotio.hippocampus.highlighter.FilterSyntaxHighlighterFactory"/>
+    </extensions>
+
+    <actions>
+        <action id="io.github.kaidotio.hippocampus.actions.JumpToKustomization"
+                class="io.github.kaidotio.hippocampus.actions.JumpToKustomizationAction"
+                text="Jump to Kustomization"
+                description="Jump to the kustomization.yaml file that references this Kubernetes manifest">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift K"/>
+        </action>
+    </actions>
+
+</idea-plugin>

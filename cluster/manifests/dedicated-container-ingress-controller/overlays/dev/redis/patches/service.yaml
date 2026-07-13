@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  trafficDistribution: PreferClose
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-haproxy-reader
+spec:
+  trafficDistribution: PreferClose
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-haproxy-writer
+spec:
+  trafficDistribution: PreferClose

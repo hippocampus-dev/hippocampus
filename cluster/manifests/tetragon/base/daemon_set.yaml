@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: tetragon
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: tetragon
+      app.kubernetes.io/component: ""
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      serviceAccountName: tetragon
+      automountServiceAccountToken: true
+      terminationGracePeriodSeconds: 1
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: tetragon
+          # Privileged is required for eBPF syscall interception
+          securityContext:
+            privileged: true
+          image: quay.io/cilium/tetragon
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config-dir=/etc/tetragon/tetragon.conf.d/
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          livenessProbe:
+            grpc:
+              port: 6789
+            timeoutSeconds: 60
+          volumeMounts:
+            - mountPath: /etc/tetragon/tetragon.conf.d/
+              name: tetragon-config
+              readOnly: true
+            - mountPath: /sys/fs/bpf
+              name: bpf-maps
+              mountPropagation: Bidirectional
+            - mountPath: /var/run/cilium
+              name: cilium-run
+            - mountPath: /procRoot
+              name: host-proc
+      volumes:
+        - name: tetragon-config
+          configMap:
+            name: tetragon-config
+        - name: bpf-maps
+          hostPath:
+            path: /sys/fs/bpf
+        - name: cilium-run
+          hostPath:
+            path: /var/run/cilium
+        - name: host-proc
+          hostPath:
+            path: /proc

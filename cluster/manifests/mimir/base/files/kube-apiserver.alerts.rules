@@ -1,0 +1,36 @@
+groups:
+  - name: kube-apiserver
+    rules:
+      - alert: KubeApiserverCouldNotFind
+        annotations:
+          message: |
+            kube-apiserver could not find the requested resource detected {{ $value }} times / 5m.
+        expr: |
+            sum(
+                filtered_logs_total{kind="kube-apiserver-could-not-find-the-requested-resource"} - filtered_logs_total{kind="kube-apiserver-could-not-find-the-requested-resource"} offset 5m
+                or filtered_logs_total{kind="kube-apiserver-could-not-find-the-requested-resource"} > 0
+                or increase(filtered_logs_total{kind="kube-apiserver-could-not-find-the-requested-resource"}[5m])
+            ) > 0
+        for: 0m
+        labels:
+          severity: warning
+  - name: api-priority-and-fairness
+    rules:
+      - alert: APIServerFlowcontrolPriorityLevelRequestUtilizationHigh
+        annotations:
+          message: |
+            {{ $labels.priority_level }} priority level request utilization is high (current value: {{ $value }}).
+        expr: |
+          histogram_quantile(0.9, sum(rate(apiserver_flowcontrol_priority_level_request_utilization_bucket{phase="executing"}[5m])) by (le,priority_level)) > 0.8
+        for: 1m
+        labels:
+          severity: warning
+      - alert: APIServerFlowcontrolPriorityLevelSeatUtilizationHigh
+        annotations:
+          message: |
+            {{ $labels.priority_level }} priority level seat utilization is high (current value: {{ $value }}).
+        expr: |
+          histogram_quantile(0.9, sum(rate(apiserver_flowcontrol_priority_level_seat_utilization_bucket{phase="executing"}[5m])) by (le,priority_level)) > 0.8
+        for: 1m
+        labels:
+          severity: warning

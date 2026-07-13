@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+pactl set-sink-volume @DEFAULT_SINK@ -1%
+notify-send "Current Volume" "$(pactl get-sink-volume @DEFAULT_SINK@ | awk -F'[/,]' 'NR==1{gsub(/ /, "", $2); gsub(/ /, "", $5); print "L: " $2 ", R: " $5}')"

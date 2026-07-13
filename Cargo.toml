@@ -1,0 +1,40 @@
+[workspace]
+resolver = "2"
+members = [
+    "packages/elapsed",
+    "packages/elapsed_macro",
+    "packages/elf",
+    "packages/enum_derive",
+    "packages/error",
+    "packages/gcs",
+    "packages/gcs/examples/*",
+    "packages/hedged",
+    "packages/hippocampus-client",
+    "packages/hippocampus-configuration",
+    "packages/hippocampus-core",
+    "packages/hippocampus-core/examples/*",
+    "packages/hippocampus-core/benches",
+    "packages/hippocampus-server",
+    "packages/hippocampus-standalone",
+    "packages/hippocampus-web",
+    "packages/hippocampusql",
+    "packages/husky",
+    "packages/jwt",
+    "packages/jwt_derive",
+    "packages/opentelemetry-tracing",
+    "packages/retry",
+    "packages/singleflight",
+    "packages/swr",
+    "packages/serde_binary",
+    "packages/bakery",
+    "packages/bloom-filter",
+    "packages/openai",
+    "packages/audio",
+    "packages/mysql-protocol-parser",
+    "packages/hippocampus-wasm-tokenizer-example",
+]
+
+[profile.release]
+strip = "symbols"
+lto = true
+panic = "abort"

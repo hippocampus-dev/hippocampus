@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: promphet
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: promphet
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

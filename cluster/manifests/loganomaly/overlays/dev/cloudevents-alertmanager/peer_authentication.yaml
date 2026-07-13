@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cloudevents-alertmanager
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudevents-alertmanager
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    # Knative activator probes this port over plain HTTP via PassthroughCluster.
+    "8012":
+      mode: PERMISSIVE

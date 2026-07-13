@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: anonymous-proxy
+  labels:
+    name: anonymous-proxy
+    pod-security.kubernetes.io/enforce: restricted

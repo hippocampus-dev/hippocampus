@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/jupyterhub_config.py
+  name: jupyterhub-hub
+  options:
+    immutable: true
+images:
+- digest: sha256:9f5e2ee3ea09d77c414c4e6875f07629a80dd357a3abad976dd8dfc2cf289962
+- digest: sha256:cc1e62b68d91e5fbe347593901d0659073da370af1689223d8fbeb57af0674f5
+  name: ghcr.io/hippocampus-dev/hippocampus/configurable-http-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/configurable-http-proxy
+- digest: sha256:bd844a9e28cbf1689d7bc6dec54f755e29f091f8df60f8f54fc25b8cc3899b97
+  name: ghcr.io/hippocampus-dev/hippocampus/jupyterhub
+  newName: ghcr.io/hippocampus-dev/hippocampus/jupyterhub

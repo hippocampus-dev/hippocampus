@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+mkdir -p "${ASDF_DOWNLOAD_PATH}"
+
+function get_arch() {
+  uname | tr "[:upper:]" "[:lower:]"
+}
+
+function get_cpu() {
+  local machine_hardware_name="${ASDF_HIPPOCAMPUS_OVERWRITE_ARCH:-$(uname -m)}"
+
+  case "${machine_hardware_name}" in
+    x86_64)
+      local cpu_type="amd64"
+      ;;
+    powerpc64le | ppc64le)
+      local cpu_type="ppc64le"
+      ;;
+    aarch64)
+      local cpu_type="arm64"
+      ;;
+    armv7l)
+      local cpu_type="arm"
+      ;;
+    *)
+      local cpu_type="${machine_hardware_name}"
+      ;;
+  esac
+
+  echo "${cpu_type}"
+}
+
+function get_download_url() {
+  local version="${1}"
+  local binary="${2}"
+  local platform="$(get_arch)"
+  local cpu="$(get_cpu)"
+
+  # Verify release exists before constructing URL
+  local release_url="https://api.github.com/repos/hippocampus-dev/hippocampus/releases/tags/v${version}"
+  if ! curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "${release_url}" >/dev/null 2>&1; then
+    echo "asdf-hippocampus: Release v${version} not found. Create a GitHub Release first." >&2
+    echo ""
+    return
+  fi
+
+  local asset="${binary}_${version}_${platform}_${cpu}"
+  echo "https://github.com/hippocampus-dev/hippocampus/releases/download/v${version}/${asset}"
+}
+
+function get_asset_url() {
+  local version="${1}"
+  local binary="${2}"
+  local platform="$(get_arch)"
+  local cpu="$(get_cpu)"
+
+  local release_url="https://api.github.com/repos/hippocampus-dev/hippocampus/releases/tags/v${version}"
+  local release_json
+  release_json="$(curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "${release_url}" 2>/dev/null)" || {
+    echo "asdf-hippocampus: Release v${version} not found. Create a GitHub Release first." >&2
+    echo ""
+    return
+  }
+
+  local asset="${binary}_${version}_${platform}_${cpu}"
+  local asset_id
+  asset_id="$(echo "${release_json}" | asset="${asset}" perl -MJSON::PP -le '
+    my $input = do { local $/; <STDIN> };
+    my $json = decode_json($input);
+    foreach my $asset (@{$json->{assets}}) {
+      print $asset->{id} if $asset->{name} eq $ENV{asset};
+    }
+  ')"
+
+  if [ -z "${asset_id}" ]; then
+    echo "asdf-hippocampus: Asset not found: ${asset} in release v${version}" >&2
+    echo ""
+    return
+  fi
+
+  echo "https://api.github.com/repos/hippocampus-dev/hippocampus/releases/assets/${asset_id}"
+}
+
+opts=("-fsSL")
+if [ -n "$GITHUB_TOKEN" ]; then
+  opts+=("-H" "Authorization: token ${GITHUB_TOKEN}")
+fi
+
+private=false
+visibility="$(curl "${opts[@]}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hippocampus-dev/hippocampus | awk -F'"' '/"visibility":/ {print $4}')"
+if [ "${visibility}" = "private" ]; then
+  private=true
+fi
+
+binaries=("armyknife" "kubectl-patchstring")
+linux_binaries=("insight" "l7sniff" "runner")
+if [ "$(get_arch)" == "linux" ]; then
+  binaries+=("${linux_binaries[@]}")
+fi
+
+for binary in "${binaries[@]}"; do
+  if [ "${private}" == "true" ]; then
+    asset_url="$(get_asset_url "${ASDF_INSTALL_VERSION}" "${binary}")"
+    if [ -z "${asset_url}" ]; then
+      echo -e "asdf-hippocampus: Asset not found for ${binary} v${ASDF_INSTALL_VERSION}" >&2
+      exit 1
+    fi
+    if curl "${opts[@]}" -H "Accept: application/octet-stream" "${asset_url}" -C - -o "${ASDF_DOWNLOAD_PATH}/${binary}"; then
+      chmod +x "${ASDF_DOWNLOAD_PATH}/${binary}"
+    else
+      echo -e "asdf-hippocampus: Could not download ${asset_url}" >&2
+      exit 1
+    fi
+  else
+    download_url="$(get_download_url "${ASDF_INSTALL_VERSION}" "${binary}")"
+    if [ -z "${download_url}" ]; then
+      echo -e "asdf-hippocampus: Asset not found for ${binary} v${ASDF_INSTALL_VERSION}" >&2
+      exit 1
+    fi
+    if curl "${opts[@]}" "${download_url}" -C - -o "${ASDF_DOWNLOAD_PATH}/${binary}"; then
+      chmod +x "${ASDF_DOWNLOAD_PATH}/${binary}"
+    else
+      echo -e "asdf-hippocampus: Could not download ${download_url}" >&2
+      exit 1
+    fi
+  fi
+done

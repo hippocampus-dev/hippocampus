@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loganomaly
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loganomaly
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

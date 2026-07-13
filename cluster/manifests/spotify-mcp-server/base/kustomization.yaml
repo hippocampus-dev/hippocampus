@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:a4a95cd5c98182d62a2676ffa3c4c997a47e11b83568c229a44da3ad5b5558e0
+  name: ghcr.io/hippocampus-dev/hippocampus/spotify-mcp-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/spotify-mcp-server

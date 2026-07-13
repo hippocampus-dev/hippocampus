@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: api.openai.com
+spec:
+  host: api.openai.com
+  trafficPolicy:
+    portLevelSettings:
+      - port:
+          number: 80
+        tls:
+          mode: SIMPLE
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: memory-bank-varnish
+spec:
+  host: memory-bank-varnish
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: x-body-hash

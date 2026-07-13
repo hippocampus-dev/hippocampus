@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:d2f6d201c7770ee752e02196360f7c82ef4f0a959e572c09b2366e3b5b75259a
+  name: ghcr.io/hippocampus-dev/hippocampus/embedding-gateway
+  newName: ghcr.io/hippocampus-dev/hippocampus/embedding-gateway

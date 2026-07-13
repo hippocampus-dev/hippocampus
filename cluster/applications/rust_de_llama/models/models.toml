@@ -1,0 +1,32 @@
+[models."gemma-3-4b-it-Q4_K_M.gguf"]
+n_ctx = 4096
+n_parallel = 4
+n_batch = 512
+n_ubatch = 512
+n_gpu_layers = 999
+stop_sequences = ["<end_of_turn>", "<start_of_turn>"]
+# Reuse a completed slot's KV prefix across turns to cut chat TTFT (single-tenant safe).
+prompt_cache = true
+# KV cache precision; q8_0 halves K-cache memory near-losslessly (no flash-attention requirement).
+type_k = "q8_0"
+#type_v = "q8_0"     # rejected at load: a quantized V cache needs flash attention, which this path cannot guarantee.
+#offload_kqv = false # keep KV in system RAM so a small-VRAM GPU can hold more weight layers; hardware-dependent, measure first.
+#use_mlock = true    # pin weights against OS eviction; helps only RAM-pressured hosts.
+
+[models."gemma-3-4b-it-Q4_K_M.gguf".prompt_format]
+user_prefix = "<start_of_turn>user\n"
+user_suffix = "<end_of_turn>\n"
+assistant_prefix = "<start_of_turn>model\n"
+assistant_suffix = "<end_of_turn>\n"
+system_prefix = "<start_of_turn>system\n"
+system_suffix = "<end_of_turn>\n"
+add_generation_prompt = "<start_of_turn>model\n"
+
+# Speculative decoding; off by default, validate throughput on real hardware.
+# ngram = prompt-lookup suffix length, max_draft = tokens proposed per step.
+# draft_model = same-family GGUF whose greedy proposals replace prompt-lookup (must share vocab).
+#[models."gemma-3-4b-it-Q4_K_M.gguf".speculation]
+#enabled = true
+#ngram = 2
+#max_draft = 4
+#draft_model = "gemma-3-270m-it-Q4_K_M.gguf"

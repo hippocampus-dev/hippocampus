@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:576fafe30b47221cb02f37bfb22b2798845dce7411c6aac929e2a3cfb427fdf8
+  name: ghcr.io/hippocampus-dev/hippocampus/talk
+  newName: ghcr.io/hippocampus-dev/hippocampus/talk

@@ -1,0 +1,149 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: tempo-distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: distributor
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: tempo-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: querier
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: tempo-query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: query-frontend
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: tempo-compactor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: compactor
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: tempo-ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: ingester
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: tempo-metrics-generator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: metrics-generator
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
