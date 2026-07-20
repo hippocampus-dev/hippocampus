@@ -37,7 +37,7 @@ jobs:
             cluster/applications/packages/cortex/
       - if: ${{ !contains(needs.runner.outputs.runner, 'local') }}
         run: bash .github/scripts/cleanup.sh
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.14
           # https://github.com/actions/setup-python/pull/818
