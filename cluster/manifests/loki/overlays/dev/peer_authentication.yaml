@@ -1,0 +1,119 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: distributor
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: querier
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: query-frontend
+  mtls:
+      mode: STRICT
+  portLevelMtls:
+    "9095":
+      mode: PERMISSIVE # querier
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-query-scheduler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: query-scheduler
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9095":
+      mode: PERMISSIVE # querier,query-frontend
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-compactor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: compactor
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-index-gateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: index-gateway
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9095":
+      mode: PERMISSIVE # querier
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: ingester
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9095":
+      mode: PERMISSIVE # distributor,querier
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-ruler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: ruler
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loki-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki
+      app.kubernetes.io/component: proxy
+  mtls:
+    mode: STRICT

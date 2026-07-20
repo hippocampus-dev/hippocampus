@@ -1,0 +1,38 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: kube-crud-server
+spec:
+  gateways:
+    - kube-crud-server
+  hosts:
+    - kube-crud-server.minikube.127.0.0.1.nip.io
+    - kube-crud-server.kaidotio.dev
+  http:
+    - match:
+        - method:
+            exact: OPTIONS
+      directResponse:
+        status: 204
+      headers:
+        response:
+          set:
+            Access-Control-Allow-Origin: "https://kube-crud.kaidotio.dev"
+            Access-Control-Allow-Headers: "Content-Type, Cookie"
+            Access-Control-Allow-Methods: "POST, PATCH, DELETE"
+            Access-Control-Max-Age: "86400"
+            Access-Control-Allow-Credentials: "true"
+    - route:
+        - destination:
+            host: kube-crud-server
+            port:
+              number: 8080
+          headers:
+            response:
+              set:
+                Access-Control-Allow-Origin: "https://kube-crud.kaidotio.dev"
+                Access-Control-Max-Age: "86400"
+                Access-Control-Allow-Credentials: "true"
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

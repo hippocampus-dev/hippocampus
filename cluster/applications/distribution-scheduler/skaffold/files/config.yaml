@@ -1,0 +1,18 @@
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+profiles:
+  - schedulerName: distribution-scheduler
+    plugins:
+      preFilter:
+        enabled:
+          - name: DistributionScheduler
+      filter:
+        enabled:
+          - name: DistributionScheduler
+      score:
+        enabled:
+          - name: DistributionScheduler
+leaderElection:
+  leaderElect: true
+  resourceNamespace: skaffold-distribution-scheduler
+  resourceName: distribution-scheduler

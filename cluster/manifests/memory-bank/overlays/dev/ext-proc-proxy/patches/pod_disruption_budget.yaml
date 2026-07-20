@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ext-proc-proxy
+spec:
+  maxUnavailable: 1

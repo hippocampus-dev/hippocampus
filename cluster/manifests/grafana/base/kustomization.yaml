@@ -1,0 +1,67 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configurations:
+- kustomizeconfig.yaml
+
+resources:
+- dashboard.yaml
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+
+configMapGenerator:
+- files:
+  - cluster.jsonnet=jsonnet/dashboards/kubernetes/cluster.jsonnet
+  name: kubernetes-cluster.jsonnet
+  options:
+    immutable: true
+- files:
+  - cronjob.jsonnet=jsonnet/dashboards/kubernetes/cronjob.jsonnet
+  name: kubernetes-cronjob.jsonnet
+  options:
+    immutable: true
+- files:
+  - namespace.jsonnet=jsonnet/dashboards/kubernetes/namespace.jsonnet
+  name: kubernetes-namespace.jsonnet
+  options:
+    immutable: true
+- files:
+  - node.jsonnet=jsonnet/dashboards/kubernetes/node.jsonnet
+  name: kubernetes-node.jsonnet
+  options:
+    immutable: true
+- files:
+  - pod.jsonnet=jsonnet/dashboards/kubernetes/pod.jsonnet
+  name: kubernetes-pod.jsonnet
+  options:
+    immutable: true
+- files:
+  - volume.jsonnet=jsonnet/dashboards/kubernetes/volume.jsonnet
+  name: kubernetes-volume.jsonnet
+  options:
+    immutable: true
+- files:
+  - workload.jsonnet=jsonnet/dashboards/kubernetes/workload.jsonnet
+  name: kubernetes-workload.jsonnet
+  options:
+    immutable: true
+- files:
+  - lighthouse.jsonnet=jsonnet/dashboards/other/lighthouse.jsonnet
+  name: other-lighthouse.jsonnet
+  options:
+    immutable: true
+- files:
+  - overview.jsonnet=jsonnet/dashboards/other/overview.jsonnet
+  name: other-overview.jsonnet
+  options:
+    immutable: true
+
+images:
+- digest: sha256:95173c11b36f53a423ce47f00baee3f913a3e403f202a83c8bc3c7115a2cfdd0
+  name: grafana/grafana
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/grafana/grafana
+- digest: sha256:768e7d87873950b1a1ddf26c1690f626892b0aee981fd3380d4fc20fa4cfdc12
+  name: mcp/grafana
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/mcp/grafana

@@ -1,0 +1,18 @@
+[project]
+name = "promphet"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.14"
+
+dependencies = [
+    "statsforecast==2.0.1",
+    "requests==2.32.3",
+    "pyyaml==6.0.2",
+    "prometheus-client==0.21.1",
+
+    "pydantic-settings==2.7.1",
+
+    "python-dotenv==1.0.0",
+    "python-json-logger==2.0.7",
+]

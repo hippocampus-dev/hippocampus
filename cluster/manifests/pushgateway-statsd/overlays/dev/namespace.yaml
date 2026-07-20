@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pushgateway-statsd
+  labels:
+    name: pushgateway-statsd
+    pod-security.kubernetes.io/enforce: restricted

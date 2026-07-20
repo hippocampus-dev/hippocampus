@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: litestream-credentials
+stringData:
+  AWS_ACCESS_KEY_ID: "minio"
+  AWS_SECRET_ACCESS_KEY: "miniominio"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  annotations:
+    skaffold.litestream-hook.kaidotio.github.io/inject: "true"
+    skaffold.litestream-hook.kaidotio.github.io/bucket: "litestream"
+    skaffold.litestream-hook.kaidotio.github.io/secret: "litestream-credentials"
+    skaffold.litestream-hook.kaidotio.github.io/path: "/mnt/litestream1.db,/mnt/litestream2.db"
+    skaffold.litestream-hook.kaidotio.github.io/endpoint: "http://minio:9000"
+spec:
+  containers:
+    - name: my-container
+      image: ghcr.io/coleifer/sqlite-web@sha256:31e338c418777ade2afaaa1634e7fb96cf4ff310a1f77ee6fc9c59f22642dfaa
+      command:
+        - sqlite_web
+        - -H
+        - 0.0.0.0
+        - -x
+      args:
+        - /mnt/litestream.db

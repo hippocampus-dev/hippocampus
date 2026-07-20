@@ -1,0 +1,21 @@
+[package]
+name = "masknas"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+resolver = "2"
+
+[dependencies]
+libbpf-rs = { version = "0.24.3" }
+libbpf-sys = { version = "=1.7.0", features = ["vendored-libbpf", "static-libbpf"] }
+libc = { version = "0.2.186" }
+regex = { version = "1.13.0" }
+
+[build-dependencies]
+libbpf-cargo = { version = "0.24.3" }
+
+[profile.release]
+strip = "symbols"
+lto = true
+panic = "abort"

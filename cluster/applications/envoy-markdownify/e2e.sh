@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -eo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+cd e2e && skaffold run && cd ..
+kubectl port-forward svc/envoy-markdownify 8080:8080 8081:8081 -n e2e-envoy-markdownify > /dev/null 2>&1 &
+trap "kill $! 2>/dev/null" EXIT
+cat k6/index.js | docker compose exec -T k6 k6 run -

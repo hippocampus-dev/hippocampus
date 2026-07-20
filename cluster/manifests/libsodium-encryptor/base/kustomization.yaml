@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:0f94a0250f2c58ff6e34eab29c304f735a3b771d27a14c7932f56026a768448e
+  name: ghcr.io/hippocampus-dev/hippocampus/libsodium-encryptor
+  newName: ghcr.io/hippocampus-dev/hippocampus/libsodium-encryptor

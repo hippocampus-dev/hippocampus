@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- service.yaml
+images:
+- digest: sha256:c0b6a795eed926f4a464f63f46efbd1e96e3bae2dfdec45a60c3ac88f32eb7dc
+  name: ghcr.io/hippocampus-dev/hippocampus/realtime-search-exporter
+  newName: ghcr.io/hippocampus-dev/hippocampus/realtime-search-exporter

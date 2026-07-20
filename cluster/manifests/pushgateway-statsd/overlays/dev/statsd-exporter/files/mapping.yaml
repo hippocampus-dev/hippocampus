@@ -1,0 +1,12 @@
+mappings:
+  - match: ".*"
+    match_type: "regex"
+    name: "$0"
+    match_metric_type: observer
+    observer_type: histogram
+    honor_labels: true
+
+  - match: ".*"
+    match_type: "regex"
+    name: "$0"
+    honor_labels: true
