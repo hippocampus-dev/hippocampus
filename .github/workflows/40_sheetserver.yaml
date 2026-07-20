@@ -34,7 +34,7 @@ jobs:
       with:
         sparse-checkout: |
           google-app-scripts/sheetserver/
-    - uses: actions/setup-node@v6
+    - uses: actions/setup-node@v7
       with:
         node-version: lts/*
         cache: npm
