@@ -23,7 +23,7 @@ jobs:
         with:
           distribution: zulu
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@v6.2.0
       - run: |
           set -eo pipefail
           VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
