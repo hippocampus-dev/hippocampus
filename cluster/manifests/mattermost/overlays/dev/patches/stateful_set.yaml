@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mattermost
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 10m
+        sidecar.istio.io/proxyMemory: 64Mi
+    spec:
+      securityContext:
+        fsGroup: 2000
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: mattermost
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - controller-revision-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: mattermost
+              app.kubernetes.io/component: ""
+      initContainers:
+        - name: envsubst
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 2000
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+          args:
+            - -c
+            - |
+              install -m 0664 /mnt/config-template/config.json /mattermost/config/config.json
+          volumeMounts:
+            - name: config-template
+              mountPath: /mnt/config-template
+              readOnly: true
+            - name: config
+              mountPath: /mattermost/config
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mattermost
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - /mnt/init.sh
+          volumeMounts:
+            - name: mattermost-init
+              mountPath: /mnt
+              readOnly: true
+            - name: data
+              mountPath: /mattermost/data
+            - name: logs
+              mountPath: /mattermost/logs
+            - name: config
+              mountPath: /mattermost/config
+            - name: var-tmp
+              mountPath: /var/tmp
+        - name: mattermost-webhook-proxy
+          command:
+            - sh
+          args:
+            - -c
+            - |
+              until [ -s /mattermost/data/webhookId ]; do sleep 5; done
+              sed "s/\$MATTERMOST_WEBHOOK_ID/$(cat /mattermost/data/webhookId)/g" /mnt/configmap/nginx.conf.tmpl > /tmp/nginx.conf
+              exec nginx -c /tmp/nginx.conf -g 'daemon off;'
+          volumeMounts:
+            - name: data
+              mountPath: /mattermost/data
+              readOnly: true
+            - name: mattermost-proxy-config
+              mountPath: /mnt/configmap
+              readOnly: true
+      volumes:
+        - name: config
+          emptyDir:
+            medium: Memory
+        - name: config-template
+          configMap:
+            name: mattermost-config
+        - name: mattermost-init
+          configMap:
+            name: mattermost-init
+        - name: mattermost-proxy-config
+          configMap:
+            name: mattermost-proxy-config
+        - name: logs
+          emptyDir: {}
+        # Carries the local mode socket, which grants unauthenticated administrator access - do not mount it into another container
+        - name: var-tmp
+          emptyDir:
+            medium: Memory
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

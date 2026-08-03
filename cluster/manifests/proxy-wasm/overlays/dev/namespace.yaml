@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: proxy-wasm
+  labels:
+    name: proxy-wasm
+    pod-security.kubernetes.io/enforce: restricted

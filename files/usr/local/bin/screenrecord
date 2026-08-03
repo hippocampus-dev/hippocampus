@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+state_file="${XDG_RUNTIME_DIR:-/tmp}/screenrecord"
+
+if [ -f "${state_file}" ]; then
+  read -r pid output < "${state_file}" || true
+  rm -f "${state_file}"
+  if [ "$(cat "/proc/${pid}/comm" 2>/dev/null)" = "ffmpeg" ]; then
+    kill -INT "$pid"
+    deadline=$(($(date +%s) + 10))
+    while [ "$(date +%s)" -lt "$deadline" ] && kill -0 "$pid" 2>/dev/null; do
+      sleep 0.1
+    done
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -KILL "$pid"
+      notify-send "Screenrecord" "Aborted ${output}"
+    else
+      notify-send "Screenrecord" "Saved ${output}"
+    fi
+    exit 0
+  fi
+fi
+
+sink=$(pactl get-default-sink)
+output="${XDG_VIDEOS_DIR:-$HOME/Videos}/$(date +%Y%m%d%H%M%S).mp4"
+
+mkdir -p "$(dirname "${output}")"
+ffmpeg -nostdin -loglevel error -f x11grab -select_region 1 -framerate 30 -i "$DISPLAY" -f pulse -i "${sink}.monitor" -c:v h264_nvenc -pix_fmt yuv420p -c:a aac "${output}" &
+echo "$! ${output}" > "${state_file}"
+notify-send "Screenrecord" "Recording to ${output}"

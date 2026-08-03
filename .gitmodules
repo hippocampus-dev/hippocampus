@@ -1,0 +1,6 @@
+[submodule "proto/googleapis"]
+	path = proto/googleapis
+	url = https://github.com/googleapis/googleapis
+[submodule "cluster/applications/rust_de_llama/llama.cpp"]
+	path = cluster/applications/rust_de_llama/llama.cpp
+	url = https://github.com/ggml-org/llama.cpp.git

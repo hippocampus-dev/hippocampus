@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: k6-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k6-operator
+      app.kubernetes.io/component: ""

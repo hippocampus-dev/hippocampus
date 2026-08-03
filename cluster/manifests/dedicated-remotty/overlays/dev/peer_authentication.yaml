@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: dedicated-remotty
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dedicated-remotty
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8080":
+      mode: PERMISSIVE # Controller connects to Pod IPs directly

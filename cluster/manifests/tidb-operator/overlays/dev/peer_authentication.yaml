@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tidb-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tidb-operator
+      app.kubernetes.io/component: controller-manager
+  mtls:
+    mode: STRICT

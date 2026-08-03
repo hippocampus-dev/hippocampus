@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cloudevents-ingress
+spec:
+  maxUnavailable: 1

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy-ratelimit
+spec:
+  # istio-proxy supports client-side load balancing
+  #clusterIP: None
+  selector:
+    app.kubernetes.io/name: envoy-ratelimit
+    app.kubernetes.io/component: ""
+  ports:
+    - name: grpc
+      port: 8081
+      protocol: TCP
+      targetPort: grpc

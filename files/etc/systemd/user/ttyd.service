@@ -1,0 +1,10 @@
+[Unit]
+
+[Service]
+Restart=always
+WorkingDirectory=/opt/hippocampus
+
+ExecStart=/bin/bash -lc 'exec /usr/bin/ttyd -W -p 1234 -t fontSize=22 tmux new -A -s ttyd'
+
+[Install]
+WantedBy=default.target

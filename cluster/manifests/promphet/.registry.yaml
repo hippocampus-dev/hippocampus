@@ -1,0 +1,13 @@
+name: promphet
+namespace: promphet
+components:
+  - name: promphet
+    workloadType: cronjob
+    labels:
+      app.kubernetes.io/component: ""
+      app.kubernetes.io/name: promphet
+    logs:
+      grouping: kubernetes.promphet.promphet
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.promphet.promphet%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=promphet&var-workload_type=cronjob&var-workload=promphet

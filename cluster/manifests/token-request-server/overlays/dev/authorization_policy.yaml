@@ -1,0 +1,44 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: token-request-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: token-request-server
+      app.kubernetes.io/component: ""
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - token-request-server.minikube.127.0.0.1.nip.io
+            - token-request-server.kaidotio.dev
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - token-request-server-public.kaidotio.dev
+        - key: request.auth.claims[iss]
+          values:
+            - https://token.actions.githubusercontent.com
+        - key: request.auth.claims[repository_owner]
+          values:
+            - kaidotio
+      to:
+        - operation:
+            methods:
+              - POST
+            paths:
+              - /token

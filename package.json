@@ -1,0 +1,16 @@
+{
+  "name": "hippocampus",
+  "private": true,
+  "scripts": {
+    "premarp:dev": "find -L slides/images -type f \\( -iname '*.jpg' -o -iname '*.jpeg' \\) -exec sh -c 'umask 022; for f; do t=$(readlink -f \"$f\"); jpegtran -copy none -optimize -outfile \"${t}.tmp\" \"$t\" || { rm -f \"${t}.tmp\"; exit 1; }; chmod --reference=\"$t\" \"${t}.tmp\" || { rm -f \"${t}.tmp\"; exit 1; }; mv \"${t}.tmp\" \"$t\" || { rm -f \"${t}.tmp\"; exit 1; }; done' _ {} +",
+    "marp:dev": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/[0-9]*.md --watch",
+    "premarp:build": "find -L slides/images -type f \\( -iname '*.jpg' -o -iname '*.jpeg' \\) -exec sh -c 'umask 022; for f; do t=$(readlink -f \"$f\"); jpegtran -copy none -optimize -outfile \"${t}.tmp\" \"$t\" || { rm -f \"${t}.tmp\"; exit 1; }; chmod --reference=\"$t\" \"${t}.tmp\" || { rm -f \"${t}.tmp\"; exit 1; }; mv \"${t}.tmp\" \"$t\" || { rm -f \"${t}.tmp\"; exit 1; }; done' _ {} +",
+    "marp:build": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/[0-9]*.md",
+    "premarp:dist": "find -L slides/images -type f \\( -iname '*.jpg' -o -iname '*.jpeg' \\) -exec sh -c 'umask 022; for f; do t=$(readlink -f \"$f\"); jpegtran -copy none -optimize -outfile \"${t}.tmp\" \"$t\" || { rm -f \"${t}.tmp\"; exit 1; }; chmod --reference=\"$t\" \"${t}.tmp\" || { rm -f \"${t}.tmp\"; exit 1; }; mv \"${t}.tmp\" \"$t\" || { rm -f \"${t}.tmp\"; exit 1; }; done' _ {} +",
+    "marp:dist": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/[0-9]*.md && bash bin/inline-slide-images.sh slides/[0-9]*.html"
+  },
+  "devDependencies": {
+    "@types/k6": "^0.51.0",
+    "@marp-team/marp-cli": "^3.4.0"
+  }
+}

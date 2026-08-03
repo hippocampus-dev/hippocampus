@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+images:
+- digest: sha256:9b89af53103f8ea7ee19e33951c82f826b8c873baf89cf04d49c69fed76b737e
+  name: grafana/tempo
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/grafana/tempo

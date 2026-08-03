@@ -1,0 +1,44 @@
+[package]
+name = "hippocampus-standalone"
+version = "0.1.0"
+authors = ["Kai Aihara <kaidotio@gmail.com>"]
+edition = "2024"
+
+[dependencies]
+tikv-jemallocator = { version = "0.6.0", optional = true }
+clap = { version = "4.5.38", features = ["derive"] }
+toml = { version = "0.5.8" }
+serde = { version = "1.0.127", features = ["derive"] }
+serde_json = { version = "1.0.66" }
+futures = { version = "0.3.16" }
+tokio = { version = "1.45.1", features = ["macros", "rt-multi-thread"] }
+tracing = { version = "0.1.37" }
+tracing-opentelemetry = { version = "0.18.0" }
+tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
+termion = { version = "1.5.6" }
+regex = { version = "1.5.4" }
+opentelemetry = { version = "0.18.0", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.11.0", features = ["tls", "tls-roots"] }
+dotenv = { version = "0.15.0" }
+rustc-hash = { version = "2.0.0" }
+
+hippocampus-configuration = { path = "../hippocampus-configuration", features = ["gcs"] }
+hippocampus-core = { path = "../hippocampus-core" }
+hippocampusql = { path = "../hippocampusql" }
+elapsed = { path = "../elapsed" }
+gcs = { path = "../gcs" }
+error = { path = "../error" }
+
+[features]
+default = ["use-rustls", "ipadic"]
+use-rustls = ["gcs/use-rustls"]
+use-openssl = ["gcs/use-openssl"]
+ipadic = ["hippocampus-core/ipadic"]
+#unidic = ["hippocampus-core/unidic"]
+ko-dic = ["hippocampus-core/ko-dic"]
+#cc-cedict = ["hippocampus-core/cc-cedict"]
+tracing = ["hippocampus-core/tracing", "gcs/tracing"]
+jemalloc = ["tikv-jemallocator"]
+wasm = ["hippocampus-core/wasm", "hippocampus-configuration/wasm"]
+sqlite = ["hippocampus-core/sqlite", "hippocampus-configuration/sqlite"]
+cassandra = ["hippocampus-core/cassandra", "hippocampus-configuration/cassandra"]

@@ -1,0 +1,7 @@
+[filter]
+rules = ["slack_logger.encrypted_messages"]
+
+[sink]
+dispatchers = [
+    {matcher = ["slack_logger.encrypted_messages"], topic = "slack-logger-cdc", partition = "ts"},
+]

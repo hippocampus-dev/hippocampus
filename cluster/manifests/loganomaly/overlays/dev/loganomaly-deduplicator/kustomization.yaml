@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- service.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:25f6bcfcf34c22e25e0fe9f7b6f96e7907a943be5246d9467994bf9bc42cfbc8
+  name: ghcr.io/hippocampus-dev/hippocampus/loganomaly
+  newName: ghcr.io/hippocampus-dev/hippocampus/loganomaly
