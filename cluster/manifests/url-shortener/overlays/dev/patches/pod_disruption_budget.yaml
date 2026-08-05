@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: url-shortener
+spec:
+  maxUnavailable: 1

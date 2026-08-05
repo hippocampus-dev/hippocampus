@@ -1,0 +1,73 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: embedding-gateway
+spec:
+  gateways:
+    - embedding-gateway
+  hosts:
+    - embedding-gateway.minikube.127.0.0.1.nip.io
+    - embedding-gateway.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: embedding-gateway
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: embedding-gateway-purge
+spec:
+  gateways:
+    - embedding-gateway-purge
+  hosts:
+    - embedding-gateway-purge.minikube.127.0.0.1.nip.io
+    - embedding-gateway-purge.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: embedding-gateway-endpoint-broadcaster
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: api.openai.com
+spec:
+  hosts:
+    - api.openai.com
+  gateways:
+    - mesh
+    - istio-egressgateway
+  tls:
+    - match:
+        - gateways:
+            - mesh
+          port: 443
+          sniHosts:
+            - api.openai.com
+      route:
+        - destination:
+            host: istio-egressgateway.istio-gateways.svc.cluster.local
+            port:
+              number: 443
+    - match:
+        - gateways:
+            - istio-egressgateway
+          port: 443
+          sniHosts:
+            - api.openai.com
+      route:
+        - destination:
+            host: api.openai.com
+            port:
+              number: 443

@@ -1,0 +1,13 @@
+resources:
+- csi_driver.yaml
+- daemon_set.yaml
+- service_account.yaml
+images:
+- digest: sha256:6d3343221106c9802356767ea9aacee4c56f6a238b4311523681874684245b10
+  name: ghcr.io/hippocampus-dev/hippocampus/fuse-csi-driver
+  newName: ghcr.io/hippocampus-dev/hippocampus/fuse-csi-driver
+- digest: sha256:f032a0ca4c699eebe403988a0e217c3dfc82e2cee8b7d9d247a493e5a2425f24
+  name: registry.k8s.io/sig-storage/csi-node-driver-registrar
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/registry.k8s.io/sig-storage/csi-node-driver-registrar
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization

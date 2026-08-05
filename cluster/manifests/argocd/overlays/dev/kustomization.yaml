@@ -1,0 +1,54 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argocd
+
+resources:
+- ../../base
+- cluster_role_binding.yaml
+- gateway.yaml
+- namespace.yaml
+- network_policy.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- peer_authentication.yaml
+- virtual_service.yaml
+- http-redis-proxy
+- redis
+- secret.yaml
+
+patches:
+- path: patches/config_map.yaml
+- path: patches/deployment.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+- path: patches/stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/secretsfromvault/go.mod
+  - files/secretsfromvault/go.sum
+  - files/secretsfromvault/main.go
+  name: secretsfromvault-src
+  options:
+    immutable: true
+images:
+- digest: sha256:418b5f8ad0cf47b31f4b6dff708c9ca59de0e82aead2288fad0c1b77fa1c3a8f
+  name: golang
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/golang
+- digest: sha256:5219bc9a42e22e0dfed3610696de876e8b14c18b81125456a50880c358c4c855
+  name: quay.io/argoproj/argocd
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/argoproj/argocd
+
+replacements:
+- source:
+    fieldPath: spec.replicas
+    kind: StatefulSet
+    name: argocd-application-controller
+  targets:
+  - fieldPaths:
+    - spec.template.spec.containers.[name=argocd-application-controller].env.[name=ARGOCD_CONTROLLER_REPLICAS].value
+    select:
+      kind: StatefulSet
+      name: argocd-application-controller

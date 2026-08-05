@@ -1,0 +1,25 @@
+apiVersion: cilium.io/v2
+kind: CiliumLocalRedirectPolicy
+metadata:
+  name: node-local-dns
+  annotations:
+    # Cilium re-resolves backends on every pod event, but a policy spec is never updated in place, so hold this
+    # until the DaemonSet is Healthy and the hostNetwork pod it would otherwise bind to is gone
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  redirectFrontend:
+    serviceMatcher:
+      serviceName: kube-dns
+      namespace: kube-system
+  redirectBackend:
+    localEndpointSelector:
+      matchLabels:
+        app.kubernetes.io/name: node-local-dns
+        app.kubernetes.io/component: ""
+    toPorts:
+      - name: dns
+        port: "53"
+        protocol: UDP
+      - name: dns-tcp
+        port: "53"
+        protocol: TCP

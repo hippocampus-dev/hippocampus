@@ -1,0 +1,36 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: reporting-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reporting-server
+      app.kubernetes.io/component: ""
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - reporting-server.minikube.127.0.0.1.nip.io
+            - reporting-server.kaidotio.dev
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - reporting-server-public.kaidotio.dev
+      to:
+        - operation:
+            methods:
+              - POST

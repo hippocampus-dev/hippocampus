@@ -1,0 +1,62 @@
+name: pages
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/20_pages.yaml
+      - images/Kai.jpg
+      - slides/**
+      - .npmrc
+      - package.json
+      - package-lock.json
+  workflow_dispatch:
+    inputs: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  deploy:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            images/Kai.jpg
+            slides/
+            .npmrc
+            package.json
+            package-lock.json
+          sparse-checkout-cone-mode: false
+      - run: mkdir -p dist
+      - name: Build slides
+        run: |
+          set -eo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends libjpeg-turbo-progs
+
+          npm ci
+          npm --no-ignore-scripts run marp:build
+
+          mkdir -p dist/slides
+          cp -Lr slides/images dist/slides/
+          cp slides/*.html dist/slides/
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

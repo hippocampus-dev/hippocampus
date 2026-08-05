@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: http-redis-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: http-redis-proxy
+  mtls:
+    mode: STRICT

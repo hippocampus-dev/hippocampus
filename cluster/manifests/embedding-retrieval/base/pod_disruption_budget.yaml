@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: embedding-retrieval
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-retrieval
+      app.kubernetes.io/component: ""

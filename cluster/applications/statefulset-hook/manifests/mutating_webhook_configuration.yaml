@@ -1,0 +1,26 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: statefulset-hook
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: statefulset-hook
+        path: /mutate
+        port: 9443
+    name: statefulset-hook.kaidotio.github.io
+    failurePolicy: Fail
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - apps
+        apiVersions:
+          - v1
+        resources:
+          - statefulsets
+        scope: "*"
+        operations:
+          - CREATE

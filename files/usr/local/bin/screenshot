@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+import png:- | xclip -selection clipboard -t image/png

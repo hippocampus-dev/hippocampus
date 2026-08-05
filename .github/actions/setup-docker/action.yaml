@@ -1,0 +1,8 @@
+name: setup-docker
+runs:
+  using: composite
+  steps:
+    - run: docker login ghcr.io -u ${GITHUB_REPOSITORY_OWNER} -p ${{ github.token }}
+      shell: bash
+    - uses: docker/setup-qemu-action@v3
+    - uses: docker/setup-buildx-action@v3

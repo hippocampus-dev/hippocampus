@@ -1,0 +1,12 @@
+[package]
+name = "benches"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tempfile = { version = "3.3.0" }
+rustc-hash = "2.0.0"
+ahash = { version = "0.8.11" }
+tokio = "1.45.1"
+
+hippocampus-core = { path = ".." }

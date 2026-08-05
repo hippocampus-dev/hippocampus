@@ -1,0 +1,244 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+function usage() {
+  cat <<EOS
+Usage:
+   claudex-with-worktree [--disable-diff-view]
+EOS
+}
+
+ALLOWED_TOOLS="Task,Glob,Grep,LS,Read,Edit,MultiEdit,Write,TodoRead,TodoWrite,WebSearch,WebFetch,Bash(find:*),Bash(ls:*),Bash(grep:*),Bash(git:*)"
+
+args=()
+DISABLE_DIFF_VIEW=false
+while (( $# )); do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --disable-diff-view)
+      DISABLE_DIFF_VIEW=true
+      shift
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+GIT_ROOT=$(git rev-parse --show-toplevel)
+
+WORKTREE_NAME=claude-worktree-$$
+WORKTREE_PATH=$(pwd)/${WORKTREE_NAME}
+WORKING_CONTEXT=$(git rev-parse --show-prefix)
+WORKING_DIRECTORY=${WORKTREE_PATH}/${WORKING_CONTEXT}
+
+git worktree add -b "$WORKTREE_NAME" "$WORKTREE_PATH"
+
+if [ -n "$TMUX" ] && [ "$DISABLE_DIFF_VIEW" == false ]; then
+  DIFF_PANE=$(tmux split-window -h -c "$WORKING_DIRECTORY" -P -F "#{pane_id}")
+  tmux send-keys "git status" C-m
+  tmux select-pane -L
+fi
+
+hunk_answers() {
+  # 'git add -p' walks the raw content, so a textconv driver that changes the
+  # line count would otherwise renumber the hunks counted here.
+  git diff --no-textconv -- "$2" | awk -v selection="$1" '
+    BEGIN {
+      split(selection, wanted, ",")
+    }
+    # git add -p asks about a mode change before it walks any hunk, and no hunk
+    # index addresses it, so it is taken along with whatever else was selected.
+    /^old mode / {
+      print "y"
+    }
+    /^@@/ {
+      hunks++
+      keep = 0
+      for (i in wanted) {
+        if (wanted[i] + 0 == hunks) {
+          keep = 1
+        }
+      }
+      print (keep ? "y" : "n")
+    }
+  '
+}
+
+# claudex only produces text because the sandbox mounts the parent .git read-only.
+# Both functions run as conditions, which suspends 'set -e' inside them.
+stage_session_changes() {
+  if ! plan=$(claudex "/git:stage" --allowedTools "$ALLOWED_TOOLS" --print < /dev/null | sed -n 's/^[[:space:]]*hunks:[[:space:]]*\([^ ]*\)[[:space:]]*file:[[:space:]]*/\1 /p'); then
+    return 1
+  fi
+
+  if [ -z "$plan" ]; then
+    echo "No hunk selection reported" 1>&2
+    return 1
+  fi
+
+  while IFS= read -r line; do
+    path="${line#* }"
+    # 'git add -p' walks no hunk for an untracked, deleted, mode-changed or
+    # binary file, and every one of those arrives as 'all'.
+    if [ "${line%% *}" == all ]; then
+      if ! git add -- "$path"; then
+        return 1
+      fi
+    elif ! hunk_answers "${line%% *}" "$path" | git add -p -- "$path" > /dev/null; then
+      return 1
+    elif git diff --cached --no-textconv --quiet -- "$path"; then
+      # 'git add -p' exits 0 even when every answer missed.
+      echo "Staged nothing for ${path}" 1>&2
+      return 1
+    fi
+  done <<< "$plan"
+
+  ! git diff --cached --no-textconv --quiet
+}
+
+commit_staged_changes() {
+  if ! message=$(claudex "Write a commit message for the changes staged in the index, which you can read with 'git diff --cached'. Output only the commit message." --allowedTools "$ALLOWED_TOOLS" --print < /dev/null); then
+    return 1
+  fi
+
+  if [ -z "$message" ]; then
+    echo "No commit message produced" 1>&2
+    return 1
+  fi
+
+  if ! printf "%s\n" "$message" | git commit -F -; then
+    return 1
+  fi
+}
+
+# Runs as a condition, which suspends 'set -e' inside it.
+resolve_merge_conflicts() {
+  if ! conflicted=$(git -c core.quotePath=false diff --name-only --diff-filter=U); then
+    return 1
+  fi
+
+  if [ -z "$conflicted" ]; then
+    echo "No conflicted path to resolve" 1>&2
+    return 1
+  fi
+
+  # git leaves no marker in a binary conflict, so nothing below could tell a
+  # resolved one from an untouched one.
+  while IFS= read -r path; do
+    if [ -e "$path" ] && [ "$(wc -c < "$path")" -ne "$(tr -d '\0' < "$path" | wc -c)" ]; then
+      echo "Binary conflict in ${path} needs a manual resolution" 1>&2
+      return 1
+    fi
+  done <<< "$conflicted"
+
+  # A delete/modify conflict carries no marker either, so the status codes are
+  # the only way for the agent to learn that such a path needs a decision.
+  if ! claudex "A git merge stopped on these conflicts:
+$(git -c core.quotePath=false status --porcelain | awk '/^(DD|AU|UD|UA|DU|AA|UU) /')
+Edit each of those paths in the working tree so that no conflict marker remains and the result keeps what both sides intended. A UD or DU path is a delete/modify conflict holding no marker: remove the file if the deletion should win, otherwise leave its content in place. Do not run any git command." --allowedTools "$ALLOWED_TOOLS" --print < /dev/null; then
+    return 1
+  fi
+
+  while IFS= read -r path; do
+    # A delete/modify conflict resolved by removing the file has nothing to read.
+    if [ -e "$path" ] && [ -n "$(awk '/^<<<<<<< |^>>>>>>> /' < "$path")" ]; then
+      echo "Conflict markers remain in ${path}" 1>&2
+      return 1
+    fi
+
+    if ! git add -- "$path"; then
+      return 1
+    fi
+  done <<< "$conflicted"
+
+  GIT_EDITOR=true git merge --continue
+}
+
+cleanup() {
+  read -e -p "Merge changes back to original branch? (y/N): " response
+
+  COMMITTED=false
+  if [[ "$response" =~ ^[Yy]$ ]] && [ "$(git status --porcelain | wc -l)" -gt 0 ] && stage_session_changes && commit_staged_changes; then
+    COMMITTED=true
+
+    if [ -n "$CLAUDE_PARENT_WORKTREE_NAME" ]; then
+      (
+        cd "$GIT_ROOT"
+        STASHED=false
+        if ! git diff --quiet || ! git diff --staged --quiet; then
+          git stash
+          STASHED=true
+        fi
+
+        git checkout "$CLAUDE_PARENT_WORKTREE_NAME"
+        if ! git merge "$WORKTREE_NAME"; then
+          if ! resolve_merge_conflicts; then
+            echo "Merge left unresolved in $(pwd) - finish it manually or run 'git merge --abort'" 1>&2
+          fi
+        fi
+
+        if [ "$STASHED" == true ]; then
+          git stash pop
+        fi
+      )
+    else
+      (
+        cd "$GIT_ROOT"
+        STASHED=false
+        if ! git diff --quiet || ! git diff --staged --quiet; then
+          git stash
+          STASHED=true
+        fi
+
+        if ! git merge "$WORKTREE_NAME"; then
+          if ! resolve_merge_conflicts; then
+            echo "Merge left unresolved in $(pwd) - finish it manually or run 'git merge --abort'" 1>&2
+          fi
+        fi
+
+        if [ "$STASHED" == true ]; then
+          git stash pop
+        fi
+      )
+    fi
+  fi
+
+  if [ -n "$TMUX" ] && [ "$DISABLE_DIFF_VIEW" == false ]; then
+    tmux kill-pane -t "$DIFF_PANE" 2>/dev/null || true
+  fi
+
+  (
+    if [ "$(git status --porcelain | wc -l)" -gt 0 ]; then
+      if [ "$COMMITTED" == true ]; then
+        echo "Only part of the worktree was committed - deleting the branch discards the rest:" 1>&2
+      else
+        echo "Nothing was committed - deleting the branch discards everything:" 1>&2
+      fi
+      git status --porcelain 1>&2
+    fi
+
+    if git -C "$GIT_ROOT" rev-parse --verify --quiet MERGE_HEAD > /dev/null; then
+      echo "A merge is still unfinished in ${GIT_ROOT} - deleting the branch removes what it needs" 1>&2
+    fi
+
+    read -e -p $'\e[31mAre you sure you want to delete the branch?\e[0m (y/N): ' response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+      cd "$GIT_ROOT"
+      git worktree remove "$WORKTREE_PATH" --force
+      git branch -D "$WORKTREE_NAME"
+    fi
+  )
+}
+
+trap cleanup EXIT
+
+cd "$WORKING_DIRECTORY"
+
+claudex "${args[@]}"

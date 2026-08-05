@@ -1,0 +1,66 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: csviewer
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: csviewer
+      app.kubernetes.io/component: ""
+  configPatches:
+    - applyTo: LISTENER
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: MERGE
+        value:
+          per_connection_buffer_limit_bytes: 1073741824
+    - applyTo: CLUSTER
+      patch:
+        operation: ADD
+        value:
+          name: envoy-markdownify
+          connect_timeout: 1s
+          type: STATIC
+          lb_policy: ROUND_ROBIN
+          typed_extension_protocol_options:
+            envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+              "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+              explicit_http_config:
+                http2_protocol_options: {}
+          load_assignment:
+            cluster_name: envoy-markdownify
+            endpoints:
+              - lb_endpoints:
+                  - endpoint:
+                      address:
+                        socket_address:
+                          address: 127.0.0.1
+                          port_value: 50051
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.ext_proc
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExternalProcessor
+            grpc_service:
+              envoy_grpc:
+                cluster_name: envoy-markdownify
+              timeout: 30s
+            failure_mode_allow: true
+            processing_mode:
+              request_header_mode: SEND
+              response_header_mode: SEND
+              request_body_mode: NONE
+              response_body_mode: BUFFERED
+              request_trailer_mode: SKIP
+              response_trailer_mode: SKIP

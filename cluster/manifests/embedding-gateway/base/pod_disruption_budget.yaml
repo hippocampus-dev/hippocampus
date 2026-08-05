@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: embedding-gateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-gateway
+      app.kubernetes.io/component: ""

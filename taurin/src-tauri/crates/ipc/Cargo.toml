@@ -1,0 +1,13 @@
+[package]
+name = "ipc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+inventory = { version = "0.3" }
+
+ipc_macro = { path = "../ipc_macro" }
+
+[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+tauri-plugin-global-shortcut = "2"

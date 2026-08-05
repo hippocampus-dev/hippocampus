@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: my-app
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+      annotations:
+        # GOMEMLIMIT becomes 90% of limits.memory. The env var below keeps stating
+        # where the number comes from; the hook resolves it, evaluates the
+        # expression and writes the result as a literal. Without the hook the env
+        # var resolves to the whole limit.
+        skaffold.resource-field-hook.kaidotio.github.io/GOMEMLIMIT: '{{ scale .Value 0.9 }}'
+    spec:
+      containers:
+        - name: my-container
+          image: ghcr.io/hippocampus-dev/hippocampus/my-app
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 1000m
+              memory: 128Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-small-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &small-labels
+      app.kubernetes.io/name: my-small-app
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *small-labels
+      annotations:
+        # A fixed reserve suits a container too small for a share to leave usable
+        # room: 10% of 16Mi is under 2Mi, which the binary's own mapped pages
+        # exceed. GOMEMLIMIT becomes limits.memory minus 4Mi.
+        skaffold.resource-field-hook.kaidotio.github.io/GOMEMLIMIT: '{{ sub .Value (quantity "4Mi") }}'
+    spec:
+      containers:
+        - name: my-container
+          image: ghcr.io/hippocampus-dev/hippocampus/my-small-app
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          resources:
+            requests:
+              cpu: 10m
+              memory: 8Mi
+            limits:
+              cpu: 1000m
+              memory: 16Mi

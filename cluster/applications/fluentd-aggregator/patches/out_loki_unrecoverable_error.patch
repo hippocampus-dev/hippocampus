@@ -1,0 +1,22 @@
+--- a/lib/fluent/plugin/out_loki.rb
++++ b/lib/fluent/plugin/out_loki.rb
+@@ -167,8 +167,17 @@
+         log.warn "failed to write post to #{@uri} (#{res_summary})"
+         log.debug Yajl.dump(body)
+
+-        # Only retry 429 and 500s
+-        raise(LogPostError, res_summary) if res.is_a?(Net::HTTPTooManyRequests) || res.is_a?(Net::HTTPServerError)
++        # Retry 429 and 500s
++        if res.is_a?(Net::HTTPTooManyRequests) || res.is_a?(Net::HTTPServerError)
++          raise LogPostError, res_summary
++        elsif res.is_a?(Net::HTTPBadRequest)
++          # historical logs should be sent to secondary
++          body_lower = res.body.to_s.downcase
++          if body_lower.include?('too far behind') ||
++             body_lower.include?('out of order')
++            raise Fluent::UnrecoverableError, "Loki rejected with 400: #{res_summary}"
++          end
++        end
+       end
+
+       def http_request_opts(uri)

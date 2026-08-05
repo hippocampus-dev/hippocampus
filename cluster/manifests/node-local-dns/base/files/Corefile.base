@@ -1,0 +1,48 @@
+cluster.local:53 {
+  errors
+  health :8053
+  bind 0.0.0.0
+  prometheus :9253
+  forward . __PILLAR__CLUSTER__DNS__ {
+    force_tcp
+  }
+  cache {
+    success 9984 30 5
+    denial 9984 5 5
+  }
+  loop
+  reload
+}
+in-addr.arpa:53 {
+  errors
+  bind 0.0.0.0
+  prometheus :9253
+  forward . __PILLAR__CLUSTER__DNS__ {
+    force_tcp
+  }
+  cache 30
+  loop
+  reload
+}
+ip6.arpa:53 {
+  errors
+  bind 0.0.0.0
+  prometheus :9253
+  forward . __PILLAR__CLUSTER__DNS__ {
+    force_tcp
+  }
+  cache 30
+  loop
+  reload
+}
+.:53 {
+  errors
+  bind 0.0.0.0
+  prometheus :9253
+  forward . __PILLAR__UPSTREAM__SERVERS__ {
+    force_tcp
+  }
+  cache 30
+  loop
+  reload
+}

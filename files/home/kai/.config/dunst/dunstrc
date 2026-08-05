@@ -1,0 +1,5 @@
+[global]
+  timeout = 3
+  font = Noto Sans Mono 14
+  icon_path = /usr/share/icons/Adwaita/16x16/status/:/usr/share/icons/Adwaita/16x16/devices/:/usr/share/icons/Adwaita/16x16/legacy/
+  stack_duplicates = false

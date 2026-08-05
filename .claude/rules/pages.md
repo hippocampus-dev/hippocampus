@@ -1,0 +1,14 @@
+---
+paths:
+  - "pages/**"
+---
+
+* Use symlinks with relative paths to expose files from other directories
+* API endpoints (`/api/*`) require GitHub Actions OIDC token authentication
+
+## Static File Serving
+
+| Scenario | Method |
+|----------|--------|
+| Pages-specific content | Create file directly in `pages/` |
+| Expose existing file | Create symlink to original |

@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: github-token-server
+spec:
+  gateways:
+    - hippocampus-dev-github-token-server
+  hosts:
+    - hippocampus-dev-github-token-server.minikube.127.0.0.1.nip.io
+    - hippocampus-dev-github-token-server.kaidotio.dev
+    - hippocampus-dev-github-token-server-public.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: hippocampus-dev-github-token-server
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

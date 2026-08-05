@@ -1,0 +1,30 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: resource-field-hook
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: resource-field-hook
+        path: /mutate
+        port: 9443
+    name: resource-field-hook.kaidotio.github.io
+    # A pod carrying no annotation of this hook's is passed through untouched, and
+    # an unreachable hook leaves every resourceFieldRef for the kubelet to resolve
+    # as it already does, so ignoring a failure costs the scaling and nothing else.
+    failurePolicy: Ignore
+    reinvocationPolicy: IfNeeded
+    sideEffects: None
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        resources:
+          - pods
+        scope: "*"
+        operations:
+          - CREATE
