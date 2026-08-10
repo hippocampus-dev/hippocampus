@@ -1,0 +1,22 @@
+version: 0.1
+http:
+  addr: 0.0.0.0:5002
+  debug:
+    addr: 0.0.0.0:5003
+    prometheus:
+      enabled: true
+      path: /metrics
+  headers:
+    X-Content-Type-Options: [nosniff]
+log:
+  formatter: json
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3

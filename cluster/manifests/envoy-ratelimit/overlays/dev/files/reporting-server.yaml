@@ -1,0 +1,27 @@
+domain: reporting-server
+descriptors:
+- key: X-CLIENT-IP
+  rate_limit:
+    unit: second
+    requests_per_unit: 4
+  descriptors:
+  - key: PATH
+    value: /csp-reports
+    rate_limit:
+      unit: second
+      requests_per_unit: 1
+  - key: PATH
+    value: /reports
+    rate_limit:
+      unit: second
+      requests_per_unit: 1
+- key: PATH
+  value: /csp-reports
+  rate_limit:
+    unit: second
+    requests_per_unit: 16
+- key: PATH
+  value: /reports
+  rate_limit:
+    unit: second
+    requests_per_unit: 32

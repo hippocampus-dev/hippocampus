@@ -1,0 +1,276 @@
+{
+   "annotations": {
+      "list": [
+         {
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "expr": "sum(ALERTS{alertstate=\"firing\",severity=\"critical\"}) by (alertname)",
+            "iconColor": "rgba(255, 96, 96, 1)",
+            "name": "Critical Alerts",
+            "textFormat": "{{alertname}}"
+         }
+      ]
+   },
+   "graphTooltip": 1,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 1,
+         "title": "Schedules",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "w"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "CronJob"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Drill down",
+                              "tooltip": "Drill down",
+                              "type": "link",
+                              "url": "/d/workload/workload?var-namespace=${__data.fields[\"namespace\"]}&var-workload=${__data.fields[\"cronjob\"]}&var-workload_type=cronjob&from=${__from}&to=${__to}"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "namespace"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "cronjob"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "schedule"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Schedule"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #A"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #B"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Next"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fcronjob%5Fnext%5Fschedule%5Ftime%7Bnamespace%3D%7E%5C%22${__data.fields[\"namespace\"]}%5C%22%7D%20%2A%201000%29%20by%20%28namespace%2Ccronjob%29%20%2A%20on%28namespace%2Ccronjob%29%20group%5Fleft%20group%28kube%5Fcronjob%5Finfo%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Ccronjob%3D%5C%22${__data.fields[\"cronjob\"]}%5C%22%7D%29%20by%20%28namespace%2Ccronjob%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "dateTimeAsIso"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #C"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Last"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kube%5Fcronjob%5Fstatus%5Flast%5Fschedule%5Ftime%7Bnamespace%3D%7E%5C%22${__data.fields[\"namespace\"]}%5C%22%7D%20%2A%201000%29%20by%20%28namespace%2Ccronjob%29%20%2A%20on%28namespace%2Ccronjob%29%20group%5Fleft%20group%28kube%5Fcronjob%5Finfo%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Ccronjob%3D%5C%22${__data.fields[\"cronjob\"]}%5C%22%7D%29%20by%20%28namespace%2Ccronjob%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "dateTimeAsIso"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Time"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 24,
+            "w": 24
+         },
+         "id": 2,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_cronjob_info{namespace=~\"${namespace}\"}) by (namespace,cronjob,schedule) * on(namespace,cronjob) group_left(w) group(label_join(kube_cronjob_info, \"w\", \"/\", \"namespace\", \"cronjob\")) by (namespace,cronjob,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_cronjob_next_schedule_time{namespace=~\"${namespace}\"} * 1000) by (namespace,cronjob) * on(namespace,cronjob) group_left(w) group(label_join(kube_cronjob_info, \"w\", \"/\", \"namespace\", \"cronjob\")) by (namespace,cronjob,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kube_cronjob_status_last_schedule_time{namespace=~\"${namespace}\"} * 1000) by (namespace,cronjob) * on(namespace,cronjob) group_left(w) group(label_join(kube_cronjob_info, \"w\", \"/\", \"namespace\", \"cronjob\")) by (namespace,cronjob,w)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Schedules",
+         "transformations": [
+            {
+               "id": "joinByField",
+               "options": {
+                  "byField": "w",
+                  "mode": "outer"
+               }
+            }
+         ],
+         "type": "table"
+      }
+   ],
+   "schemaVersion": 36,
+   "templating": {
+      "list": [
+         {
+            "current": {
+               "selected": false,
+               "text": [
+                  "All"
+               ],
+               "value": [
+                  "All"
+               ]
+            },
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "includeAll": true,
+            "multi": true,
+            "name": "namespace",
+            "query": "label_values(kube_cronjob_info, namespace)",
+            "type": "query"
+         }
+      ]
+   },
+   "time": {
+      "from": "now-1h",
+      "to": "now"
+   },
+   "timezone": "browser",
+   "title": "CronJob",
+   "uid": "cron_job"
+}

@@ -1,0 +1,382 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  name: scans.owasp-zap.kaidotio.github.io
+spec:
+  group: owasp-zap.kaidotio.github.io
+  names:
+    kind: Scan
+    listKind: ScanList
+    plural: scans
+    singular: scan
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.lastScanTime
+      name: LastScan
+      type: date
+    - jsonPath: .spec.automation.env.contexts[0].urls[0]
+      name: Target
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: Scan is the schema for the scans API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ScanSpec defines the desired state of Scan
+            properties:
+              automation:
+                description: ZAP Automation Framework configuration (native structure)
+                properties:
+                  env:
+                    description: ZAPEnvironment represents the environment configuration
+                      for ZAP automation
+                    properties:
+                      contexts:
+                        description: Contexts for the scan
+                        items:
+                          description: ZAPContext represents a scanning context in
+                            ZAP
+                          properties:
+                            authentication:
+                              description: Authentication configuration
+                              properties:
+                                credentials:
+                                  description: |-
+                                    Kubernetes-specific: Reference to secret containing credentials
+                                    This field is not included in the YAML output to ZAP
+                                  properties:
+                                    envMappings:
+                                      additionalProperties:
+                                        type: string
+                                      description: |-
+                                        Environment variable mappings from secret keys
+                                        Map key is the secret key, value is the environment variable name
+                                        Example: {"username": "MY_APP_USER", "password": "MY_APP_PASS"}
+                                      minProperties: 1
+                                      type: object
+                                    secretRef:
+                                      description: Reference to the Kubernetes secret
+                                      properties:
+                                        name:
+                                          description: name is unique within a namespace
+                                            to reference a secret resource.
+                                          type: string
+                                        namespace:
+                                          description: namespace defines the space
+                                            within which the secret name must be unique.
+                                          type: string
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                  required:
+                                  - envMappings
+                                  - secretRef
+                                  type: object
+                                method:
+                                  enum:
+                                  - http
+                                  - form
+                                  - json
+                                  - manual
+                                  - script
+                                  - browser
+                                  type: string
+                                parameters:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Authentication parameters (varies by method)
+                                    Using map[string]string to avoid controller-gen issues with interface{}
+                                  type: object
+                                verification:
+                                  description: Verification configuration
+                                  properties:
+                                    loggedInRegex:
+                                      type: string
+                                    loggedOutRegex:
+                                      type: string
+                                    method:
+                                      enum:
+                                      - response
+                                      - request
+                                      - both
+                                      - poll
+                                      type: string
+                                    pollData:
+                                      type: string
+                                    pollFrequency:
+                                      description: Poll configuration
+                                      type: integer
+                                    pollHeaders:
+                                      type: string
+                                    pollUnits:
+                                      type: string
+                                    pollUrl:
+                                      type: string
+                                  required:
+                                  - method
+                                  type: object
+                              required:
+                              - method
+                              type: object
+                            excludePaths:
+                              items:
+                                type: string
+                              type: array
+                            includePaths:
+                              items:
+                                type: string
+                              type: array
+                            name:
+                              type: string
+                            sessionManagement:
+                              description: Session management configuration
+                              properties:
+                                method:
+                                  enum:
+                                  - cookie
+                                  - http
+                                  - script
+                                  type: string
+                                parameters:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Parameters for session management (varies by method)
+                                    Using map[string]string to avoid controller-gen issues with interface{}
+                                  type: object
+                              required:
+                              - method
+                              type: object
+                            technology:
+                              description: Technology configuration
+                              properties:
+                                exclude:
+                                  items:
+                                    type: string
+                                  type: array
+                                include:
+                                  items:
+                                    type: string
+                                  type: array
+                              type: object
+                            urls:
+                              items:
+                                type: string
+                              type: array
+                            users:
+                              description: Users for authenticated scanning
+                              items:
+                                description: ZAPUser represents a user for authenticated
+                                  scanning
+                                properties:
+                                  credentialsRef:
+                                    description: |-
+                                      Kubernetes-specific: Reference to secret containing credentials
+                                      This field is not included in the YAML output to ZAP
+                                    properties:
+                                      name:
+                                        description: name is unique within a namespace
+                                          to reference a secret resource.
+                                        type: string
+                                      namespace:
+                                        description: namespace defines the space within
+                                          which the secret name must be unique.
+                                        type: string
+                                    type: object
+                                    x-kubernetes-map-type: atomic
+                                  name:
+                                    type: string
+                                  password:
+                                    type: string
+                                  username:
+                                    type: string
+                                required:
+                                - name
+                                type: object
+                              type: array
+                          required:
+                          - name
+                          - urls
+                          type: object
+                        minItems: 1
+                        type: array
+                      continueOnFailure:
+                        default: true
+                        type: boolean
+                      failOnError:
+                        default: true
+                        type: boolean
+                      failOnWarning:
+                        default: false
+                        type: boolean
+                      parameters:
+                        additionalProperties:
+                          type: string
+                        description: Parameters for the automation plan
+                        type: object
+                      progressToStdout:
+                        default: true
+                        type: boolean
+                      vars:
+                        additionalProperties:
+                          type: string
+                        description: Environment variables
+                        type: object
+                    required:
+                    - contexts
+                    type: object
+                  jobs:
+                    items:
+                      description: ZAPJob represents a job in the ZAP automation plan
+                      properties:
+                        configuration:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Job-specific configuration
+                            Using map[string]string to avoid controller-gen issues with interface{}
+                          type: object
+                        parameters:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Job-specific parameters
+                            Using map[string]string to avoid controller-gen issues with interface{}
+                          type: object
+                        tests:
+                          description: Tests to run after the job
+                          items:
+                            description: ZAPTest represents a test in a ZAP job
+                            properties:
+                              parameters:
+                                additionalProperties:
+                                  type: string
+                                description: Using map[string]string to avoid controller-gen
+                                  issues with interface{}
+                                type: object
+                              type:
+                                type: string
+                            required:
+                            - type
+                            type: object
+                          type: array
+                        type:
+                          description: Job type (e.g., spider, spiderAjax, passiveScan-config,
+                            passiveScan-wait, activeScan, report)
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    type: array
+                required:
+                - env
+                - jobs
+                type: object
+              resources:
+                description: Resources for the scan job
+                properties:
+                  claims:
+                    description: |-
+                      Claims lists the names of resources, defined in spec.resourceClaims,
+                      that are used by this container.
+
+                      This is an alpha field and requires enabling the
+                      DynamicResourceAllocation feature gate.
+
+                      This field is immutable. It can only be set for containers.
+                    items:
+                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                      properties:
+                        name:
+                          description: |-
+                            Name must match the name of one entry in pod.spec.resourceClaims of
+                            the Pod where this field is used. It makes that resource available
+                            inside a container.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    x-kubernetes-list-type: map
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Limits describes the maximum amount of compute resources allowed.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Requests describes the minimum amount of compute resources required.
+                      If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                      otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                type: object
+              zapImage:
+                default: ghcr.io/zaproxy/zaproxy:stable
+                description: Reference to the ZAP image to use
+                type: string
+            required:
+            - automation
+            type: object
+          status:
+            description: ScanStatus defines the observed state of Scan
+            properties:
+              lastScanTime:
+                description: LastScanTime is the time when the last scan was triggered
+                format: date-time
+                type: string
+              observedGeneration:
+                description: ObservedGeneration represents the .metadata.generation
+                  that the status was updated for
+                format: int64
+                type: integer
+              reports:
+                additionalProperties:
+                  type: string
+                description: Reports contains the scan report data
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

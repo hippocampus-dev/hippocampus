@@ -1,0 +1,8 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: Runner
+metadata:
+  name: runner
+spec:
+  image: ghcr.io/hippocampus-dev/hippocampus/runner
+  owner: kaidotio
+  repo: hippocampus

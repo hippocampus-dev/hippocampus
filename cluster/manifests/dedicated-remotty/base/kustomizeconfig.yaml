@@ -1,0 +1,5 @@
+images:
+  - path: spec/template/spec/initContainers/image
+    kind: DedicatedContainerIngress
+  - path: spec/template/spec/containers/image
+    kind: DedicatedContainerIngress

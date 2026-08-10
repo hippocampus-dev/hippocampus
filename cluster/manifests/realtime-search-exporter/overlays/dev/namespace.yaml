@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: realtime-search-exporter
+  labels:
+    name: realtime-search-exporter
+    pod-security.kubernetes.io/enforce: restricted

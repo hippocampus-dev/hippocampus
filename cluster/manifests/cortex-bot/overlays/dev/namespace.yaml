@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cortex-bot
+  labels:
+    name: cortex-bot
+    pod-security.kubernetes.io/enforce: restricted

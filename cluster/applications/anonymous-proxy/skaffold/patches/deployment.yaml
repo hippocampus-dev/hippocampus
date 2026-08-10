@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anonymous-proxy
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: anonymous-proxy
+          image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+          volumeMounts:
+            # delve uses /home/nonroot/.config for storing delve configuration
+            - name: tmp
+              mountPath: /home/nonroot/.config
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

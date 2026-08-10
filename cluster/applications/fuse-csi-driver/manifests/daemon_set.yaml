@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fuse-csi-driver
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: fuse-csi-driver
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      serviceAccountName: fuse-csi-driver
+      automountServiceAccountToken: false
+      containers:
+        - name: fuse-csi-driver
+          securityContext:
+            privileged: true
+            readOnlyRootFilesystem: true
+            runAsUser: 0
+          image: ghcr.io/hippocampus-dev/hippocampus/fuse-csi-driver
+          imagePullPolicy: IfNotPresent
+          args:
+            - --node-name=$(NODE_NAME)
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          volumeMounts:
+            - name: kubelet-dir
+              mountPath: /var/lib/kubelet/pods
+              mountPropagation: Bidirectional
+            - name: socket-dir
+              mountPath: /csi
+        - name: csi-node-driver-registrar
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar
+          imagePullPolicy: IfNotPresent
+          args:
+            - --v=5
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
+          env:
+            - name: DRIVER_REG_SOCK_PATH
+              value: /var/lib/kubelet/plugins/fuse-csi-driver.csi.kaidotio.github.io/csi.sock
+          volumeMounts:
+            - name: registration-dir
+              mountPath: /registration
+            - name: socket-dir
+              mountPath: /csi
+      volumes:
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: Directory
+        - name: kubelet-dir
+          hostPath:
+            path: /var/lib/kubelet/pods/
+            type: Directory
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/fuse-csi-driver.csi.kaidotio.github.io/
+            type: DirectoryOrCreate

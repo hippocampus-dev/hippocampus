@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: vitess-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vitess-operator
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

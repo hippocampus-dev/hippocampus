@@ -1,0 +1,8 @@
+apiVersion: messaging.knative.dev/v1
+kind: KafkaChannel
+metadata:
+  name: dead-letter
+spec:
+  numPartitions: 1
+  replicationFactor: 1
+  retentionDuration: PT24H

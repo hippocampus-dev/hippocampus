@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+if (( $# )); then
+  exec /usr/bin/env "$@"
+fi
+
+output=$(/usr/bin/env)
+
+shopt -s nullglob
+for f in ~/.secrets/*; do
+  output=${output//$(cat "$f")/[REDACTED]}
+done
+shopt -u nullglob
+
+echo "$output"

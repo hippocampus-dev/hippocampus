@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: elastic-operator
+spec:
+  workloadSelector:
+    labels:
+      control-plane: elastic-operator
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

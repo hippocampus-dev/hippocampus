@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: kube-crud
+spec:
+  gateways:
+    - kube-crud
+  hosts:
+    - kube-crud.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: kube-crud
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

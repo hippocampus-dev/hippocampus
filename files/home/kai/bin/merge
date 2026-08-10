@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+gh pr list --draft=false --limit 100 | fzf -m | awk '{print $1}' | xargs -r -L1 gh pr merge -m --admin

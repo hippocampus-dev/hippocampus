@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: skaffold-fuse-csi-driver
+  labels:
+    name: skaffold-fuse-csi-driver
+    # fuse-csi-driver requires privileged access for /dev/fuse and mount(2)
+    pod-security.kubernetes.io/enforce: privileged

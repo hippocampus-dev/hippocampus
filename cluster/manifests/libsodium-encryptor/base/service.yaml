@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: libsodium-encryptor
+spec:
+  selector:
+    app.kubernetes.io/name: libsodium-encryptor
+    app.kubernetes.io/component: ""
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http

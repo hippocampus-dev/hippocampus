@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-crud-server
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: kube-crud-server
+          image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+          env:
+            - name: OTEL_TRACES_SAMPLER
+              value: always_off
+          volumeMounts:
+            # delve uses /home/nonroot/.config for storing delve configuration
+            - name: tmp
+              mountPath: /home/nonroot/.config
+        - name: nginx
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          command:
+            - nginx
+          args:
+            - -c
+            - /mnt/nginx.conf
+            - -g
+            - "daemon off;"
+          ports:
+            - name: cors
+              containerPort: 8081
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: cors
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: cors-proxy
+              mountPath: /mnt
+              readOnly: true
+            - name: tmp
+              mountPath: /var/run
+            - name: cache
+              mountPath: /var/cache/nginx
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: cors-proxy
+          configMap:
+            name: cors-proxy
+        - name: cache
+          emptyDir:
+            medium: Memory

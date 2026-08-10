@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mattermost
+spec:
+  serviceName: mattermost
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: mattermost
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: wait-for-database
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until nc -vz mattermost-vitess.mattermost.svc.cluster.local 3306; do sleep 1; done
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mattermost
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 2000
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: mattermost/mattermost-team-edition
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8065
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /api/v4/system/ping
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: plugins
+              mountPath: /mattermost/plugins
+            - name: client-plugins
+              mountPath: /mattermost/client/plugins
+        - name: mattermost-webhook-proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          command:
+            - nginx
+          args:
+            - -c
+            - /etc/nginx/nginx.conf
+            - -g
+            - 'daemon off;'
+          ports:
+            - name: http-proxy
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http-proxy
+            initialDelaySeconds: 10
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "3"]
+          volumeMounts:
+            - name: proxy-config
+              mountPath: /etc/nginx
+              readOnly: true
+            - name: tmp-proxy
+              mountPath: /tmp
+            - name: run
+              mountPath: /var/run
+            - name: cache
+              mountPath: /var/cache/nginx
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: tmp-proxy
+          emptyDir:
+            medium: Memory
+        - name: run
+          emptyDir:
+            medium: Memory
+        - name: cache
+          emptyDir:
+            medium: Memory
+        - name: plugins
+          emptyDir: {}
+        - name: client-plugins
+          emptyDir: {}
+        - name: proxy-config
+          emptyDir:
+            medium: Memory

@@ -1,0 +1,15 @@
+name: Capture
+inputs:
+  url:
+    required: true
+    description: "Target URL"
+outputs:
+  screenshotPath:
+    description: "Path of screenshot"
+  htmlPath:
+    description: "Path of HTML"
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.url }}

@@ -1,0 +1,74 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: vpa-admission-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: admission-controller
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: vpa-recommender
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: recommender
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: vpa-updater
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: updater
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

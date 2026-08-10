@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: embedding-gateway-
+
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/name: embedding-gateway
+    variant: utilities
+
+commonAnnotations:
+  argocd.argoproj.io/sync-wave: "-2"
+
+resources:
+- ../../../../utilities/ext-proc-proxy
+- envoy_filter.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+images:
+- digest: sha256:a0956635aea334aeec4ee49c8bc29a0e9ab6ce981e72beec10f1f88fd27bdd20
+  name: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher
+  newName: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher

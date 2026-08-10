@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: statsd-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: statsd-exporter
+  mtls:
+    mode: STRICT

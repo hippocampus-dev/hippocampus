@@ -1,0 +1,59 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: elasticsearch-master
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: master
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9300":
+      mode: PERMISSIVE # unicast
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: elasticsearch-data
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: data
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9300":
+      mode: PERMISSIVE # unicast
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: elasticsearch-ingest
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: ingest
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9300":
+      mode: PERMISSIVE # unicast
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: elasticsearch-coordinating
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: coordinating
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9300":
+      mode: PERMISSIVE # unicast

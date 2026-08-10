@@ -1,0 +1,4 @@
+/vendor
+/common.libsonnet
+/jsonnetfile.json
+/jsonnetfile.lock.json
