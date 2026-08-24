@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: litestream-hook
+  annotations:
+    cert-manager.io/inject-ca-from: litestream-hook/litestream-hook

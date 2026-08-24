@@ -1,0 +1,140 @@
+name: cortex-api
+namespace: cortex-api
+components:
+  - name: cortex-api
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: ""
+      app.kubernetes.io/name: cortex-api
+    logs:
+      grouping: kubernetes.cortex-api.cortex-api
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.cortex-api.cortex-api%5C%22%7D%22%7D%5D%7D%7D
+    traces:
+      serviceName: cortex-api
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22tempo%22%2C%22queries%22%3A%5B%7B%22limit%22%3A20%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22cortex-api%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%2C%22refId%22%3A%22A%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=cortex-api&var-workload_type=deployment&var-workload=cortex-api
+      labelSets:
+        - labels:
+            destination_service_name: cortex-api
+            destination_service_namespace: cortex-api
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: cortex-api
+            source_workload_namespace: cortex-api
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: cortex-api
+            workload: cortex-api
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: ""
+            app_kubernetes_io_name: cortex-api
+            namespace: cortex-api
+  - name: cortex-api-redis-haproxy
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: redis-haproxy
+      app.kubernetes.io/name: cortex-api
+      variant: utilities
+    logs:
+      grouping: kubernetes.cortex-api.cortex-api-redis-haproxy
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.cortex-api.cortex-api-redis-haproxy%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=cortex-api&var-workload_type=deployment&var-workload=cortex-api-redis-haproxy
+      labelSets:
+        - labels:
+            destination_service_name: cortex-api-redis-haproxy
+            destination_service_namespace: cortex-api
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: cortex-api-redis-haproxy
+            source_workload_namespace: cortex-api
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: cortex-api
+            workload: cortex-api-redis-haproxy
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: redis-haproxy
+            app_kubernetes_io_name: cortex-api
+            namespace: cortex-api
+  - name: cortex-api-redis
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: redis
+      app.kubernetes.io/name: cortex-api
+      variant: utilities
+    logs:
+      grouping: kubernetes.cortex-api.cortex-api-redis
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.cortex-api.cortex-api-redis%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=cortex-api&var-workload_type=statefulset&var-workload=cortex-api-redis
+      labelSets:
+        - labels:
+            destination_service_name: cortex-api-redis
+            destination_service_namespace: cortex-api
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: cortex-api-redis
+            source_workload_namespace: cortex-api
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: cortex-api
+            workload: cortex-api-redis
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: redis
+            app_kubernetes_io_name: cortex-api
+            namespace: cortex-api

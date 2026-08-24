@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: translator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: translator
+      app.kubernetes.io/component: ""

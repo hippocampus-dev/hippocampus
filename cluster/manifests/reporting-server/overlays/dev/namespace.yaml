@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reporting-server
+  labels:
+    name: reporting-server
+    pod-security.kubernetes.io/enforce: restricted

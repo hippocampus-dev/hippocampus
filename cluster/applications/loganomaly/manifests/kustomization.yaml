@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+images:
+- digest: sha256:bf4d23956b01dcb94270a43ffc22a20346ba6b1437373ae2f311fe70fbe73aa0
+- digest: sha256:68e709ceff01d9433ef92d254e66220558eba1adecff470d40e16a53b6a79b6d
+  name: ghcr.io/hippocampus-dev/hippocampus/loganomaly
+  newName: ghcr.io/hippocampus-dev/hippocampus/loganomaly

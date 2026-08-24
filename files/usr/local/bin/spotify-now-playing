@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+SPOTIFY_OAUTH_BRIDGE_URL="https://hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev"
+SPOTIFY_SCOPE="user-read-playback-state user-modify-playback-state"
+
+COVER_FILE="${XDG_RUNTIME_DIR:-/tmp}/spotify-now-playing.jpg"
+
+token=$(armyknife oauth device --url "$SPOTIFY_OAUTH_BRIDGE_URL" --client-id "spotify" --scope "$SPOTIFY_SCOPE")
+
+state_json=$(curl -fsSL --retry 5 --retry-all-errors -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player")
+
+# Spotify answers 204 with an empty body only while no device is active, and types an ad or a podcast episode as something other than "track"
+track=$(echo "$state_json" | jq -r 'select(.is_playing) | .item | select(.type == "track") | "\(.name) — \([.artists[].name] | join(", "))"')
+
+if [ -z "$track" ]; then
+  exit 0
+fi
+
+cover_url=$(echo "$state_json" | jq -r '.item.album.images[0].url // empty')
+track_url=$(echo "$state_json" | jq -r '.item.external_urls.spotify // empty')
+
+body="$track"
+if [ -n "$track_url" ]; then
+  body="${track_url}"$'\n\n'"${track}"
+fi
+
+if [ -n "$cover_url" ] && curl -fsSL --retry 5 --retry-all-errors "$cover_url" -o "$COVER_FILE"; then
+  notify-send -i "$COVER_FILE" -- "Spotify" "$body"
+else
+  notify-send -- "Spotify" "$body"
+fi

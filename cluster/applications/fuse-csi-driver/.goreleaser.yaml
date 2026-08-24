@@ -1,0 +1,37 @@
+version: 2
+builds:
+  - id: fuser
+    main: bin/fuser/main.go
+    binary: fuser
+    flags:
+      - -trimpath
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+  - id: fuse-placeholder
+    main: bin/fuse-placeholder/main.go
+    binary: fuse-placeholder
+    flags:
+      - -trimpath
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+
+changelog:
+  disable: true
+
+checksum:
+  split: true
+
+archives:
+  - format: binary

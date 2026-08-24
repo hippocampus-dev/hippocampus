@@ -1,0 +1,14 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: mimir-ingest
+  labels:
+    strimzi.io/cluster: mimir-ingest
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  partitions: 4
+  replicas: 1
+  config:
+    retention.ms: 21600000 # 6 hours
+    segment.bytes: 1073741824 # 1 GB

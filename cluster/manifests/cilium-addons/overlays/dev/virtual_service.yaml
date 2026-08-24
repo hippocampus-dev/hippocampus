@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: hubble-ui
+spec:
+  gateways:
+    - hubble-ui
+  hosts:
+    - hubble-ui.minikube.127.0.0.1.nip.io
+    - hubble-ui.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: hubble-ui
+            port:
+              number: 80
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

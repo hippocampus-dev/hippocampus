@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All in example" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" activateToolWindowBeforeRun="false" path="$PROJECT_DIR$/hippocampus-server/example.http">
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,0 +1,58 @@
+apiVersion: skaffold.owasp-zap.kaidotio.github.io/v1
+kind: Scan
+metadata:
+  name: comprehensive-scan-example
+spec:
+  automation:
+    env:
+      contexts:
+        - name: "Default"
+          urls:
+            - http://juice-shop.default.svc.cluster.local:3000
+      failOnError: true
+      failOnWarning: false
+      continueOnFailure: true
+      progressToStdout: true
+    jobs:
+      - type: passiveScan-config
+        parameters:
+          maxAlertsPerRule: "10"
+
+      - type: spider
+        parameters:
+          maxDuration: "15"
+          maxDepth: "10"
+          maxChildren: "20"
+          acceptCookies: "true"
+          handleODataParametersVisited: "true"
+
+      - type: spiderAjax
+        parameters:
+          maxDuration: "10"
+          maxCrawlDepth: "10"
+          browserId: "chrome-headless"
+
+      - type: passiveScan-wait
+        parameters:
+          maxDuration: "15"
+
+      - type: activeScan
+        parameters:
+          maxDuration: "60"
+          maxRuleDurationInMins: "10"
+          defaultPolicy: ""
+          defaultScannerStrength: "HIGH"
+          defaultScannerThreshold: "LOW"
+          injectPluginIdInHeader: "true"
+          handleAntiCSRFTokens: "true"
+
+      - type: delay
+        parameters:
+          time: "5"
+
+      - type: report
+        parameters:
+          template: "sarif-json"
+          reportFile: "/tmp/report.json"
+          reportTitle: "ZAP Security Scan Report"
+          reportDescription: "Comprehensive security scan results for Juice Shop"

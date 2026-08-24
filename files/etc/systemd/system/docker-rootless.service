@@ -1,0 +1,35 @@
+[Unit]
+Requires=network-online.target user@1000.service
+After=network-online.target user@1000.service
+StartLimitBurst=3
+StartLimitIntervalSec=60
+
+[Service]
+Type=notify
+NotifyAccess=all
+Delegate=yes
+KillMode=mixed
+Restart=always
+RestartSec=2
+LimitNOFILE=infinity
+
+User=kai
+Environment=HOME=/home/kai
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=PATH=/usr/local/lib/docker:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# the systemd cgroup driver reaches its manager over dbus, and InaccessiblePaths below leaves runc no route to either bus
+ExecStart=/usr/local/lib/docker/dockerd-rootless.sh --exec-opt native.cgroupdriver=cgroupfs
+
+# Containers resolve -v mounts against this unit's namespace, not the host's
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ReadWritePaths=/run/user/1000 /home/kai/.local/share/docker
+InaccessiblePaths=-/home/kai/.ssh -/home/kai/.secrets -/home/kai/.vault -/home/kai/.gnupg
+InaccessiblePaths=-/etc/shadow -/run/claudex
+InaccessiblePaths=-/run/user/1000/gnupg -/run/user/1000/bus -/run/user/1000/systemd -/run/user/1000/libvirt
+# a read-only mount does not stop a connect() to a socket on it
+InaccessiblePaths=-/run/libvirt -/run/dbus/system_bus_socket -/run/docker.sock -/run/docker -/run/containerd
+
+[Install]
+WantedBy=multi-user.target

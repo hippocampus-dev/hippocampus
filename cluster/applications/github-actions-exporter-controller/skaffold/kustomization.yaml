@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: skaffold-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      variant: skaffold
+
+namespace: skaffold-github-actions-exporter-controller
+
+resources:
+  - ../manifests
+  - namespace.yaml
+
+patches:
+  - path: patches/deployment.yaml
+  # CRD does not support namePrefix
+  - patch: |
+      - op: replace
+        path: /metadata/name
+        value: exporters.skaffold.github-actions-exporter.kaidotio.github.io
+      - op: replace
+        path: /spec/group
+        value: skaffold.github-actions-exporter.kaidotio.github.io
+    target:
+      kind: CustomResourceDefinition
+      name: exporters.github-actions-exporter.kaidotio.github.io
+  - patch: |
+      - op: add
+        path: /rules/0
+        value:
+          apiGroups:
+            - skaffold.github-actions-exporter.kaidotio.github.io
+          resources:
+            - "*"
+          verbs:
+            - "*"
+    target:
+      kind: ClusterRole
+      name: github-actions-exporter-controller

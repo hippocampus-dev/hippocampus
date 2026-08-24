@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "tmux-monitor",
+  "description": "Capability for the tmux monitor window",
+  "windows": ["tmux-monitor"],
+  "permissions": [
+    "core:event:default",
+    "core:window:allow-is-visible",
+    "core:window:allow-set-size",
+    "core:window:allow-start-dragging"
+  ]
+}

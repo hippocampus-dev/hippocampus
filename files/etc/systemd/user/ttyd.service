@@ -1,0 +1,12 @@
+[Unit]
+
+[Service]
+Restart=always
+WorkingDirectory=/opt/hippocampus
+
+# Workaround: libwebsockets 4.5.8-2 has no libsystemd DT_NEEDED; drop once it does
+Environment=LD_PRELOAD=/usr/lib/libsystemd.so.0
+ExecStart=/bin/bash -lc 'exec /usr/bin/ttyd -W -p 1234 -t fontSize=22 env -u LD_PRELOAD tmux new -A -s ttyd'
+
+[Install]
+WantedBy=default.target

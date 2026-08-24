@@ -1,0 +1,30 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mattermost
+spec:
+  gateways:
+    - mattermost
+  hosts:
+    - mattermost.minikube.127.0.0.1.nip.io
+    - mattermost.kaidotio.dev
+  http:
+    # The identity header is only trustworthy on a host the ext-authz filter covers, and a client sets it freely on any other
+    - match:
+        - uri:
+            prefix: /_oauth/
+          authority:
+            exact: mattermost.kaidotio.dev
+      route:
+        - destination:
+            host: mattermost-gitlab-sso-bridge
+            port:
+              number: 8080
+    - route:
+        - destination:
+            host: mattermost
+            port:
+              number: 8065
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

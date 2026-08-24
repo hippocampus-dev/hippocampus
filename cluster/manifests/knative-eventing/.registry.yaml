@@ -1,0 +1,3 @@
+name: knative-eventing
+namespace: knative-eventing
+components: []

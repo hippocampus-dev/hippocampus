@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: e2e-fuse-csi-driver
+  labels:
+    name: e2e-fuse-csi-driver
+    # fuse-csi-driver requires privileged access for /dev/fuse and mount(2)
+    pod-security.kubernetes.io/enforce: privileged

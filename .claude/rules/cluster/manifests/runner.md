@@ -1,0 +1,7 @@
+---
+paths:
+  - "cluster/manifests/runner/**"
+---
+
+* Keep `runnerContainerSpec.isolation: userns` off a `Runner` or `ScaleSet` whose `template.spec.runtimeClassName` names a handler that reports no user namespace support - the controller pins `spec.hostUsers` to false for that value and the kubelet refuses a pod asking for a user namespace from a handler without one, so no runner pod is ever created while the CR and its Deployment both report success; the node lists what each handler supports (`kubectl get node {node} -o jsonpath='{.status.runtimeHandlers}'`), and `kata-qemu` is one that reports it has none, which is why `isolation: privileged` reaches its isolation through the runtime class instead
+* Keep `runnerContainerSpec.isolation: userns` off a `Runner` or `ScaleSet` until a pod created in this cluster comes back still carrying the `spec.hostUsers` it was given (`kubectl get pod {pod} -o jsonpath='{.spec.hostUsers}'`) - the API server drops that field instead of rejecting it wherever its feature gate is off, which leaves the container holding `SYS_ADMIN` alone and gets the pod denied by `pods.validating.kaidotio.github.io` in `cluster/manifests/validating-admission/base/validating_admission_policy.yaml`, so no runner pod is ever created while the CR and its Deployment both report success (`cluster/applications/github-actions-runner-controller/README.md`'s `### Rootless Runner` names what each gate governs)

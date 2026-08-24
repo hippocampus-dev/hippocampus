@@ -1,0 +1,12 @@
+/.mitmproxy
+/target
+/node_modules
+__pycache__
+*.egg-info
+.env.keys
+**/.claude/settings.local.json
+/.stage-*
+**/claude-worktree-*
+CLAUDE.local.md
+
+/config/master.key

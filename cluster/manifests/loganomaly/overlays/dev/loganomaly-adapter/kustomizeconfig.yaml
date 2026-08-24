@@ -1,0 +1,12 @@
+nameReference:
+  - version: v1
+    kind: Secret
+    fieldSpecs:
+      - path: spec/template/spec/containers/envFrom/secretRef/name
+        group: serving.knative.dev
+        version: v1
+        kind: Service
+      - path: spec/template/spec/containers/env/valueFrom/secretKeyRef/name
+        group: serving.knative.dev
+        version: v1
+        kind: Service

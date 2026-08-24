@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: token-request-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: token-request-server
+subjects:
+  - kind: ServiceAccount
+    name: token-request-server

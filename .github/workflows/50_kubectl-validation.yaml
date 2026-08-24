@@ -1,0 +1,78 @@
+name: kubectl-validation
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - cluster/manifests/**
+      - cluster/applications/**
+      - files/home/kai/kustomize/**
+      - .github/workflows/50_kubectl-validation.yaml
+      - "!**/*.md"
+      - "!cluster/applications/**/e2e/**"
+      - "!cluster/applications/**/skaffold/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller, standard]
+    env:
+      XDG_CONFIG_HOME: ${{ github.workspace }}/files/home/kai
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+          sparse-checkout: |
+            cluster/applications/
+            cluster/manifests/
+            files/home/kai/kustomize/
+      - run: git config --global submodule.recurse false
+      - run: |
+          set -eo pipefail
+          : > "${{ runner.temp }}/changed"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            git diff HEAD^1 HEAD --name-only --no-renames > "${{ runner.temp }}/changed"
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ -n "$(awk '/^\.github\/workflows\/50_kubectl-validation\.yaml$/' "${{ runner.temp }}/changed")" ]; then
+            find cluster/manifests -type d -path "*/overlays/dev" | sort -u > "${{ runner.temp }}/targets"
+          else
+            {
+              awk '/^cluster\/manifests\/.*\/overlays\/dev\// { sub(/\/overlays\/dev\/.*/, "/overlays/dev"); print }' "${{ runner.temp }}/changed"
+              awk -F/ 'NF > 4 && $1 == "cluster" && $2 == "manifests" && $3 != "utilities" && $4 != "overlays" { print $1 "/" $2 "/" $3 "/overlays/dev" }' "${{ runner.temp }}/changed"
+              awk '/^cluster\/applications\// { split($0, segments, "/"); print "applications/" segments[3]; next } /^cluster\/manifests\/utilities\// { split($0, segments, "/"); print "utilities/" segments[4] }' "${{ runner.temp }}/changed" | sort -u | while IFS= read -r reference; do
+                find cluster/manifests -name kustomization.yaml | xargs -r awk -v reference="$reference" '$0 ~ (reference "(/|$)") { print FILENAME }'
+              done | sed -E 's#^(cluster/manifests/[^/]+)/.*#\1/overlays/dev#'
+              if [ -n "$(awk '/^files\/home\/kai\/kustomize\//' "${{ runner.temp }}/changed")" ]; then
+                find cluster/manifests -name "*.yaml" | xargs -r awk '/kustomize\.kaidotio\.github\.io/ { print FILENAME }' | sed -E 's#(/overlays/dev)/.*#\1#'
+              fi
+            } | sort -u | while IFS= read -r candidate; do
+              if [ -d "$candidate" ]; then
+                echo "$candidate"
+              else
+                echo "dropped $candidate: not a directory" >&2
+              fi
+            done > "${{ runner.temp }}/targets"
+          fi
+          if [ -s "${{ runner.temp }}/targets" ]; then
+            cat "${{ runner.temp }}/targets"
+          else
+            echo "no overlays affected by this diff" >&2
+          fi
+          while IFS= read -r d; do
+            if ! kustomize build --enable-alpha-plugins "$d" | kubectl apply --dry-run=server -f -; then
+              exit 1
+            fi
+          done < "${{ runner.temp }}/targets"

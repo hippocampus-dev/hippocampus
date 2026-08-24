@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-crud
+  labels:
+    name: kube-crud
+    pod-security.kubernetes.io/enforce: restricted
