@@ -1,0 +1,65 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  name: assignedjobs.github-actions-runner.kaidotio.github.io
+spec:
+  group: github-actions-runner.kaidotio.github.io
+  names:
+    kind: AssignedJob
+    listKind: AssignedJobList
+    plural: assignedjobs
+    singular: assignedjob
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AssignedJob is the schema for the assignedjobs API, and is named
+          after the runner the job was assigned to
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              AssignedJobSpec defines the desired state of AssignedJob
+              The listener fills the job identity in when GitHub reports the job started, and the reconciler marks the interruption when the runner's pod is terminated, either of which may arrive first
+            properties:
+              interrupted:
+                description: Interrupted marks that the runner container was terminated
+                  by SIGTERM while it was running the job
+                type: boolean
+              owner:
+                description: Owner specifies the GitHub organization or user owning
+                  the repository the job belongs to, which an organization-level scale
+                  set takes from the job rather than from the ScaleSet
+                type: string
+              repo:
+                description: Repo specifies the repository the job belongs to
+                type: string
+              workflowRunID:
+                description: WorkflowRunID is the run holding the job, which the cancel
+                  and the rerun are addressed to
+                format: int64
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true

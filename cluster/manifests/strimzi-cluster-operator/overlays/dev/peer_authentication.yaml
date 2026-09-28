@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: strimzi-cluster-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: strimzi-cluster-operator
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

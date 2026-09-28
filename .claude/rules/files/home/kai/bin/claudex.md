@@ -1,0 +1,8 @@
+---
+paths:
+  - "files/home/kai/bin/claudex"
+---
+
+* Create on the host, ahead of `systemd-run`, every path this script names that the host does not already provide - a `BindPaths=` needs its destination as much as its source, and a path on `/run/user/$(id -u)` has to be created at each launch rather than placed by `setup.sh`, since logind rebuilds that tmpfs at every login; leaving one out of the `for path in` list costs its grant with nothing reported anywhere, because the list's `[ -e "${path#*=}" ]` guard drops a missing path while the unit still starts clean, while a `BindPaths=` written as its own `-p` fails the unit outright
+* Put a path that another unit has to deny somewhere that unit can already see when it starts - `files/etc/systemd/system/docker-rootless.service` grants containers `/run/user/1000` and denies individual paths under it, but `InaccessiblePaths=` is read once as the namespace is built and a `-` prefixed entry naming a path that is not there yet is skipped for the life of that unit, so a socket directory this script creates at launch is never covered there; `files/etc/tmpfiles.d/claudex.conf` puts the sockets under `/run/claudex/` instead, which `systemd-tmpfiles-setup` creates long before dockerd and the deny list already carries
+* Re-check the unusable commands `files/home/kai/.config/claudex/config/CLAUDE.important.md` names whenever a change here alters what the sandbox hides - `TemporaryFileSystem=/run/systemd` is what leaves `systemctl` unable to operate while the rebound `/run/systemd/journal` keeps `journalctl` reading, and nothing reports that list going stale, so the block is rediscovered by running the command and reading its error once per session

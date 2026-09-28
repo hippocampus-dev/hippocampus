@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: seata
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: seata
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9091":
+      mode: PERMISSIVE # raft

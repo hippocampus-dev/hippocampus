@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: tls-intercept-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: tls-intercept-proxy
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - cortex-api

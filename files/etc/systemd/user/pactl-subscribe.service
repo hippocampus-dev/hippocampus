@@ -1,0 +1,14 @@
+[Unit]
+# PipeWire
+Requires=pipewire-pulse.service
+After=pipewire-pulse.service
+#Requires=pulseaudio.service
+#After=pulseaudio.service
+
+[Service]
+Restart=always
+
+ExecStart=/usr/local/bin/pactl-subscribe.sh
+
+[Install]
+WantedBy=default.target

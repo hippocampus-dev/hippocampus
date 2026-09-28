@@ -1,0 +1,9 @@
+nameReference:
+  - group: ""
+    version: v1
+    kind: ConfigMap
+    fieldSpecs:
+      - path: spec/configMapRef/name
+        group: grafana-manifest.kaidotio.github.io
+        version: v1
+        kind: Dashboard

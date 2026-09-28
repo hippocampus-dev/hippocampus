@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+REPOSITORY=hippocampus-dev/hippocampus
+
+function usage() {
+    cat <<EOS
+Usage:
+   github-local-self-hosted-runner.sh <index>
+
+Register a self-hosted runner as local-runner-<host>-<user>-<index> and keep it
+taking one job at a time. That name is stable across reboots, so a registration
+a shutdown left behind is replaced on the next start instead of accumulating.
+EOS
+}
+
+args=()
+while (( $# )); do
+    case "$1" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*|--*)
+            echo "Unsupported flag $1" 1>&2
+            exit 1
+            ;;
+        *)
+            args+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [ "${#args[@]}" -eq 0 ]; then
+    usage
+    exit 1
+fi
+
+t=$(mktemp -d)
+
+cd "$t"
+
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo "Please declare required environment variables: GITHUB_TOKEN" 1>&2
+    exit 1
+fi
+
+version=$(curl -fsSL --retry 5 --retry-all-errors -H "Accept: application/vnd.github+json" -H @<(printf 'Authorization: Bearer %s\n' "$GITHUB_TOKEN") -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/actions/runner/releases/latest | jq -re '.tag_name' | sed 's/^v//')
+
+curl -fsSL --retry 5 --retry-all-errors "https://github.com/actions/runner/releases/download/v${version}/actions-runner-linux-x64-${version}.tar.gz" -o actions-runner-linux-x64.tar.gz
+tar xzf actions-runner-linux-x64.tar.gz
+rm actions-runner-linux-x64.tar.gz
+
+ENV_OVERRIDE_C=$(mktemp --suffix=.c)
+ENV_OVERRIDE_SO=$(mktemp --suffix=.so)
+
+cat <<EOF > "$ENV_OVERRIDE_C"
+#define _GNU_SOURCE
+#include <string.h>
+#include <dlfcn.h>
+
+char *getenv(const char *name) {
+    char *(*original_getenv)(const char *) = (char *(*)(const char *))dlsym(RTLD_NEXT, "getenv");
+
+    if (strcmp(name, "RAILS_MASTER_KEY") == 0) return "";
+
+    return original_getenv(name);
+}
+EOF
+
+gcc -shared -fPIC -o "$ENV_OVERRIDE_SO" "$ENV_OVERRIDE_C" -ldl
+
+cleanup() {
+    if [ -f .runner ]; then
+        token=$(curl -fsSL --retry 5 --retry-all-errors -X POST -H "Accept: application/vnd.github+json" -H @<(printf 'Authorization: Bearer %s\n' "$GITHUB_TOKEN") -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/${REPOSITORY}/actions/runners/remove-token" | jq -re '.token')
+
+        ./config.sh remove --token "$token"
+    fi
+    rm -f "$ENV_OVERRIDE_C"
+    rm -f "$ENV_OVERRIDE_SO"
+    exit 0
+}
+
+trap cleanup EXIT
+
+while true; do
+    token=$(curl -fsSL --retry 5 --retry-all-errors -X POST -H "Accept: application/vnd.github+json" -H @<(printf 'Authorization: Bearer %s\n' "$GITHUB_TOKEN") -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/${REPOSITORY}/actions/runners/registration-token" | jq -re '.token')
+
+    work=$(mktemp -d)
+
+    ./config.sh --url "https://github.com/${REPOSITORY}" --token "$token" --name "local-runner-${HOSTNAME}-${USER}-${args[0]}" --work "$work" --labels self-hosted,Linux,X64,local --ephemeral --replace --unattended
+
+    LD_PRELOAD=$ENV_OVERRIDE_SO ./run.sh || true
+
+    rm -rf "$work"
+done

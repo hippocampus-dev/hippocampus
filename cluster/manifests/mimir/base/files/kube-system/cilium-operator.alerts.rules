@@ -1,0 +1,102 @@
+groups:
+  - name: pods
+    rules:
+      - alert: CPUThrottled at cilium in kube-system
+        annotations:
+          message: |
+            CPU of {{ $labels.pod }} {{ $labels.container }} container is throttling {{ $value }} seconds / 5m in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(rate(container_cpu_cfs_throttled_seconds_total{namespace="kube-system",container!=""}[5m])) by (namespace,pod,container) * on(namespace,pod) group_left(workload)     mixin_pod_workload{namespace="kube-system",workload="cilium"} > 0.1
+        for: 10m
+        labels:
+          severity: warning
+      - alert: MemoryFailed at cilium in kube-system
+        annotations:
+          message: |
+            Memory of {{ $labels.pod }} hits limits {{ printf "%.2f" $value }} times / 5m in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(increase(container_memory_failcnt{namespace="kube-system"}[5m])) by (namespace,pod) * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"} > 0
+        for: 1m
+        labels:
+          severity: warning
+      - alert: NetworkReceiveDropped at cilium in kube-system
+        annotations:
+          message: |
+            Network receive packet of {{ $labels.pod }} {{ $labels.container }} container dropped {{ printf "%.2f" $value }} times / 5m in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(increase(container_network_receive_packets_dropped_total{namespace="kube-system"}[5m])) by (namespace,pod,container) * on(namespace,pod) group_left(workload)     mixin_pod_workload{namespace="kube-system",workload="cilium"} > 0
+        for: 5m
+        labels:
+          severity: warning
+      - alert: NetworkTransmitDropped at cilium in kube-system
+        annotations:
+          message: |
+            Network transmit packet of {{ $labels.pod }} {{ $labels.container }} container dropped {{ printf "%.2f" $value }} times / 5m in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(increase(container_network_transmit_packets_dropped_total{namespace="kube-system"}[5m])) by (namespace,pod,container) * on(namespace,pod) group_left(workload)     mixin_pod_workload{namespace="kube-system",workload="cilium"} > 0
+        for: 5m
+        labels:
+          severity: warning
+      - alert: PodStatusIsWaiting at cilium in kube-system
+        annotations:
+          message: |
+            {{ $labels.pod }} {{ $labels.container }} container is now {{ $labels.reason }} in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(kube_pod_container_status_waiting_reason{namespace="kube-system"}) by (namespace,pod,container,reason) * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"} > 0
+        for: 10m
+        labels:
+          severity: warning
+      - alert: PodContainerStatusRestartsTotal at cilium in kube-system
+        annotations:
+          message: |
+            {{ $labels.pod }} {{ $labels.container }} container is restarting for {{ $labels.reason }} {{ printf "%.2f" $value }} times / 5m in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(increase(kube_pod_container_status_restarts_total{namespace="kube-system"}[5m])) by (namespace,pod,container) * on(namespace,pod,container) group_left(reason) (sum    (kube_pod_container_status_last_terminated_reason{namespace="kube-system"}) by (namespace,pod,container,reason) > 0) * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system", workload="cilium"} > 0
+        for: 10m
+        labels:
+          severity: warning
+      - alert: PodStatusIsAbnormal at cilium in kube-system
+        annotations:
+          message: |
+            {{ $labels.pod }} {{ $labels.container }} container is now {{ $labels.phase }} in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(kube_pod_status_phase{namespace="kube-system",phase!~"Running|Succeeded"}) by (namespace,pod) * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"} - on(pod) sum(label_replace(kube_events_total{reason="Evicted"},"pod","$1","name","(.*)")) by (pod) > 0
+        for: 5m
+        labels:
+          severity: warning
+      - alert: PodStatusIsNotReady at cilium in kube-system
+        annotations:
+          message: |
+            {{ $labels.workload }} has {{ $value | humanizePercentage }}% NotReady pod in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(kube_pod_status_ready{namespace="kube-system",condition="false"} * on(namespace,pod) group_left(workload) kube_pod_status_phase{namespace="kube-system",phase="Running"} * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"}) by (namespace,workload) / sum (kube_pod_status_ready{namespace="kube-system"} * on(namespace,pod) group_left(workload) kube_pod_status_phase{namespace="kube-system",phase="Running"} * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"}) by (namespace,workload) > 0
+        for: 10m
+        labels:
+          severity: warning
+      - alert: PodStatusIsNotReadyAll at cilium in kube-system
+        annotations:
+          message: |
+            {{ $labels.workload }} all pods is NotReady in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(kube_pod_status_ready{namespace="kube-system",condition="true"} * on(namespace,pod) group_left(workload) kube_pod_status_phase{namespace="kube-system",phase="Running"} * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"}) by (namespace,workload) == 0
+        for: 1m
+        labels:
+          severity: critical
+      - alert: WasteCPURequests at cilium in kube-system
+        annotations:
+          message: |
+            requests.cpu of {{ $labels.pod }} {{ $labels.container }} container too much extra cpu quota in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(sum_over_time((sum(rate(container_cpu_usage_seconds_total{namespace="kube-system",container!=""}[5m])) by (namespace,pod,container) * on(namespace,pod) group_left(workload)     mixin_pod_workload{namespace="kube-system",workload="cilium"})[24h:10m])) by (namespace,pod,container) / sum(sum_over_time((kube_pod_container_resource_requests_cpu_cores{namespace="kube-system"} *     on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"})[24h:10m])) by (namespace,pod,container) < 0.1 and on() avg (kube_pod_container_resource_requests_cpu_cores{namespace="kube-system"} * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"}) > 0.1
+        for: 30m
+        labels:
+          severity: warning
+      - alert: WasteCPURequests at cilium in kube-system
+        annotations:
+          message: |
+            requests.memory of {{ $labels.pod }} {{ $labels.container }} container too much extra memory in {{ $labels.namespace }} namespace.
+        expr: |
+          sum(sum_over_time((container_memory_usage_bytes{container!=""} * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"})[24h:10m])) by (namespace,pod, container) / sum(sum_over_time((kube_pod_container_resource_requests_memory_bytes * on(namespace,pod) group_left(workload) mixin_pod_workload{namespace="kube-system",workload="cilium"})[24h:10m])) by (namespace,pod,container) < 0.1
+        for: 30m
+        labels:
+          severity: warning

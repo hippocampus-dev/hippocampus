@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gateway-proxy
+spec:
+  issuerRef:
+    name: skaffold-gateway-proxy-selfsigned
+  dnsNames:
+    - skaffold-gateway-proxy.skaffold-gateway-proxy.svc
+    - skaffold-gateway-proxy.skaffold-gateway-proxy.svc.cluster.local

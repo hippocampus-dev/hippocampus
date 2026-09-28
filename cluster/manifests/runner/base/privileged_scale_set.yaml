@@ -1,0 +1,16 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: ScaleSet
+metadata:
+  name: privileged-scale-set
+spec:
+  image: ghcr.io/hippocampus-dev/hippocampus/privileged-runner
+  owner: kaidotio
+  repo: hippocampus
+  labels:
+    - privileged
+  minRunners: 0
+  maxRunners: 1
+  runnerContainerSpec:
+    env:
+      - name: ACTIONS_RUNNER_HOOK_JOB_STARTED
+        value: /usr/local/bin/start-dockerd.sh

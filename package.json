@@ -1,0 +1,16 @@
+{
+  "name": "hippocampus",
+  "private": true,
+  "scripts": {
+    "premarp:dev": "bash bin/strip-slide-image-metadata.sh slides/images",
+    "marp:dev": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/[0-9]*.md --watch",
+    "premarp:build": "bash bin/strip-slide-image-metadata.sh slides/images",
+    "marp:build": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/[0-9]*.md",
+    "premarp:dist": "bash bin/strip-slide-image-metadata.sh slides/images",
+    "marp:dist": "marp --html --bespoke.osc --bespoke.progress --bespoke.transition --allow-local-files slides/[0-9]*.md && bash bin/inline-slide-images.sh slides/[0-9]*.html"
+  },
+  "devDependencies": {
+    "@types/k6": "^0.51.0",
+    "@marp-team/marp-cli": "^3.4.0"
+  }
+}

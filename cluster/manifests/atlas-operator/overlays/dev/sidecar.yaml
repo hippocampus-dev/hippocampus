@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: atlas-operator
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: atlas-operator
+      app.kubernetes.io/component: controller-manager
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

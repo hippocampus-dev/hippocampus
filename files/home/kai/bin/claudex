@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+UNIT_NAME="claudex-$$"
+
+# The agent reaches the host through the armyknife brokers registered as MCP servers rather than through the sockets they front.
+if [ -n "$TMUX_PANE" ]; then
+  tmux setw -t "$TMUX_PANE" monitor-silence 3 || true
+fi
+
+WORKING_DIRECTORY=$(pwd)
+
+args=()
+LOCAL_MEMORY_FILE=""
+while (( $# )); do
+  case "$1" in
+    --local-memory-file)
+      LOCAL_MEMORY_FILE="$2"
+      shift 2
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+cleanup() {
+  if [ -n "$TMUX_PANE" ]; then
+    tmux setw -t "$TMUX_PANE" monitor-silence 0 2>/dev/null || true
+  fi
+  if [ -n "$LOCAL_MEMORY_FILE" ]; then
+    rm -f ./CLAUDE.local.md
+  fi
+}
+
+trap cleanup EXIT
+
+if [ -n "$LOCAL_MEMORY_FILE" ] && [ -f "$LOCAL_MEMORY_FILE" ]; then
+  cp "$LOCAL_MEMORY_FILE" ./CLAUDE.local.md
+fi
+
+# Claude Code binds $XDG_RUNTIME_DIR/cc-socks/<pid>.sock for cross-session messaging
+mkdir -p -m 700 "/run/user/$(id -u)/cc-socks"
+
+paths=()
+for path in \
+  "ReadWritePaths=$WORKING_DIRECTORY" \
+  "ReadWritePaths=${HOME}/.asdf" \
+  "ReadWritePaths=${HOME}/.npm" \
+  "ReadWritePaths=${HOME}/.cargo" \
+  "ReadWritePaths=${HOME}/.rustup" \
+  "ReadWritePaths=${HOME}/.gradle" \
+  "ReadWritePaths=${HOME}/.android" \
+  "ReadWritePaths=${HOME}/.cache" \
+  "ReadWritePaths=${HOME}/.local/bin" \
+  "ReadWritePaths=${HOME}/.local/share" \
+  "ReadWritePaths=${HOME}/.local/state" \
+  "ReadWritePaths=${HOME}/.config/claudex" \
+  "ReadWritePaths=${HOME}/.config/.wrangler" \
+  "ReadWritePaths=${HOME}/.codex" \
+  "ReadWritePaths=${HOME}/.gemini" \
+  "ReadWritePaths=${HOME}/.docker/buildx" \
+  "ReadWritePaths=${HOME}/.kube" \
+  "ReadWritePaths=${HOME}/.skaffold" \
+  "ReadWritePaths=${HOME}/brain/report" \
+  "ReadWritePaths=/opt/hippocampus/files/${HOME}/.config/claudex/config/settings.json" \
+  "ReadWritePaths=/opt/hippocampus/target" \
+  "InaccessiblePaths=${HOME}/.secrets" \
+  "InaccessiblePaths=${HOME}/.vault" \
+  "InaccessiblePaths=${HOME}/.ssh" \
+  "InaccessiblePaths=${HOME}/.gnupg" \
+  "InaccessiblePaths=${HOME}/.config/gcloud" \
+  "InaccessiblePaths=${HOME}/.config/hippocampus" \
+  "InaccessiblePaths=/etc/passwd" \
+  "InaccessiblePaths=/etc/shadow" \
+  "InaccessiblePaths=/run/user/$(id -u)/libvirt" \
+  "InaccessiblePaths=/run/user/$(id -u)/bus" \
+  "InaccessiblePaths=/run/user/$(id -u)/systemd" \
+  "InaccessiblePaths=/run/user/$(id -u)/gnupg" \
+  "InaccessiblePaths=/run/user/$(id -u)/sslkey.log" \
+  "InaccessiblePaths=/run/user/$(id -u)/pipewire-0" \
+  "InaccessiblePaths=/run/user/$(id -u)/pipewire-0-manager" \
+  "InaccessiblePaths=/run/user/$(id -u)/pulse" \
+  "InaccessiblePaths=/run/user/$(id -u)/at-spi" \
+  "InaccessiblePaths=/run/user/$(id -u)/p11-kit" \
+  "InaccessiblePaths=/run/dbus/system_bus_socket" \
+  "InaccessiblePaths=/run/libvirt" \
+  "InaccessiblePaths=/run/xrdp" \
+  "InaccessiblePaths=/run/polkit" \
+  "InaccessiblePaths=/run/gssproxy.sock" \
+  "InaccessiblePaths=/run/rpcbind.sock" \
+  "InaccessiblePaths=/run/docker.sock" \
+  "InaccessiblePaths=/run/docker" \
+  "InaccessiblePaths=/run/containerd" \
+; do
+  [ -e "${path#*=}" ] && paths+=(-p "$path")
+done
+
+for target in "/run/user/$(id -u)"/jb.station.*.sock "/run/user/$(id -u)"/jetbrainsd-*; do
+  [ -e "$target" ] && paths+=(-p "InaccessiblePaths=$target")
+done
+
+# Blank /run/systemd to hide its enumeration surfaces (unit varlinks + userdb user list); rebind only resolve (DNS) and journal (/dev/log)
+paths+=(-p "TemporaryFileSystem=/run/systemd")
+for source in /run/systemd/resolve /run/systemd/journal; do
+  [ -d "$source" ] && paths+=(-p "BindReadOnlyPaths=$source")
+done
+
+for device in /dev/nvidia[0-9]* /dev/nvidiactl /dev/nvidia-uvm; do
+  [ -e "$device" ] && paths+=(-p "BindPaths=$device")
+done
+
+systemd-run \
+  --unit="$UNIT_NAME" \
+  --user \
+  --pipe \
+  --wait \
+  --collect \
+  --same-dir \
+  -E CLAUDE_CODE_OAUTH_TOKEN="" \
+  -E DISABLE_AUTOUPDATER="1" \
+  -E CLAUDE_CONFIG_DIR="${HOME}/.config/claudex/config" \
+  -E PATH="$PATH" \
+  -E GOPATH="/tmp" \
+  -E DOCKER_HOST="unix:///run/user/$(id -u)/docker.sock" \
+  -E TMUX_PANE="$TMUX_PANE" \
+  -E BROWSER="${HOME}/bin/tmux-xdg-open" \
+  -E EDITOR="${HOME}/bin/tmux-idea" \
+  -E VISUAL="${HOME}/bin/tmux-idea" \
+  "${paths[@]}" \
+  `#-p AppArmorProfile=claude` \
+  -p ProtectProc=invisible \
+  -p ProcSubset=pid \
+  -p NoNewPrivileges=yes \
+  -p ProtectSystem=strict \
+  -p ProtectHome=read-only \
+  -p ReadOnlyDirectories="/opt/hippocampus/.git" \
+  -p PrivateTmp=yes \
+  -p PrivateDevices=yes \
+  -p PrivateNetwork=no \
+  -p PrivateUsers=yes \
+  -p PrivateMounts=yes \
+  -p ProtectKernelTunables=yes \
+  -p ProtectKernelModules=yes \
+  -p ProtectKernelLogs=yes \
+  -p ProtectControlGroups=private \
+  -p ProtectHostname=yes \
+  -p ProtectClock=yes \
+  -p BindPaths="/run/claudex/pts:/dev/pts" \
+  -p BindPaths="/run/claudex/pts/ptmx:/dev/ptmx" \
+  `#files/home/kai/bin/hacklaudex runs claude outside this sandbox, so its sockets must not share a directory with the sandboxed ones` \
+  -p BindPaths="/run/claudex/socks:/run/user/$(id -u)/cc-socks" \
+  -p PrivateIPC=yes \
+  -p RestrictNamespaces=yes \
+  -p RestrictRealtime=yes \
+  -p RestrictSUIDSGID=yes \
+  -p LockPersonality=yes \
+  -p MemoryDenyWriteExecute=no \
+  -p SystemCallArchitectures=native \
+  -p SystemCallFilter="@system-service" \
+  -p SystemCallFilter="~@privileged @debug" \
+  -p SystemCallErrorNumber=EPERM \
+  -p RestrictAddressFamilies="AF_UNIX AF_INET AF_INET6 AF_VSOCK" \
+  -p CapabilityBoundingSet="" \
+  -p AmbientCapabilities="" \
+  -p UMask=0077 \
+  -p CoredumpFilter=0 \
+  -p KeyringMode=private \
+  -p NotifyAccess=none \
+  -p UnsetEnvironment="DBUS_SESSION_BUS_ADDRESS DBUS_SYSTEM_BUS_ADDRESS NOTIFY_SOCKET" \
+  claude "${args[@]}"

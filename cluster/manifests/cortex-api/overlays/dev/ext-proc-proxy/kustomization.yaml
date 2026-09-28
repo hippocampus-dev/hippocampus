@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: cortex-api-
+
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/name: cortex-api
+    variant: utilities
+
+commonAnnotations:
+  argocd.argoproj.io/sync-wave: "-2"
+
+resources:
+- ../../../../utilities/ext-proc-proxy
+- authorization_policy.yaml
+- envoy_filter.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+images:
+- digest: sha256:6c55997aa634b0716c6d5a73a4f406806588afcb25856248f58abe9847161845
+  name: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher
+  newName: ghcr.io/hippocampus-dev/hippocampus/envoy-request-hasher

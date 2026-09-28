@@ -1,0 +1,16 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: ext-proc-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: ext-proc-proxy
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - cortex-api
+            principals:
+              - cluster.local/ns/cortex-api/sa/cortex-api-tls-intercept-proxy

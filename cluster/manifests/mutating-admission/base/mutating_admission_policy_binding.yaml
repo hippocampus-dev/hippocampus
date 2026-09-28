@@ -1,0 +1,13 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: pods.mutating.kaidotio.github.io
+spec:
+  policyName: pods.mutating.kaidotio.github.io
+  matchResources:
+    objectSelector:
+      matchExpressions:
+        - key: planetscale.com/component
+          operator: NotIn
+          values:
+            - vttablet # VitessShard reconciles this Pod directly and loops a rolling update against this injected env var

@@ -1,0 +1,6 @@
+resources:
+  - ../../base
+  - namespace.yaml
+namespace: fuse-csi-driver
+patches:
+  - path: patches/daemon_set.yaml

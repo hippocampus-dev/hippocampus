@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tls-intercept-proxy
+spec:
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/component: tls-intercept-proxy
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      serviceAccountName: tls-intercept-proxy
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              <<: *labels
+          matchLabelKeys:
+            - pod-template-hash
+      containers:
+        - name: tls-intercept-proxy
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/tls-intercept-proxy
+          imagePullPolicy: IfNotPresent
+          args:
+            - --certificate-authority-file=/var/certs/tls.crt
+            - --certificate-authority-private-key-file=/var/certs/tls.key
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - name: tcp-proxy
+              containerPort: 3128
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: certs
+              mountPath: /var/certs
+              readOnly: true
+      volumes:
+        - name: certs
+          secret:
+            secretName: tls-intercept-proxy

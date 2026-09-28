@@ -1,0 +1,21 @@
+nameReference:
+  - group: ""
+    version: v1
+    kind: Secret
+    fieldSpecs:
+      - path: spec/tokenSecretKeyRef/name
+        group: skaffold.github-actions-runner.kaidotio.github.io
+        version: v1
+        kind: Runner
+      - path: spec/template/spec/volumes/secret/secretName
+        group: skaffold.github-actions-runner.kaidotio.github.io
+        version: v1
+        kind: Runner
+      - path: spec/tokenSecretKeyRef/name
+        group: skaffold.github-actions-runner.kaidotio.github.io
+        version: v1
+        kind: ScaleSet
+      - path: spec/template/spec/volumes/secret/secretName
+        group: skaffold.github-actions-runner.kaidotio.github.io
+        version: v1
+        kind: ScaleSet

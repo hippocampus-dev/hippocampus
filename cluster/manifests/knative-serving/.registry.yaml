@@ -1,0 +1,3 @@
+name: knative-serving
+namespace: knative-serving
+components: []
