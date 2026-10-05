@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: vault
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: vault
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+        - default/kubernetes.default.svc.cluster.local
+        - default/etcd.default.svc.cluster.local

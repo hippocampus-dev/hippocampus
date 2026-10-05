@@ -1,0 +1,67 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: elasticsearch-master
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: master
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: elasticsearch-data
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: data
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: elasticsearch-ingest
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: ingest
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: elasticsearch-coordinating
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      role: coordinating
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

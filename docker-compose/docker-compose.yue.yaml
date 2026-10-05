@@ -1,0 +1,27 @@
+services:
+  yue:
+    profiles:
+      - yue
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: yue
+    develop:
+      watch:
+        - action: rebuild
+          path: yue/Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - DOWNLOAD_MODELS=YuE-s1-7B-anneal-en-cot-5.0bpw,YuE-s1-7B-anneal-jp-kr-cot-5.0bpw,YuE-s1-7B-anneal-jp-kr-icl-5.0bpw,YuE-s2-1B-general-exl2-5.0bpw
+    volumes:
+      - type: volume
+        source: yue-models
+        target: /workspace/models
+    networks:
+      - default

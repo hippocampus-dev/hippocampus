@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: endpoint-broadcaster
+spec:
+  maxUnavailable: 1

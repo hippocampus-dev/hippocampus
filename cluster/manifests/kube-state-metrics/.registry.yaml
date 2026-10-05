@@ -1,0 +1,135 @@
+name: kube-state-metrics
+namespace: kube-system
+components:
+  - name: kube-state-metrics-a
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: a
+      app.kubernetes.io/name: kube-state-metrics
+    logs:
+      grouping: kubernetes.kube-system.kube-state-metrics-a
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.kube-system.kube-state-metrics-a%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=kube-system&var-workload_type=statefulset&var-workload=kube-state-metrics-a
+      labelSets:
+        - labels:
+            destination_service_name: kube-state-metrics-a
+            destination_service_namespace: kube-system
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: kube-state-metrics-a
+            source_workload_namespace: kube-system
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: kube-system
+            workload: kube-state-metrics-a
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: a
+            app_kubernetes_io_name: kube-state-metrics
+            namespace: kube-system
+  - name: kube-state-metrics-b
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: b
+      app.kubernetes.io/name: kube-state-metrics
+    logs:
+      grouping: kubernetes.kube-system.kube-state-metrics-b
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.kube-system.kube-state-metrics-b%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=kube-system&var-workload_type=statefulset&var-workload=kube-state-metrics-b
+      labelSets:
+        - labels:
+            destination_service_name: kube-state-metrics-b
+            destination_service_namespace: kube-system
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: kube-state-metrics-b
+            source_workload_namespace: kube-system
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: kube-system
+            workload: kube-state-metrics-b
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: b
+            app_kubernetes_io_name: kube-state-metrics
+            namespace: kube-system
+  - name: kube-state-metrics-pods
+    workloadType: daemonset
+    labels:
+      app.kubernetes.io/component: pods
+      app.kubernetes.io/name: kube-state-metrics
+    logs:
+      grouping: kubernetes.kube-system.kube-state-metrics-pods
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.kube-system.kube-state-metrics-pods%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=kube-system&var-workload_type=daemonset&var-workload=kube-state-metrics-pods
+      labelSets:
+        - labels:
+            destination_service_name: kube-state-metrics-pods
+            destination_service_namespace: kube-system
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: kube-state-metrics-pods
+            source_workload_namespace: kube-system
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: kube-system
+            workload: kube-state-metrics-pods
+            workload_type: daemonset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: pods
+            app_kubernetes_io_name: kube-state-metrics
+            namespace: kube-system

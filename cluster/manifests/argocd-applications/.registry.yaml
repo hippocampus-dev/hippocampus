@@ -1,0 +1,3 @@
+name: argocd-applications
+namespace: argocd
+components: []

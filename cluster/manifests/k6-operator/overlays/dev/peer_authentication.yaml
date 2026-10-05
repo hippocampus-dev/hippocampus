@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: k6-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k6-operator
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

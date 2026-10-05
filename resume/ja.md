@@ -1,0 +1,70 @@
+# Kai Aihara
+
+| Role | Location |
+|---|---|
+| ソフトウェアエンジニア | Tokyo, Japan |
+
+## 略歴
+
+2015年4月に新卒で株式会社LIFULLへ入社。
+
+Platform Engineering, Site Reliability Engineering領域でIndividual Contributorとして活動する傍ら、唯一のシニアプリンシパルエンジニアとして技術戦略の立案や全社のシステムアーキテクト・PSIRTも務める。
+
+2018年にKubernetesベースの内製PaaSのチームを立ち上げ、現在に至る。
+
+## 職務経歴
+
+### 株式会社LIFULL
+
+| Role | Location | Period |
+|---|---|---|
+| シニアプリンシパルエンジニア | Tokyo, Japan | Apr. 2015 - Now |
+
+コーポレートメッセージである「あらゆるLIFEを、FULLに。」実現にスケーラブルに影響力を発揮すべく、一貫してPlatform Engineering領域に携わってきました。
+
+2015年の新卒入社直後からMicroservices化に伴うAWS移行のチームにアサインされ、多くのWebサーバ・データストアの無停止での移行、事業の中核を成す全文検索エンジンであるSolrのアーキテクチャ刷新を歴任。
+
+その中でMicroservices化による車輪の再発明を問題視し、かねてより趣味で開発していたKubernetesベースのPaaSの採用を進言して2018年にチーム立ち上げ、現在に至るまでKubernetesの枠にとどまらないプラットフォームとして成長させてきました。
+
+- 内製PaaSチームの立ち上げ及び育成・テクニカルマネジメント
+    - 2018年のチーム立ち上げから現在に至るまで、テックリードとして開発だけでなくメンバーの育成やチームビルディングなども兼務し、人事評価といったピープルマネジメント以外の一切に従事
+    - 2020年からは札幌の開発拠点からメンバーを受け入れ、東京との多拠点のチームとしてリモートワークの環境を整備
+    - 関連するアウトプット
+        - [LIFULLの全社アプリケーション実行基盤 KEEL について](https://www.docswell.com/s/LIFULL/5QL3JZ-LIFULL%E3%81%AE%E5%85%A8%E7%A4%BE%E3%82%A2%E3%83%95%E3%82%9A%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%AE%9F%E8%A1%8C%E5%9F%BA%E7%9B%A4%20KEEL%20%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)
+- Kubernetesベースの内製PaaSであるKEELの開発・運用
+    - リソース集約によるコスト最適化を狙ったマルチテナント・シングルクラスタのKubernetesをベースに、Istio 0.2.0の頃からサービスメッシュを採用し、Knativeでサーバレスワークロードにも対応
+    - Prometheus, Thanos, Grafana Loki, Fluentd, Grafana Tempo, Pyroscopeによる可観測性基盤も備え、デプロイにはSpinnakerを採用
+    - 関連するアウトプット
+        - [Istio を本番環境に導入するまで (2018/12/16)](https://www.lifull.blog/entry/2018/12/16/235900)
+        - [LIFULLを支えるKubernetesエコシステムまとめ 2020年版 (2020/08/03)](https://www.lifull.blog/entry/2020/08/03/113000)
+- プロダクトへの組み込みやLLMOpsを見据えた汎用AIエージェント実装の開発
+    - gpt-3.5-turboのリリースタイミングで、今後のプロダクトへの組み込みやプラットフォームとしてのLLMOpsを見据えて現在で言うところのAgent Loopを実装した汎用AIエージェントを先行して開発
+    - それを利用した社内の汎用チャットボットも同時にリリースし、グループ会社への展開とともに[2024年10月時点で単体で社員82%の利用率、42,000時間の業務時間削減を達成](https://lifull.com/news/39363/)
+    - Rate Limitや堅牢なエラーハンドリング・充実した可観測性からプロダクトからも広く利用
+    - 関連するアウトプット
+        - [OpenAI Assistants APIを使わずに無限にスケールする汎用AI(仮)を開発した (2023/11/16)](https://www.lifull.blog/entry/2023/11/16/170000)
+        - [比較的安全にMCPサーバを動かす (2025/05/08)](https://www.lifull.blog/entry/2025/05/08/170000)
+- PaaS体験を実現するためのコードジェネレータの開発
+    - Custom Resource Definitionの必要な項目を入力して実行すると、Kubernetes Manifestだけでなく運用ドキュメントや各種GitHub Actionsのほかに監視設定・ダッシュボード・J-SOX法対応のContent Trustを含むデプロイ設定などアプリケーションの開発サイクルに必要なものがすべて自動で生成
+    - コードジェネレータであるためKubernetesを利用しないリポジトリにオプトインも可能で、Content Trustの仕組みや各種GitHub Actionsを流用すべく開発がアクティブな社内の全てのリポジトリに導入され、セルフアップデート機能によって全てのリポジトリを常に健全な状態に維持
+    - 関連するアウトプット
+        - [コマンド1発でKubernetes上にProduction Readyな環境を手に入れる (2021/03/30)](https://www.lifull.blog/entry/2021/03/30/100000)
+- CloudNativeなWebアプリケーションを開発するためのボイラープレートの開発
+    - Go, TypeScript, PythonそれぞれでOpenTelemetry, Graceful Shutdownや構造化ログ・プロファイリング・最適なDockerfileなどを備えたボイラープレートを提供し、プラットフォームの利用者を支援
+    - 前述のコードジェネレータと組み合わせることで、ボイラープレートを利用することで5分で
+    - 新規開発のリポジトリの9割以上がこれらのボイラープレートを利用
+- フルマネージドなKafka/Redis/memcached/Qdrantクラスタの提供
+    - アプリケーションからの利用頻度が高いデータストアをKubernetesクラスタ内でSaaSとして提供し、利用者は前述のコードジェネレータに設定を数行追加するだけでこれらのデータストアが払い出し可能
+    - 一部クラウドプロバイダの提供する
+    - 関連するアウトプット
+        - [LLM活用促進に向けたPlatform Engineeringからのアプローチ (2023/07/05)](https://www.lifull.blog/entry/2023/07/05/090000)
+- Kubernetes Operator, Prometheus Exporter, proxy-wasmやミドルウェア開発によるプラットフォームの機能拡充
+    - 所謂Preview Environmentを実現するためのKubernetes Operatorといった定番の機能のほかに、proxy-wasmでの認可の仕組みやeBPFでのLinuxカーネルレイヤのメトリクス取得などあらゆるソフトウェアを実装して開発者のニーズに先回りして提供
+    - 経路最適化のためのTCP Proxyの開発によるKubernetesクラスタ外への通信料の削減など、Kubernetes内にとどまらず広くプラットフォームとしての機能を拡充
+    - 関連するアウトプット
+        - [小さい経路最適化ミドルウェアを実装してあらゆるAZ間通信を削減する (2024/09/03)](https://www.lifull.blog/entry/2024/09/03/070000)
+        - [Kubernetesクラスタの可観測性の隙間を埋めるeBPF (2023/11/21)](https://www.lifull.blog/entry/2023/11/21/170000)
+        - [GitHub Actions Self-hosted runners on Kubernetesによる自動化 (2020/06/03)](https://www.lifull.blog/entry/2020/06/03/080000)
+- 縮退予定を除くアプリケーション全ての内製PaaSへの移行及び移行支援
+    - 関連するアウトプット
+        - [LIFULLが主要サービスの(ほぼ)全てをKubernetesに移行するまで (2019/12/16)](https://www.lifull.blog/entry/2019/12/16/000000)

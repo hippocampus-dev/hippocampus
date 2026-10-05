@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- privileged_scale_set.yaml
+- runner.yaml
+- scale_set.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:af82e833931337488dbd4b61bba07eccf850f37ca66d97f7cf902f5a5020176a
+  name: ghcr.io/hippocampus-dev/hippocampus/privileged-runner
+  newName: ghcr.io/hippocampus-dev/hippocampus/privileged-runner
+- digest: sha256:b7f991e4d00db87ac4b306b46da030619712e699fba66f10db8d4ac5c01a6f6d
+  name: ghcr.io/hippocampus-dev/hippocampus/runner
+  newName: ghcr.io/hippocampus-dev/hippocampus/runner

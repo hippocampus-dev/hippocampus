@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: resource-field-hook
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # issuer + 1
+spec:
+  dnsNames:
+    - resource-field-hook.resource-field-hook.svc
+    - resource-field-hook.resource-field-hook.svc.cluster.local

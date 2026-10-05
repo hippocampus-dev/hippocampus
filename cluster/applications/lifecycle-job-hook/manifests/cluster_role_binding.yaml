@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: lifecycle-job-hook
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: lifecycle-job-hook
+subjects:
+  - kind: ServiceAccount
+    name: lifecycle-job-hook

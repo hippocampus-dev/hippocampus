@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-manifest-controller
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/manifest-generate-paths: "/cluster/applications/grafana-manifest-controller;/cluster/manifests/grafana-manifest-controller"
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: notifications
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: notifications
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:hippocampus-dev/hippocampus
+    targetRevision: main
+    path: cluster/manifests/grafana-manifest-controller/overlays/dev
+    kustomize:
+      version: custom
+      commonAnnotationsEnvsubst: true
+      commonAnnotations:
+        repository: ${ARGOCD_APP_SOURCE_REPO_URL}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: grafana-manifest-controller
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false

@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: whisper-worker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: whisper-worker
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

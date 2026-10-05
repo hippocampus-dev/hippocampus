@@ -1,0 +1,11 @@
+{
+  "name": "lighthouse-exporter",
+  "private": true,
+  "dependencies": {
+    "@opentelemetry/exporter-prometheus": "^0.54.0",
+    "@opentelemetry/host-metrics": "^0.35.4",
+    "@opentelemetry/sdk-metrics": "^1.27.0",
+    "lighthouse": "^12.2.1",
+    "puppeteer": "^23.6.0"
+  }
+}

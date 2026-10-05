@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seata
+spec:
+  serviceName: seata-raft
+  minReadySeconds: 30
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: seata
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: wait-for-raft-dns
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: apache/seata-server
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+          args:
+            - -c
+            - until getent hosts "${POD_NAME}.seata-raft.${POD_NAMESPACE}.svc.cluster.local" > /dev/null; do sleep 1; done
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+      containers:
+        - name: seata
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: apache/seata-server
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SEATA_IP
+              value: $(POD_IP)
+            - name: LOG_HOME
+              value: /seata-server/logs
+            - name: JVM_XMS
+              value: 256m
+            - name: JVM_XMX
+              value: 512m
+            - name: store.mode
+              value: raft
+            - name: store.file.dir
+              value: /seata-server/sessionStore
+            - name: server.raft.serverAddr
+              value: seata-0.seata-raft.$(POD_NAMESPACE).svc.cluster.local:9091,seata-1.seata-raft.$(POD_NAMESPACE).svc.cluster.local:9091,seata-2.seata-raft.$(POD_NAMESPACE).svc.cluster.local:9091
+            - name: metrics.enabled
+              value: "true"
+          ports:
+            - name: tcp
+              containerPort: 8091
+              protocol: TCP
+            - name: raft
+              containerPort: 9091
+              protocol: TCP
+            - name: metrics
+              containerPort: 9898
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: tcp
+            initialDelaySeconds: 15
+            periodSeconds: 1
+            successThreshold: 3
+            failureThreshold: 3
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 3
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: logs
+              mountPath: /seata-server/logs
+            # the entrypoint's `[ ! -x "$BASEDIR"/logs ]` guard skips its mkdir once this exists
+            - name: logs
+              mountPath: /logs
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: logs
+          emptyDir: {}

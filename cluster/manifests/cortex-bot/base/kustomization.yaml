@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- pod_disruption_budget.yaml
+- service_account.yaml
+
+images:
+- digest: sha256:a0e3bf4b8e44ee694e3ca15b2bf622f39636250bfe9902f38e36dde006d1f0db
+- digest: sha256:4c8781ede77d2c77f689ecef78d0f979d5dd9fc5bab82eabcbf6fc5d1637615d
+  name: ghcr.io/hippocampus-dev/hippocampus/cortex-bot
+  newName: ghcr.io/hippocampus-dev/hippocampus/cortex-bot

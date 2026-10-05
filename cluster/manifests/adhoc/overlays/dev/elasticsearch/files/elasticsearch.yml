@@ -1,0 +1,47 @@
+cluster:
+  name: adhoc
+  initial_master_nodes:
+    - adhoc-elasticsearch-master-0
+
+node:
+  store:
+    allow_mmap: false
+
+network:
+  host: 0.0.0.0
+
+bootstrap:
+  memory_lock: false
+
+discovery:
+  seed_hosts:
+    - adhoc-elasticsearch-master.adhoc.svc.cluster.local
+
+xpack:
+  security:
+    enabled: false
+    transport:
+      ssl:
+        enabled: false
+
+indices:
+  memory:
+    index_buffer_size: 10%
+  queries:
+    cache:
+      size: 10%
+  requests:
+    cache:
+      size: 1%
+      #expire: 60s
+  fielddata:
+    cache:
+      size: 30%
+      #expire: 60s
+  breaker:
+    total:
+      limit: 90%
+    fielddata:
+      limit: 50%
+    request:
+      limit: 80%

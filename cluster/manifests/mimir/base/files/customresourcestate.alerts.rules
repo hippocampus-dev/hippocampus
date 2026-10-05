@@ -1,0 +1,21 @@
+groups:
+  - name: customresourcestate
+    rules:
+      - alert: KafkaChannelStuck
+        annotations:
+          message: |
+            KafkaChannel {{ $labels.namespace }}/{{ $labels.name }} is not ready while Kafka broker is healthy.
+        expr: |
+          kube_customresource_status_condition{customresource_kind="KafkaChannel",type="Ready"} == 0 and on() kube_customresource_status_condition{customresource_kind="Kafka",type="Ready"} == 1
+        for: 10m
+        labels:
+          severity: warning
+      - alert: ConsumerGroupStuck
+        annotations:
+          message: |
+            ConsumerGroup {{ $labels.namespace }}/{{ $labels.name }} is not ready while Kafka broker is healthy.
+        expr: |
+          kube_customresource_status_condition{customresource_kind="ConsumerGroup",type="Ready"} == 0 and on() kube_customresource_status_condition{customresource_kind="Kafka",type="Ready"} == 1
+        for: 10m
+        labels:
+          severity: warning

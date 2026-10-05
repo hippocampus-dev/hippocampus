@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: proxy-wasm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: proxy-wasm
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8080":
+      mode: PERMISSIVE

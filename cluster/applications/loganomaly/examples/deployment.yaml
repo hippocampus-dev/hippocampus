@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: my-app
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+      annotations:
+        loganomaly.kaidotio.github.io/my-sidecar.exclude-regex: "Failed to adjust OOM score"
+        loganomaly.kaidotio.github.io/my-noisy-container.exclude: "true"
+    spec:
+      containers:
+        - name: my-container
+          image: ghcr.io/hippocampus-dev/hippocampus/my-app
+        - name: my-sidecar
+          image: ghcr.io/hippocampus-dev/hippocampus/my-sidecar
+        - name: my-noisy-container
+          image: ghcr.io/hippocampus-dev/hippocampus/my-noisy-container
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  annotations:
+    loganomaly.kaidotio.github.io/istio-proxy.exclude: "true"

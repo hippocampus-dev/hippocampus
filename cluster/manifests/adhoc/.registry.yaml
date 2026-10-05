@@ -1,0 +1,243 @@
+name: adhoc
+namespace: adhoc
+components:
+  - name: adhoc-elasticsearch-ingest
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      app.kubernetes.io/name: adhoc
+      role: ingest
+      variant: utilities
+    logs:
+      grouping: kubernetes.adhoc.adhoc-elasticsearch
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.adhoc.adhoc-elasticsearch%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=adhoc&var-workload_type=deployment&var-workload=adhoc-elasticsearch-ingest
+      labelSets:
+        - labels:
+            destination_service_name: adhoc-elasticsearch-ingest
+            destination_service_namespace: adhoc
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: adhoc-elasticsearch-ingest
+            source_workload_namespace: adhoc
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: adhoc
+            workload: adhoc-elasticsearch-ingest
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Request Utilization
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_requests{resource="cpu",unit="core"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Limit Utilization
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_limits{resource="memory",unit="byte"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Container Restarts
+              template: sum by (pod) (increase(kube_pod_all_container_status_restarts_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive
+              template: sum by (pod) (rate(container_network_receive_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit
+              template: sum by (pod) (rate(container_network_transmit_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive Dropped
+              template: sum by (pod) (rate(container_network_receive_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit Dropped
+              template: sum by (pod) (rate(container_network_transmit_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            app_kubernetes_io_name: adhoc
+            namespace: adhoc
+  - name: adhoc-elasticsearch-coordinating
+    workloadType: deployment
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      app.kubernetes.io/name: adhoc
+      role: coordinating
+      variant: utilities
+    logs:
+      grouping: kubernetes.adhoc.adhoc-elasticsearch
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.adhoc.adhoc-elasticsearch%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=adhoc&var-workload_type=deployment&var-workload=adhoc-elasticsearch-coordinating
+      labelSets:
+        - labels:
+            destination_service_name: adhoc-elasticsearch-coordinating
+            destination_service_namespace: adhoc
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: adhoc-elasticsearch-coordinating
+            source_workload_namespace: adhoc
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: adhoc
+            workload: adhoc-elasticsearch-coordinating
+            workload_type: deployment
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Request Utilization
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_requests{resource="cpu",unit="core"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Limit Utilization
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_limits{resource="memory",unit="byte"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Container Restarts
+              template: sum by (pod) (increase(kube_pod_all_container_status_restarts_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive
+              template: sum by (pod) (rate(container_network_receive_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit
+              template: sum by (pod) (rate(container_network_transmit_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive Dropped
+              template: sum by (pod) (rate(container_network_receive_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit Dropped
+              template: sum by (pod) (rate(container_network_transmit_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            app_kubernetes_io_name: adhoc
+            namespace: adhoc
+  - name: adhoc-elasticsearch-master
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      app.kubernetes.io/name: adhoc
+      role: master
+      variant: utilities
+    logs:
+      grouping: kubernetes.adhoc.adhoc-elasticsearch
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.adhoc.adhoc-elasticsearch%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=adhoc&var-workload_type=statefulset&var-workload=adhoc-elasticsearch-master
+      labelSets:
+        - labels:
+            destination_service_name: adhoc-elasticsearch-master
+            destination_service_namespace: adhoc
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: adhoc-elasticsearch-master
+            source_workload_namespace: adhoc
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: adhoc
+            workload: adhoc-elasticsearch-master
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Request Utilization
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_requests{resource="cpu",unit="core"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Limit Utilization
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_limits{resource="memory",unit="byte"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Container Restarts
+              template: sum by (pod) (increase(kube_pod_all_container_status_restarts_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive
+              template: sum by (pod) (rate(container_network_receive_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit
+              template: sum by (pod) (rate(container_network_transmit_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive Dropped
+              template: sum by (pod) (rate(container_network_receive_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit Dropped
+              template: sum by (pod) (rate(container_network_transmit_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            app_kubernetes_io_name: adhoc
+            namespace: adhoc
+  - name: adhoc-elasticsearch-data
+    workloadType: statefulset
+    labels:
+      app.kubernetes.io/component: elasticsearch
+      app.kubernetes.io/name: adhoc
+      role: data
+      variant: utilities
+    logs:
+      grouping: kubernetes.adhoc.adhoc-elasticsearch
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.adhoc.adhoc-elasticsearch%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=adhoc&var-workload_type=statefulset&var-workload=adhoc-elasticsearch-data
+      labelSets:
+        - labels:
+            destination_service_name: adhoc-elasticsearch-data
+            destination_service_namespace: adhoc
+          queries:
+            - name: Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (response_code)
+            - name: Error Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>,response_code=~"5.*"}[5m]))
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            source_workload: adhoc-elasticsearch-data
+            source_workload_namespace: adhoc
+          queries:
+            - name: Outbound Request Rate
+              template: sum(rate(istio_requests_total{<<.LabelMatchers>>}[5m])) by (destination_service_name)
+            - name: P99 Latency
+              template: histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{<<.LabelMatchers>>}[5m])) by (le))
+        - labels:
+            namespace: adhoc
+            workload: adhoc-elasticsearch-data
+            workload_type: statefulset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Request Utilization
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_requests{resource="cpu",unit="core"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Limit Utilization
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_limits{resource="memory",unit="byte"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Container Restarts
+              template: sum by (pod) (increase(kube_pod_all_container_status_restarts_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive
+              template: sum by (pod) (rate(container_network_receive_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit
+              template: sum by (pod) (rate(container_network_transmit_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive Dropped
+              template: sum by (pod) (rate(container_network_receive_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit Dropped
+              template: sum by (pod) (rate(container_network_transmit_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: elasticsearch
+            app_kubernetes_io_name: adhoc
+            namespace: adhoc

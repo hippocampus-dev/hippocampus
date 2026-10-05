@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cilium-etcd
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cilium
+      app.kubernetes.io/component: etcd

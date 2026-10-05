@@ -1,0 +1,38 @@
+{
+  "claudex": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "~/.config/claudex/config/hooks/UserPromptSubmit.sh"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/PreToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "ExitPlanMode|NotebookEdit|multi_replace_file_content|replace_file_content|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/PostToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "~/.config/claudex/config/hooks/Stop.sh"
+      }
+    ]
+  }
+}

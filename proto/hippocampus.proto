@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package hippocampus;
+
+import "google/api/annotations.proto";
+
+service Hippocampus {
+  rpc Index (IndexRequest) returns (IndexResponse) {
+    option (google.api.http) = {
+      post: "/index"
+      body: "*"
+    };
+  }
+
+  rpc Search (SearchRequest) returns (SearchResponse) {
+    option (google.api.http) = {
+      get: "/search"
+    };
+  }
+}
+
+message IndexRequest {
+  map<string, string> fields = 1;
+}
+
+message IndexResponse {
+  uint64 document_id = 1;
+}
+
+message SearchRequest {
+  string query = 1;
+  int32 limit = 2;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+message SearchResult {
+  map<string, string> document = 1;
+  double score = 2;
+}

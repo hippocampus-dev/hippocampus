@@ -1,0 +1,38 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: vpa-admission-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: admission-webhook
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8000":
+      mode: PERMISSIVE # AdmissionWebhook
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: vpa-recommender
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: recommender
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: vpa-updater
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpa
+      app.kubernetes.io/component: updater
+  mtls:
+    mode: STRICT

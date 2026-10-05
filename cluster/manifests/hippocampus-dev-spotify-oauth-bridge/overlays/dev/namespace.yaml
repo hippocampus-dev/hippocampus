@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hippocampus-dev-spotify-oauth-bridge
+  labels:
+    name: hippocampus-dev-spotify-oauth-bridge
+    # waypoint requires baseline pod security
+    pod-security.kubernetes.io/enforce: baseline

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- config_map.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+
+images:
+- digest: sha256:464665313e0687af7635a56e6c07193a8c6e6edb12e496ba44afb84ff9cd5d0a
+  name: ghcr.io/telepresenceio/tel2
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/ghcr.io/telepresenceio/tel2

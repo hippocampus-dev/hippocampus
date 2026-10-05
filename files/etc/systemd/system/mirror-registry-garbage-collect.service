@@ -1,0 +1,11 @@
+[Unit]
+Requires=minikube.service hippocampus-compose.service
+After=minikube.service hippocampus-compose.service
+
+[Service]
+Type=oneshot
+Restart=on-failure
+RestartSec=60s
+
+User=kai
+ExecStart=/usr/local/bin/mirror-registry-garbage-collect.sh
