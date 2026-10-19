@@ -1,0 +1,8 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gitlab-sso-bridge
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: gitlab-sso-bridge

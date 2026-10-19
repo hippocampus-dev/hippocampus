@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: grafana
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      containers:
+        - name: grafana
+          image: ghcr.io/hippocampus-dev/hippocampus/mirror/grafana/grafana@sha256:95173c11b36f53a423ce47f00baee3f913a3e403f202a83c8bc3c7115a2cfdd0
+          env:
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Admin
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+spec:
+  selector:
+    app.kubernetes.io/name: grafana
+  ports:
+    - name: http
+      port: 3000
+      protocol: TCP
+      targetPort: http

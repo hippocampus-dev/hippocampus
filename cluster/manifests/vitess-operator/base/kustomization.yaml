@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - service_account.yaml
+  - cluster_role.yaml
+  - cluster_role_binding.yaml
+  - custom_resource_definition.yaml
+  - deployment.yaml
+  - pod_disruption_budget.yaml
+  - priority_class.yaml
+
+images:
+  - name: planetscale/vitess-operator
+    newName: ghcr.io/hippocampus-dev/hippocampus/mirror/planetscale/vitess-operator
+    newTag: v2.17.0-rc1

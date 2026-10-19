@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault
+spec:
+  selector:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/component: ""
+  ports:
+    - name: tcp
+      port: 8200
+      protocol: TCP
+      targetPort: tcp

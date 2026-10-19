@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: job-hook
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # issuer + 1
+spec:
+  dnsNames:
+    - job-hook.job-hook.svc
+    - job-hook.job-hook.svc.cluster.local

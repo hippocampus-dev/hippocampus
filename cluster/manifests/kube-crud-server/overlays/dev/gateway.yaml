@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: kube-crud-server
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - kube-crud-server.minikube.127.0.0.1.nip.io
+        - kube-crud-server.kaidotio.dev
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

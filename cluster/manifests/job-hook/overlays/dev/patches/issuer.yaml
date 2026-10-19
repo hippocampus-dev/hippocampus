@@ -1,0 +1,6 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: job-hook-selfsigned
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"

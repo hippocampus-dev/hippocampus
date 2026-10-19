@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: at-least-semaphore-pod-hook
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # issuer + 1
+spec:
+  dnsNames:
+    - at-least-semaphore-pod-hook.at-least-semaphore-pod-hook.svc
+    - at-least-semaphore-pod-hook.at-least-semaphore-pod-hook.svc.cluster.local

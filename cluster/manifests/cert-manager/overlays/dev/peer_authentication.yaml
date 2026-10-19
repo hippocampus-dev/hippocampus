@@ -1,0 +1,38 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cert-manager-cainjector
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: cainjector
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cert-manager-controller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: controller
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: cert-manager-webhook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: webhook
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "10250":
+      mode: PERMISSIVE # AdmissionWebhook

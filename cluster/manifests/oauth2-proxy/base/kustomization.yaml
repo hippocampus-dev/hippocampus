@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:29b04745b45e139b7b06f9f5ed0e8b97735292fe3cacab4d4fdff7b9c74ef52c
+  name: quay.io/oauth2-proxy/oauth2-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/quay.io/oauth2-proxy/oauth2-proxy

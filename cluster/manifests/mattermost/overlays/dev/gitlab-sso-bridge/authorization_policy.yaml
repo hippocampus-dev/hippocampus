@@ -1,0 +1,29 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: gitlab-sso-bridge
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: gitlab-sso-bridge
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      to:
+        - operation:
+            paths:
+              - /_oauth/authorize
+    - from:
+        - source:
+            namespaces:
+              - mattermost
+      to:
+        - operation:
+            paths:
+              - /_oauth/token
+              - /_oauth/user

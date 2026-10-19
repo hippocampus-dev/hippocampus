@@ -1,0 +1,46 @@
+name: Test/proxy-wasm
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_proxy-wasm.yaml"
+      - "cluster/applications/proxy-wasm/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            cluster/applications/proxy-wasm/
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-proxy-wasm-cargo-${{ hashFiles('cluster/applications/proxy-wasm/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-proxy-wasm-cargo-
+      - uses: actions/cache@v6
+        with:
+          path: cluster/applications/proxy-wasm/target
+          key: ${{ runner.os }}-proxy-wasm-target-${{ hashFiles('cluster/applications/proxy-wasm/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-proxy-wasm-target-
+      - run: cargo test
+        working-directory: cluster/applications/proxy-wasm

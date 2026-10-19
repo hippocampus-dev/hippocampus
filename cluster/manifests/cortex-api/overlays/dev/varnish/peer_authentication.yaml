@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: varnish
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: varnish
+  mtls:
+    mode: STRICT

@@ -1,0 +1,223 @@
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/added_tokens.json
+  out=IDEA-Research/grounding-dino-tiny/added_tokens.json
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/config.json
+  out=IDEA-Research/grounding-dino-tiny/config.json
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/model.safetensors
+  out=IDEA-Research/grounding-dino-tiny/model.safetensors
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/preprocessor_config.json
+  out=IDEA-Research/grounding-dino-tiny/preprocessor_config.json
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/special_tokens_map.json
+  out=IDEA-Research/grounding-dino-tiny/special_tokens_map.json
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/tokenizer.json
+  out=IDEA-Research/grounding-dino-tiny/tokenizer.json
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/tokenizer_config.json
+  out=IDEA-Research/grounding-dino-tiny/tokenizer_config.json
+https://huggingface.co/IDEA-Research/grounding-dino-tiny/resolve/a2bb814dd30d776dcf7e30523b00659f4f141c71/vocab.txt
+  out=IDEA-Research/grounding-dino-tiny/vocab.txt
+https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/config.json
+  out=IDEA-Research/grounding-dino-base/config.json
+https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/model.safetensors
+  out=IDEA-Research/grounding-dino-base/model.safetensors
+https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/preprocessor_config.json
+  out=IDEA-Research/grounding-dino-base/preprocessor_config.json
+https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/special_tokens_map.json
+  out=IDEA-Research/grounding-dino-base/special_tokens_map.json
+https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/tokenizer.json
+  out=IDEA-Research/grounding-dino-base/tokenizer.json
+https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/tokenizer_config.json
+  out=IDEA-Research/grounding-dino-base/tokenizer_config.json
+https://huggingface.co/IDEA-Research/grounding-dino-base/resolve/12bdfa3120f3e7ec7b434d90674b3396eccf88eb/vocab.txt
+  out=IDEA-Research/grounding-dino-base/vocab.txt
+https://huggingface.co/openmmlab-community/mm_grounding_dino_base_all/resolve/b32293f50a56f7218d9f73ff940ffb9eba84d63c/config.json
+  out=openmmlab-community/mm_grounding_dino_base_all/config.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_base_all/resolve/b32293f50a56f7218d9f73ff940ffb9eba84d63c/model.safetensors
+  out=openmmlab-community/mm_grounding_dino_base_all/model.safetensors
+https://huggingface.co/openmmlab-community/mm_grounding_dino_base_all/resolve/b32293f50a56f7218d9f73ff940ffb9eba84d63c/preprocessor_config.json
+  out=openmmlab-community/mm_grounding_dino_base_all/preprocessor_config.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_base_all/resolve/b32293f50a56f7218d9f73ff940ffb9eba84d63c/special_tokens_map.json
+  out=openmmlab-community/mm_grounding_dino_base_all/special_tokens_map.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_base_all/resolve/b32293f50a56f7218d9f73ff940ffb9eba84d63c/tokenizer_config.json
+  out=openmmlab-community/mm_grounding_dino_base_all/tokenizer_config.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_base_all/resolve/b32293f50a56f7218d9f73ff940ffb9eba84d63c/vocab.txt
+  out=openmmlab-community/mm_grounding_dino_base_all/vocab.txt
+https://huggingface.co/openmmlab-community/mm_grounding_dino_large_all/resolve/0445d0a0ae5f0fa6be689cf7243d4d0ef4ba7de0/config.json
+  out=openmmlab-community/mm_grounding_dino_large_all/config.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_large_all/resolve/0445d0a0ae5f0fa6be689cf7243d4d0ef4ba7de0/model.safetensors
+  out=openmmlab-community/mm_grounding_dino_large_all/model.safetensors
+https://huggingface.co/openmmlab-community/mm_grounding_dino_large_all/resolve/0445d0a0ae5f0fa6be689cf7243d4d0ef4ba7de0/preprocessor_config.json
+  out=openmmlab-community/mm_grounding_dino_large_all/preprocessor_config.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_large_all/resolve/0445d0a0ae5f0fa6be689cf7243d4d0ef4ba7de0/special_tokens_map.json
+  out=openmmlab-community/mm_grounding_dino_large_all/special_tokens_map.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_large_all/resolve/0445d0a0ae5f0fa6be689cf7243d4d0ef4ba7de0/tokenizer_config.json
+  out=openmmlab-community/mm_grounding_dino_large_all/tokenizer_config.json
+https://huggingface.co/openmmlab-community/mm_grounding_dino_large_all/resolve/0445d0a0ae5f0fa6be689cf7243d4d0ef4ba7de0/vocab.txt
+  out=openmmlab-community/mm_grounding_dino_large_all/vocab.txt
+https://huggingface.co/kernels/kernels-community/deformable-detr/resolve/abfd4042216fa4f84c9c5c4e3e844a3143c70ad5/build/torch214-cxx11-cu130-x86_64-linux/__init__.py
+  out=kernels-community/deformable-detr/build/torch214-cxx11-cu130-x86_64-linux/__init__.py
+https://huggingface.co/kernels/kernels-community/deformable-detr/resolve/abfd4042216fa4f84c9c5c4e3e844a3143c70ad5/build/torch214-cxx11-cu130-x86_64-linux/_deformable_detr_cuda_89d4054.abi3.so
+  out=kernels-community/deformable-detr/build/torch214-cxx11-cu130-x86_64-linux/_deformable_detr_cuda_89d4054.abi3.so
+https://huggingface.co/kernels/kernels-community/deformable-detr/resolve/abfd4042216fa4f84c9c5c4e3e844a3143c70ad5/build/torch214-cxx11-cu130-x86_64-linux/_ops.py
+  out=kernels-community/deformable-detr/build/torch214-cxx11-cu130-x86_64-linux/_ops.py
+https://huggingface.co/kernels/kernels-community/deformable-detr/resolve/abfd4042216fa4f84c9c5c4e3e844a3143c70ad5/build/torch214-cxx11-cu130-x86_64-linux/layers.py
+  out=kernels-community/deformable-detr/build/torch214-cxx11-cu130-x86_64-linux/layers.py
+https://huggingface.co/kernels/kernels-community/deformable-detr/resolve/abfd4042216fa4f84c9c5c4e3e844a3143c70ad5/build/torch214-cxx11-cu130-x86_64-linux/metadata.json
+  out=kernels-community/deformable-detr/build/torch214-cxx11-cu130-x86_64-linux/metadata.json
+https://huggingface.co/facebook/sam2.1-hiera-tiny/resolve/de431c4043854a71d8101e17995dfe596bf101a5/config.json
+  out=facebook/sam2.1-hiera-tiny/config.json
+https://huggingface.co/facebook/sam2.1-hiera-tiny/resolve/de431c4043854a71d8101e17995dfe596bf101a5/model.safetensors
+  out=facebook/sam2.1-hiera-tiny/model.safetensors
+https://huggingface.co/facebook/sam2.1-hiera-tiny/resolve/de431c4043854a71d8101e17995dfe596bf101a5/preprocessor_config.json
+  out=facebook/sam2.1-hiera-tiny/preprocessor_config.json
+https://huggingface.co/facebook/sam2.1-hiera-tiny/resolve/de431c4043854a71d8101e17995dfe596bf101a5/processor_config.json
+  out=facebook/sam2.1-hiera-tiny/processor_config.json
+https://huggingface.co/facebook/sam2.1-hiera-large/resolve/665f8e2ad61cf5f53d65644ff27c8ee525124610/config.json
+  out=facebook/sam2.1-hiera-large/config.json
+https://huggingface.co/facebook/sam2.1-hiera-large/resolve/665f8e2ad61cf5f53d65644ff27c8ee525124610/model.safetensors
+  out=facebook/sam2.1-hiera-large/model.safetensors
+https://huggingface.co/facebook/sam2.1-hiera-large/resolve/665f8e2ad61cf5f53d65644ff27c8ee525124610/preprocessor_config.json
+  out=facebook/sam2.1-hiera-large/preprocessor_config.json
+https://huggingface.co/facebook/sam2.1-hiera-large/resolve/665f8e2ad61cf5f53d65644ff27c8ee525124610/processor_config.json
+  out=facebook/sam2.1-hiera-large/processor_config.json
+https://github.com/JaidedAI/EasyOCR/releases/download/pre-v1.1.6/craft_mlt_25k.zip
+  out=craft_mlt_25k.zip
+  checksum=sha-256=8dc6a1c703a89ed56308ef742d26ebd45c656248cbbbda6e7fe60e569f873e65
+https://github.com/Sanster/models/releases/download/add_big_lama/big-lama.pt
+  out=big-lama.pt
+  checksum=sha-256=344c77bbcb158f17dd143070d1e789f38a66c04202311ae3a258ef66667a9ea9
+https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/003_realSR_BSRGAN_DFOWMFC_s64w8_SwinIR-L_x4_GAN.pth
+  out=003_realSR_BSRGAN_DFOWMFC_s64w8_SwinIR-L_x4_GAN.pth
+  checksum=sha-256=99adfa91350a84c99e946c1eb3d8fce34bc28f57d807b09dc8fe40a316328c0a
+https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
+  out=realesr-general-x4v3.pth
+  checksum=sha-256=8dc7edb9ac80ccdc30c3a5dca6616509367f05fbc184ad95b731f05bece96292
+https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-wdn-x4v3.pth
+  out=realesr-general-wdn-x4v3.pth
+  checksum=sha-256=1641f8c4464b9f097c9fdda5589273713f67cf59f3d909e0bd688f0cee269dca
+https://github.com/notofonts/noto-cjk/raw/Sans2.004/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf
+  out=NotoSansCJKjp-Regular.otf
+  checksum=sha-256=68a3fc98800b2a27b371f2fb79991daf3633bd89309d4ffaa6946fd587f375b5
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/scheduler/scheduler_config.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/scheduler/scheduler_config.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/text_encoder/config.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/text_encoder/config.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/text_encoder/model.fp16.safetensors
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/text_encoder/model.fp16.safetensors
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/text_encoder_2/config.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/text_encoder_2/config.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/text_encoder_2/model.fp16.safetensors
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/text_encoder_2/model.fp16.safetensors
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer/merges.txt
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer/merges.txt
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer/special_tokens_map.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer/special_tokens_map.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer/tokenizer_config.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer/tokenizer_config.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer/vocab.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer/vocab.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer_2/merges.txt
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer_2/merges.txt
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer_2/special_tokens_map.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer_2/special_tokens_map.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer_2/tokenizer_config.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer_2/tokenizer_config.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/tokenizer_2/vocab.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/tokenizer_2/vocab.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/unet/config.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/unet/config.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/unet/diffusion_pytorch_model.fp16.safetensors
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/unet/diffusion_pytorch_model.fp16.safetensors
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/vae/config.json
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/vae/config.json
+https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1/resolve/115134f363124c53c7d878647567d04daf26e41e/vae/diffusion_pytorch_model.fp16.safetensors
+  out=diffusers/stable-diffusion-xl-1.0-inpainting-0.1/vae/diffusion_pytorch_model.fp16.safetensors
+https://huggingface.co/QinmingZhou/OSOR/resolve/9288156766b1df44e5f50fb697876a6f2fd8c062/osor-sdxlinpainting/weights/sdxlinpainting_phase2.pth
+  out=QinmingZhou/OSOR/osor-sdxlinpainting/weights/sdxlinpainting_phase2.pth
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/added_tokens.json
+  out=Qwen/Qwen-Image-Edit-2511/processor/added_tokens.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/chat_template.jinja
+  out=Qwen/Qwen-Image-Edit-2511/processor/chat_template.jinja
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/merges.txt
+  out=Qwen/Qwen-Image-Edit-2511/processor/merges.txt
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/preprocessor_config.json
+  out=Qwen/Qwen-Image-Edit-2511/processor/preprocessor_config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/special_tokens_map.json
+  out=Qwen/Qwen-Image-Edit-2511/processor/special_tokens_map.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/tokenizer.json
+  out=Qwen/Qwen-Image-Edit-2511/processor/tokenizer.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/tokenizer_config.json
+  out=Qwen/Qwen-Image-Edit-2511/processor/tokenizer_config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/video_preprocessor_config.json
+  out=Qwen/Qwen-Image-Edit-2511/processor/video_preprocessor_config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/processor/vocab.json
+  out=Qwen/Qwen-Image-Edit-2511/processor/vocab.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/scheduler/scheduler_config.json
+  out=Qwen/Qwen-Image-Edit-2511/scheduler/scheduler_config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/text_encoder/config.json
+  out=Qwen/Qwen-Image-Edit-2511/text_encoder/config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/text_encoder/generation_config.json
+  out=Qwen/Qwen-Image-Edit-2511/text_encoder/generation_config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/text_encoder/model-00001-of-00004.safetensors
+  out=Qwen/Qwen-Image-Edit-2511/text_encoder/model-00001-of-00004.safetensors
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/text_encoder/model-00002-of-00004.safetensors
+  out=Qwen/Qwen-Image-Edit-2511/text_encoder/model-00002-of-00004.safetensors
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/text_encoder/model-00003-of-00004.safetensors
+  out=Qwen/Qwen-Image-Edit-2511/text_encoder/model-00003-of-00004.safetensors
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/text_encoder/model-00004-of-00004.safetensors
+  out=Qwen/Qwen-Image-Edit-2511/text_encoder/model-00004-of-00004.safetensors
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/text_encoder/model.safetensors.index.json
+  out=Qwen/Qwen-Image-Edit-2511/text_encoder/model.safetensors.index.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/tokenizer/added_tokens.json
+  out=Qwen/Qwen-Image-Edit-2511/tokenizer/added_tokens.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/tokenizer/chat_template.jinja
+  out=Qwen/Qwen-Image-Edit-2511/tokenizer/chat_template.jinja
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/tokenizer/merges.txt
+  out=Qwen/Qwen-Image-Edit-2511/tokenizer/merges.txt
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/tokenizer/special_tokens_map.json
+  out=Qwen/Qwen-Image-Edit-2511/tokenizer/special_tokens_map.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/tokenizer/tokenizer_config.json
+  out=Qwen/Qwen-Image-Edit-2511/tokenizer/tokenizer_config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/tokenizer/vocab.json
+  out=Qwen/Qwen-Image-Edit-2511/tokenizer/vocab.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/transformer/config.json
+  out=Qwen/Qwen-Image-Edit-2511/transformer/config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/vae/config.json
+  out=Qwen/Qwen-Image-Edit-2511/vae/config.json
+https://huggingface.co/Qwen/Qwen-Image-Edit-2511/resolve/6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9/vae/diffusion_pytorch_model.safetensors
+  out=Qwen/Qwen-Image-Edit-2511/vae/diffusion_pytorch_model.safetensors
+https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF/resolve/0d33d9692b4b26212297240d87b0d4719aa4fd06/qwen-image-edit-2511-Q4_K_M.gguf
+  out=unsloth/Qwen-Image-Edit-2511-GGUF/qwen-image-edit-2511-Q4_K_M.gguf
+https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/d74eba145674fd7e31b949324e148e21e7118abd/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors
+  out=lightx2v/Qwen-Image-Edit-2511-Lightning/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors
+https://huggingface.co/prithivMLmods/QIE-2511-Object-Remover-v2/resolve/f3782a831cd513148cc02512684e4602972649c9/Qwen-Image-Edit-2511-Object-Remover-v2-9200.safetensors
+  out=prithivMLmods/QIE-2511-Object-Remover-v2/Qwen-Image-Edit-2511-Object-Remover-v2-9200.safetensors
+https://huggingface.co/hustvl/vitmatte-base-distinctions-646/resolve/b58373f8dbbfbeb58157456e2e4949f9f872aa18/config.json
+  out=hustvl/vitmatte-base-distinctions-646/config.json
+https://huggingface.co/hustvl/vitmatte-base-distinctions-646/resolve/b58373f8dbbfbeb58157456e2e4949f9f872aa18/model.safetensors
+  out=hustvl/vitmatte-base-distinctions-646/model.safetensors
+https://huggingface.co/hustvl/vitmatte-base-distinctions-646/resolve/b58373f8dbbfbeb58157456e2e4949f9f872aa18/preprocessor_config.json
+  out=hustvl/vitmatte-base-distinctions-646/preprocessor_config.json
+https://raw.githubusercontent.com/rakutentech/pct-net-image-harmonization/1572176ed1a72217dad7395391615329b98d30c7/pretrained_models/PCTNet_ViT.pth
+  out=PCTNet_ViT.pth
+  checksum=sha-256=b2cf9260036f1e733d07a295f70f08d373593d64098727ff1798ddf2ff096aef
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/text_encoder/config.json
+  out=stablediffusionapi/realistic-vision-v51/text_encoder/config.json
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/text_encoder/model.safetensors
+  out=stablediffusionapi/realistic-vision-v51/text_encoder/model.safetensors
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/tokenizer/merges.txt
+  out=stablediffusionapi/realistic-vision-v51/tokenizer/merges.txt
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/tokenizer/special_tokens_map.json
+  out=stablediffusionapi/realistic-vision-v51/tokenizer/special_tokens_map.json
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/tokenizer/tokenizer_config.json
+  out=stablediffusionapi/realistic-vision-v51/tokenizer/tokenizer_config.json
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/tokenizer/vocab.json
+  out=stablediffusionapi/realistic-vision-v51/tokenizer/vocab.json
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/unet/config.json
+  out=stablediffusionapi/realistic-vision-v51/unet/config.json
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/unet/diffusion_pytorch_model.safetensors
+  out=stablediffusionapi/realistic-vision-v51/unet/diffusion_pytorch_model.safetensors
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/vae/config.json
+  out=stablediffusionapi/realistic-vision-v51/vae/config.json
+https://huggingface.co/stablediffusionapi/realistic-vision-v51/resolve/19e3643d7d963c156d01537188ec08f0b79a514a/vae/diffusion_pytorch_model.safetensors
+  out=stablediffusionapi/realistic-vision-v51/vae/diffusion_pytorch_model.safetensors
+https://huggingface.co/lllyasviel/ic-light/resolve/9cad1878695f546a7fb9eaca14e2a89131ba5ffe/iclight_sd15_fbc.safetensors
+  out=lllyasviel/ic-light/iclight_sd15_fbc.safetensors

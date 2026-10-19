@@ -1,0 +1,13 @@
+/.mitmproxy
+/target
+/node_modules
+__pycache__
+*.egg-info
+.env.keys
+**/.claude/settings.local.json
+**/claude-worktree-*
+CLAUDE.local.md
+
+/config/master.key
+/files/home/kai/.config/claudex/config/skills/synced
+/files/home/kai/.config/opencode/skills/synced

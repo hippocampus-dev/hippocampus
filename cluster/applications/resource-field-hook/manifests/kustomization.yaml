@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:722e03dbd7654696e0de63d91f048e4ce2caf07ea3aef11cb97b30aff995c9fb
+- digest: sha256:bd31eae4b31f356fa3485448f475f676d22a7fecb462a97692c22b231a076a10
+  name: ghcr.io/hippocampus-dev/hippocampus/resource-field-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/resource-field-hook

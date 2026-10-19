@@ -1,0 +1,46 @@
+name: Test/envoy-markdownify
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_envoy-markdownify.yaml"
+      - "cluster/applications/envoy-markdownify/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            cluster/applications/envoy-markdownify/
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-envoy-markdownify-cargo-${{ hashFiles('cluster/applications/envoy-markdownify/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-envoy-markdownify-cargo-
+      - uses: actions/cache@v6
+        with:
+          path: cluster/applications/envoy-markdownify/target
+          key: ${{ runner.os }}-envoy-markdownify-target-${{ hashFiles('cluster/applications/envoy-markdownify/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-envoy-markdownify-target-
+      - run: cargo test
+        working-directory: cluster/applications/envoy-markdownify

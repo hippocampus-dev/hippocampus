@@ -1,0 +1,72 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: chrome-devtools-protocol-server
+  labels:
+    networking.knative.dev/visibility: cluster-local
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+        autoscaling.knative.dev/metric: concurrency
+        autoscaling.knative.dev/target: "10"
+        autoscaling.knative.dev/minScale: "0"
+        # A caller reads /json/version off one Revision and then opens the WebSocket the URL it answers with names
+        autoscaling.knative.dev/maxScale: "1"
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 10m
+        sidecar.istio.io/proxyMemory: 64Mi
+      labels:
+        app.kubernetes.io/component: chrome-devtools-protocol-server
+        sidecar.istio.io/inject: "true"
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      containerConcurrency: 0
+      containers:
+        - name: chrome-devtools-protocol-server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 5m
+          ports:
+            - name: http1
+              containerPort: 59223
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /json/version
+            periodSeconds: 1
+            failureThreshold: 30
+          volumeMounts:
+            - name: chromium
+              mountPath: /home/nonroot/.config/chromium
+            - name: tmp
+              mountPath: /tmp
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - name: chromium
+          emptyDir:
+            medium: Memory
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: varlog
+          emptyDir:
+            medium: Memory

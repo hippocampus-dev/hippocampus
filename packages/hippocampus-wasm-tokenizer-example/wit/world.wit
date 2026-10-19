@@ -1,0 +1,5 @@
+package hippocampus:tokenizer@0.1.0;
+
+world tokenizer {
+    export tokenize: func(content: string) -> list<string>;
+}

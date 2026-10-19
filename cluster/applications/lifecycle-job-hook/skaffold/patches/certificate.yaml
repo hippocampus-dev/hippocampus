@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lifecycle-job-hook
+spec:
+  issuerRef:
+    name: skaffold-lifecycle-job-hook-selfsigned
+  dnsNames:
+    - skaffold-lifecycle-job-hook.skaffold-lifecycle-job-hook.svc
+    - skaffold-lifecycle-job-hook.skaffold-lifecycle-job-hook.svc.cluster.local

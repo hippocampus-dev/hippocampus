@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pushgateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pushgateway
+      app.kubernetes.io/component: ""

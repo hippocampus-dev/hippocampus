@@ -1,0 +1,54 @@
+name: sync-wave-validation
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - cluster/manifests/**
+      - cluster/applications/**
+      - files/home/kai/kustomize/**
+      - .github/scripts/sync-wave-dependencies.sh
+      - .github/workflows/50_sync-wave-validation.yaml
+      - "!**/*.md"
+      - "!cluster/applications/**/e2e/**"
+      - "!cluster/applications/**/skaffold/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller, standard]
+    env:
+      XDG_CONFIG_HOME: ${{ github.workspace }}/files/home/kai
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .github/scripts/
+            cluster/applications/
+            cluster/manifests/
+            files/home/kai/kustomize/
+      - run: git config --global submodule.recurse false
+      - run: |
+          set -eo pipefail
+          bash .github/scripts/sync-wave-dependencies.sh > "${{ runner.temp }}/dependencies"
+          violations=$(awk -F'\t' '$2 <= $4' "${{ runner.temp }}/dependencies")
+          if [ -z "$violations" ]; then
+            exit 0
+          fi
+          while IFS=$'\t' read -r dependent wave dependency dependencyWave reference; do
+            echo "::error file=cluster/manifests/argocd-applications/base/${dependent}.yaml::${dependent} (sync-wave ${wave}) uses ${reference} owned by ${dependency} (sync-wave ${dependencyWave}), which has to sync first"
+          done <<< "$violations"
+          exit 1

@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: node-problem-detector
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-problem-detector
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: embedding-retrieval
+  labels:
+    name: embedding-retrieval
+    # embedding-retrieval uses nfs
+    pod-security.kubernetes.io/enforce: baseline
