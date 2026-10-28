@@ -1,0 +1,41 @@
+name: Test/github-actions-runner-controller
+on:
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  userns:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller, userns]
+    steps:
+      - run: docker login ghcr.io -u "${GITHUB_REPOSITORY_OWNER}" -p "${GITHUB_TOKEN}"
+      - run: |
+          set -eo pipefail
+          mkdir -p "${{ runner.temp }}/context"
+          cat <<'EOF' > "${{ runner.temp }}/context/Dockerfile"
+          FROM ghcr.io/${{ github.repository }}/mirror/busybox:1.26.2
+          RUN echo ok > /ok
+          EOF
+          docker build -t scale-set-test "${{ runner.temp }}/context"
+  privileged:
+    if: github.repository_owner == 'kaidotio'
+    timeout-minutes: 10
+    runs-on: [self-hosted, github-actions-runner-controller, privileged]
+    steps:
+      - run: docker login ghcr.io -u "${GITHUB_REPOSITORY_OWNER}" -p "${GITHUB_TOKEN}"
+      - run: |
+          set -eo pipefail
+          mkdir -p "${{ runner.temp }}/context"
+          cat <<'EOF' > "${{ runner.temp }}/context/Dockerfile"
+          FROM ghcr.io/${{ github.repository }}/mirror/busybox:1.26.2
+          RUN echo ok > /ok
+          EOF
+          docker buildx build -t scale-set-test "${{ runner.temp }}/context"

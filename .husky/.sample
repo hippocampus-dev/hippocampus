@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if [ "$HUSKY_SKIP_HOOKS" == "true" ]; then
+  exit 0
+fi
+
+hook=".git/hooks/$(basename "$0")"
+if [ -x "$hook" ]; then
+  exec "$hook" "$@"
+fi

@@ -1,0 +1,10 @@
+[Unit]
+# Requires= would let the timer start minikube.service again after it was stopped on purpose: https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Requisite=
+Requisite=minikube.service libvirtd.service
+After=minikube.service libvirtd.service
+
+[Service]
+Type=oneshot
+
+User=kai
+ExecStart=/usr/local/bin/minikube-worker.sh

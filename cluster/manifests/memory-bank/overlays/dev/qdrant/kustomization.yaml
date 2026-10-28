@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: memory-bank-
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: memory-bank
+      variant: utilities
+
+resources:
+  - ../../../../utilities/qdrant
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+
+patches:
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/service.yaml
+  - path: patches/stateful_set.yaml
+
+configMapGenerator:
+  - name: qdrant
+    files:
+      - files/config.yaml
+      - files/development.yaml
+      - files/production.yaml
+    options:
+      immutable: true
+
+replacements:
+  - source:
+      kind: Service
+      name: qdrant
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: StatefulSet
+          name: qdrant
+        fieldPaths:
+          - spec.template.spec.containers.[name=qdrant].env.[name=SERVICE_NAME].value

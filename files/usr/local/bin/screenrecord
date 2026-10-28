@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+FRAMERATE=30
+SHUTDOWN_SECONDS=10
+POLL_SECONDS=0.1
+
+state_file="${XDG_RUNTIME_DIR:-/tmp}/screenrecord"
+
+if [ -f "$state_file" ]; then
+  read -r pid output < "$state_file" || true
+  rm -f "$state_file"
+  if [ "$(cat "/proc/${pid}/comm" 2>/dev/null)" != "ffmpeg" ]; then
+    echo "The recording to $output already ended - press again to start a new one" 1>&2
+    notify-send "Screenrecord" "Lost $output"
+    exit 1
+  fi
+  kill -INT "$pid"
+  deadline=$(($(date +%s) + SHUTDOWN_SECONDS))
+  while [ "$(date +%s)" -lt "$deadline" ] && kill -0 "$pid" 2>/dev/null; do
+    sleep "$POLL_SECONDS"
+  done
+  if kill -0 "$pid" 2>/dev/null; then
+    kill -KILL "$pid"
+    notify-send "Screenrecord" "Aborted $output"
+  else
+    notify-send "Screenrecord" "file://${output}"$'\n\n'"Saved"
+  fi
+  exit 0
+fi
+
+sink=$(pactl get-default-sink)
+videos_directory="${XDG_VIDEOS_DIR:-$HOME/Videos}"
+output="${videos_directory}/$(date +%Y%m%d%H%M%S).mp4"
+
+mkdir -p "$videos_directory"
+ffmpeg -nostdin -loglevel error -f x11grab -select_region 1 -framerate "$FRAMERATE" -i "$DISPLAY" -f pulse -i "${sink}.monitor" -c:v h264_nvenc -pix_fmt yuv420p -c:a aac "$output" &
+echo "$! $output" > "$state_file"
+notify-send "Screenrecord" "Recording to $output"

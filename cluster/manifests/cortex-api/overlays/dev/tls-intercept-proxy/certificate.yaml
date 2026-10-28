@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: tls-intercept-proxy
+spec:
+  # Chromium pins this key through --ignore-certificate-errors-spki-list, so privateKey.rotationPolicy must stay at its Never default
+  secretName: tls-intercept-proxy
+  issuerRef:
+    name: cortex-api-tls-intercept-proxy-selfsigned
+  isCA: true
+  commonName: cortex-api-tls-intercept-proxy
+  privateKey:
+    algorithm: ECDSA

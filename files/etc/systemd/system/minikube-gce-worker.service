@@ -1,0 +1,14 @@
+[Unit]
+# Requires= would let the timer start minikube.service again after it was stopped on purpose: https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Requisite=
+Requisite=minikube.service libvirtd.service
+After=minikube.service libvirtd.service
+
+[Service]
+Type=oneshot
+
+User=kai
+# /opt/google-cloud-cli ships no .pyc and kai cannot write there, so gcloud otherwise recompiles every module it imports on each run
+Environment=PYTHONPYCACHEPREFIX=/home/kai/.cache/python
+# gcloud otherwise writes a log file under ~/.config/gcloud/logs per invocation and keeps them for 30 days
+Environment=CLOUDSDK_CORE_DISABLE_FILE_LOGGING=true
+ExecStart=/usr/local/bin/minikube-gce-worker.sh

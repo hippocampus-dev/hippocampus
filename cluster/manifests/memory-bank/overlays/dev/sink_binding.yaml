@@ -1,0 +1,14 @@
+apiVersion: sources.knative.dev/v1
+kind: SinkBinding
+metadata:
+  name: cloudevents-ingress
+spec:
+  subject:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: memory-bank-cloudevents-ingress
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default

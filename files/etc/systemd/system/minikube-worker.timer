@@ -1,0 +1,10 @@
+[Unit]
+# A minikube-worker.service start during minikube.service's stop job cancels it with "Job for minikube.service canceled.": https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#PartOf=
+PartOf=minikube.service
+
+[Timer]
+OnCalendar=minutely
+Persistent=true
+
+[Install]
+WantedBy=timers.target

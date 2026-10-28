@@ -1,0 +1,63 @@
+---
+paths:
+  - "taurin/**"
+---
+
+* Use `LogicalSize` (not `PhysicalSize`) when calling `window.setSize()` with DOM measurements (`offsetWidth`, `offsetHeight`)
+* Set `minWidth` and `minHeight` in `tauri.conf.json` as safety net for dynamic window sizing
+* Resolve an overlay window's monitor as `current_monitor()` with `primary_monitor()` as the fallback, then divide `monitor.size()` by `monitor.scale_factor()` before building the `tauri::LogicalPosition` handed to `set_position` - `monitor.size()` reports device pixels while `LogicalPosition` takes CSS pixels, so placing a window from the raw value puts it off-screen on a high-DPI display
+* Add every window the application itself shows and positions (declared `"visible": false` in `tauri.conf.json` and reached through `get_webview_window`) to `tauri_plugin_window_state::Builder::with_denylist` in `src-tauri/src/main.rs` - the plugin's default `StateFlags` cover position, size and visibility, so a window left out of the list is moved to wherever it last sat and then given `show()` and `set_focus()` at startup
+* Show dialogs through `@tauri-apps/plugin-dialog` (`message`, `confirm`), never the webview's own `alert()` or `confirm()` - wry does not connect WebKitGTK's `script-dialog` signal, so a webview dialog is a GTK modal outside Tauri's control, parented to the window holding the webview and grabbing input until it is dismissed; one opened over a hidden window left the application unreachable until Openbox offered to force-quit it
+* Show a command's result while the window its entry hid is still hidden, returning the text to `executeItem` in `src/pages/Index.tsx` rather than showing it inside the handler - `tauri-plugin-dialog` builds its Linux dialog through rfd's gtk3 backend with a null parent and no keep-above, so a launcher window left `alwaysOnTop` stacks over the dialog once it is restored
+* Cancel a running command through a paired `cancel_*` command backed by `Cancellation` in `src-tauri/src/main.rs`, never through the `AbortController` handed to `invoke` - that signal reaches no Rust code (tauri-apps/tauri#8351), so aborting it detaches the JS promise while the command runs to completion
+* Fail a `#[tauri::command]` with `ipc::CommandError`, whether the signature spells it or `#[ipc::estringify]` rewrites it in, reporting a cancellation as its `Cancelled` variant and reading it back through `isCancelled` and `describeCommandError` in `src/ipc/error.ts` - the variant is what lets a caller drop a cancellation without showing it, which a bare string error leaves to matching on the message text
+* Declare a type crossing the IPC boundary in `src-tauri/crates/ipc/` under `#[ipc_macro::export("{file}.ts")]` and import its TypeScript counterpart from the generated `src/ipc/types/{file}.ts`, never hand-writing that counterpart - the attribute expands to an `inventory::submit!` that only registers from inside the `ipc` crate, and `build.rs` is what turns the registration into the file
+* Leave `#[ipc::estringify]` off a command that reports `Cancelled` and spell `Result<T, ipc::CommandError>` in its signature instead - the macro wraps the body in `ipc::estringify`, whose error type is `Box<dyn std::error::Error + Send + Sync + 'static>`, so `Cancelled` is unreachable from inside while an `Err("cancelled".into())` written there still compiles and reaches the caller as `Failed`
+* Carry the cancel signal as the `tokio::sync::watch` generation `Cancellation` holds, never a `tokio::sync::Notify` - `notify_one()` stores a permit when no task is waiting, and both the Ctrl+C branch of `handleKeyDown` in `src/pages/Index.tsx` and a Stop pressed in `src/pages/Translation.tsx` after the Rust side already exited send a stop with nothing running, so the permit cancels whichever run starts next
+* Add the permission a plugin call needs to the capability file under `src-tauri/capabilities/` that lists the calling window - the files are split per window and a capability listing no window matches none, so a call from a window whose file omits the permission is denied at runtime with nothing failing at build time
+* Place desktop-only native dependencies under `[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]` in `Cargo.toml`
+* Use `Feature#Setting` naming convention for store keys (e.g., `"Voice Input#Shortcut"`, `"Realtime Translation#Language"`)
+* Filter transcription output only with language-independent character-class guards, never with phrase lists or length heuristics
+
+## Window Sizing
+
+| Size Type | Input Unit | Use Case |
+|-----------|------------|----------|
+| `LogicalSize` | CSS pixels | DOM measurements (`offsetWidth`, `offsetHeight`) |
+| `PhysicalSize` | Device pixels | Screen/display APIs |
+
+DOM APIs return CSS pixels (logical), which match `LogicalSize`.
+Using `PhysicalSize` with DOM measurements causes incorrect sizing on high-DPI displays.
+
+## Platform-Conditional Dependencies
+
+| Dependency Type | Location in Cargo.toml |
+|-----------------|------------------------|
+| Cross-platform (tauri, serde, tokio) | `[dependencies]` |
+| Desktop-only native (cpal, whisper-rs, enigo, global-shortcut) | `[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]` |
+
+Desktop-only dependencies that use native system APIs (audio capture, keyboard simulation, global shortcuts) fail to compile for Android/iOS targets.
+Always gate them with the target configuration.
+
+## Settings Store
+
+| Key Format | Example | Purpose |
+|------------|---------|---------|
+| `Feature#Setting` | `"Voice Input#Model"` | Feature-scoped setting |
+| `Setting` | `"Auto Start"` | Top-level setting |
+
+Match keys across every `store_builder` caller under `src-tauri/src/`, not only `setup()`, `get_settings()` and `handle_*()` - a command that reads a setting straight from the store spells the key itself, and a mismatch there compiles and runs while the setting silently stops reaching it.
+Read existing keys from all of those callers rather than `src-tauri/src/commands/settings.rs` alone, since a key that only persists state never appears in `get_settings()`.
+
+## Transcription Filtering
+
+| Stage | Filter |
+|-------|--------|
+| Before transcription | Peak RMS across fixed-length windows |
+| During transcription | whisper's built-in `no_speech_thold` / `logprob_thold` gate |
+| After transcription | Language-independent character-class guard |
+
+whisper's built-in gate is an AND of `no_speech_prob` and `avg_logprobs`, so re-deriving its decision downstream only removes the confident segments the gate deliberately kept; confident hallucinations pass it and must be accepted.
+
+Do not enable `suppress_nst`: it masks `「」`, `『』`, `:`, `/` and `@`, breaking dictated quotes, times and URLs.
+That also gives up its `♪`-class suppression, so mixed output such as `♪ text ♪` still passes the output-stage guard.

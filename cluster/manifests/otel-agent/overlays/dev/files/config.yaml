@@ -1,0 +1,35 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {}
+  jaeger:
+    protocols:
+      thrift_http: {}
+
+processors:
+  batch:
+    send_batch_size: 8192
+    timeout: 200ms
+
+exporters:
+  otlp:
+    endpoint: otel-collector.otel.svc.cluster.local:4317
+    balancer_name: round_robin
+    tls:
+      insecure: true
+    retry_on_failure:
+      enabled: true
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [batch]
+      exporters: [otlp]

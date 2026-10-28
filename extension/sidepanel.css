@@ -1,0 +1,256 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fafafa;
+  color: #1a1a1a;
+}
+
+#header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background: white;
+}
+
+#header span {
+  font-weight: 600;
+  margin-right: auto;
+}
+
+#header button {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  color: #1a1a1a;
+}
+
+#header button:hover {
+  background: #f0f0f0;
+}
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  position: relative;
+}
+
+.message.user {
+  align-self: flex-end;
+  background: #1a73e8;
+  color: white;
+}
+
+.message.assistant {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid #e0e0e0;
+}
+
+.message .context {
+  font-size: 12px;
+  opacity: 0.7;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 4px;
+  padding-top: 4px;
+  white-space: pre-wrap;
+}
+
+.message .copy-button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-radius: 4px;
+}
+
+.message:hover .copy-button {
+  opacity: 0.6;
+}
+
+.message .copy-button:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.message .copy-button img {
+  width: 100%;
+  height: 100%;
+}
+
+.message a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+#input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  border-top: 1px solid #e0e0e0;
+  background: white;
+}
+
+#input-row {
+  display: flex;
+  gap: 8px;
+}
+
+#context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#context-chips:empty {
+  display: none;
+}
+
+.context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 8px;
+  font-size: 12px;
+  color: #555;
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  max-width: 200px;
+}
+
+.context-chip-label {
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.context-chip-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #888;
+}
+
+.context-chip button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.context-chip button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.context-chip button img {
+  width: 10px;
+  height: 10px;
+  opacity: 0.5;
+}
+
+#input-footer {
+  display: flex;
+  align-items: center;
+}
+
+#model {
+  padding: 2px 4px;
+  font-size: 11px;
+  font-family: inherit;
+  color: #888;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+#model:hover {
+  color: #1a1a1a;
+}
+
+#input {
+  flex: 1;
+  resize: none;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  max-height: 120px;
+  outline: none;
+}
+
+#input:focus {
+  border-color: #1a73e8;
+}
+
+#send {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #1a73e8;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  align-self: flex-end;
+  white-space: nowrap;
+}
+
+#send:hover {
+  background: #1557b0;
+}
+
+#send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#send.stop {
+  background: #d93025;
+}
+
+#send.stop:hover {
+  background: #b3261e;
+}

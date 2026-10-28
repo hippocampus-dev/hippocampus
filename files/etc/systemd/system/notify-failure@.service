@@ -1,0 +1,8 @@
+[Unit]
+
+[Service]
+Type=oneshot
+
+User=kai
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ExecStart=-/usr/bin/notify-send --app-name=sticky-note --hint=string:x-dunst-stack-tag:%i "%i failed" "journalctl -b -u %i"

@@ -1,0 +1,18 @@
+apiVersion: skaffold/v4beta9
+kind: Config
+build:
+  tagPolicy:
+    inputDigest: {}
+  artifacts:
+    - image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+      context: .
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          LD_FLAGS: ""
+  local:
+    useBuildkit: true
+manifests:
+  kustomize:
+    paths:
+      - skaffold

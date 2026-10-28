@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-proxy
+  labels:
+    name: gateway-proxy
+    pod-security.kubernetes.io/enforce: restricted

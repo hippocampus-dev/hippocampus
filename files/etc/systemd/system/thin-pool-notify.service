@@ -1,0 +1,11 @@
+[Unit]
+
+[Service]
+Restart=always
+
+User=kai
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ExecStart=/usr/local/bin/thin-pool-notify.sh
+
+[Install]
+WantedBy=multi-user.target

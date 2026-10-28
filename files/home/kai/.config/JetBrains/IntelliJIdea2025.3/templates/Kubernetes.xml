@@ -1,0 +1,23 @@
+<templateSet group="Kubernetes">
+  <template name="kustomize" value="apiVersion: kustomize.config.k8s.io/v1beta1&#10;kind: Kustomization" description="" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="KUBERNETES_RESOURCE" value="true" />
+    </context>
+  </template>
+  <template name="peerauthentication" value="apiVersion: security.istio.io/v1&#10;kind: PeerAuthentication&#10;metadata:&#10;  name: $NAME$&#10;spec:&#10;  selector:&#10;    matchLabels:&#10;      app.kubernetes.io/name: $NAME_LABEL$&#10;      app.kubernetes.io/component: $COMPONENT_LABEL$&#10;  mtls:&#10;    mode: STRICT" description="" toReformat="false" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="NAME_LABEL" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="COMPONENT_LABEL" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="KUBERNETES_RESOURCE" value="true" />
+    </context>
+  </template>
+  <template name="sidecar" value="apiVersion: networking.istio.io/v1&#10;kind: Sidecar&#10;metadata:&#10;  name: $NAME$&#10;spec:&#10;  workloadSelector:&#10;    labels:&#10;      app.kubernetes.io/name: $NAME_LABEL$&#10;      app.kubernetes.io/component: $COMPONENT_LABEL$&#10;  outboundTrafficPolicy:&#10;    mode: REGISTRY_ONLY&#10;  egress:&#10;    - captureMode: DEFAULT&#10;      hosts:&#10;        - ./*&#10;        - istio-system/istiod.istio-system.svc.cluster.local&#10;        - otel/otel-agent.otel.svc.cluster.local" description="" toReformat="false" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="NAME_LABEL" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="COMPONENT_LABEL" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="KUBERNETES_RESOURCE" value="true" />
+    </context>
+  </template>
+</templateSet>

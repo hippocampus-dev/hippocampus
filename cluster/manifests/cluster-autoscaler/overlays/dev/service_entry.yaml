@@ -1,0 +1,31 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: compute.googleapis.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - compute.googleapis.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: oauth2.googleapis.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - oauth2.googleapis.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS

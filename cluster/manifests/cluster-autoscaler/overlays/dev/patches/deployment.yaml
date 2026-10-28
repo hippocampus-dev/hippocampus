@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-autoscaler
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/proxyCPULimit: 1000m
+        sidecar.istio.io/proxyMemoryLimit: 1Gi
+        sidecar.istio.io/proxyCPU: 10m
+        sidecar.istio.io/proxyMemory: 64Mi
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: http
+        prometheus.io/port: "8085"
+        prometheus.io/path: /metrics
+    spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cluster-autoscaler
+              app.kubernetes.io/component: ""
+        - maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: topology.kubernetes.io/zone
+          #minDomains: 3
+          #whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys:
+            - pod-template-hash
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: cluster-autoscaler
+              app.kubernetes.io/component: ""
+      containers:
+        - name: cluster-autoscaler
+          command:
+            - /cluster-autoscaler
+          args:
+            - --v=2
+            - --cloud-provider=gce
+            # The GCE provider reads the project and zone from this file, falling back to the metadata server that only exists on GCE: https://github.com/kubernetes/autoscaler/blob/482f759b8/cluster-autoscaler/cloudprovider/gce/gce_manager.go#L145-L178
+            - --cloud-config=/mnt/cloud-config/gce.conf
+            # Instance group from terraform/google/main.tf
+            - --nodes=0:1:https://www.googleapis.com/compute/v1/projects/rich-gift-314809/zones/asia-northeast1-a/instanceGroups/minikube-gce-worker
+            - --nodes=0:1:https://www.googleapis.com/compute/v1/projects/rich-gift-314809/zones/asia-northeast1-a/instanceGroups/minikube-gce-worker-gpu
+            # Most pods here mount an emptyDir, which would otherwise keep a GCE node from ever scaling down
+            - --skip-nodes-with-local-storage=false
+            - --scale-down-unneeded-time=5m
+            - --scale-down-unready-time=5m
+            - --scale-down-delay-after-add=5m
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /mnt/credentials/credentials.json
+          resources:
+            requests:
+              cpu: 100m
+              memory: 133Mi
+            limits:
+              cpu: 100m
+              memory: 600Mi
+          volumeMounts:
+            - name: cloud-config
+              mountPath: /mnt/cloud-config
+              readOnly: true
+            - name: credentials
+              mountPath: /mnt/credentials
+              readOnly: true
+      volumes:
+        - name: cloud-config
+          configMap:
+            name: cluster-autoscaler-cloud-config
+        - name: credentials
+          secret:
+            secretName: cluster-autoscaler-google
+            items:
+              - key: GOOGLE_CREDENTIALS_JSON
+                path: credentials.json

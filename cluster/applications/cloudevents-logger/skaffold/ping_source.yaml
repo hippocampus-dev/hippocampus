@@ -1,0 +1,13 @@
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  name: cloudevents-logger
+spec:
+  schedule: "* * * * *"
+  contentType: "application/json"
+  data: '{"message": "Hello, world!"}'
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: skaffold-cloudevents-logger

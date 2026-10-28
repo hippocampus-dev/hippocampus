@@ -1,0 +1,6 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: resource-field-hook-selfsigned
+spec:
+  selfSigned: {}

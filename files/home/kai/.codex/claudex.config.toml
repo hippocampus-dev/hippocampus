@@ -1,0 +1,2 @@
+# bwrap fails with "No permissions to create a new namespace" under the RestrictNamespaces=yes of files/home/kai/bin/claudex
+sandbox_mode = "danger-full-access"

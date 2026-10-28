@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- service.yaml
+images:
+- digest: sha256:3e14c93d7754dc4dbd0cef574d83db71003e5e61996e3acde1a633409c325914
+  name: ghcr.io/hippocampus-dev/hippocampus/meegeren
+  newName: ghcr.io/hippocampus-dev/hippocampus/meegeren

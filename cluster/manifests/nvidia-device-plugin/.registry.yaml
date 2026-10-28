@@ -1,0 +1,43 @@
+name: nvidia-device-plugin
+namespace: kube-system
+components:
+  - name: nvidia-device-plugin
+    workloadType: daemonset
+    labels:
+      app.kubernetes.io/component: ""
+      app.kubernetes.io/name: nvidia-device-plugin
+    logs:
+      grouping: kubernetes.kube-system.nvidia-device-plugin
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.kube-system.nvidia-device-plugin%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      link: https://grafana.minikube.127.0.0.1.nip.io/d/workload/workload?orgId=1&var-namespace=kube-system&var-workload_type=daemonset&var-workload=nvidia-device-plugin
+      labelSets:
+        - labels:
+            namespace: kube-system
+            workload: nvidia-device-plugin
+            workload_type: daemonset
+          queries:
+            - name: CPU Usage
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Throttled
+              template: sum by (pod) (rate(container_cpu_cfs_throttled_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (rate(container_cpu_cfs_periods_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: CPU Request Utilization
+              template: sum by (pod) (rate(container_cpu_usage_seconds_total{container!=""}[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_requests{resource="cpu",unit="core"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Working Set
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Memory Limit Utilization
+              template: sum by (pod) (container_memory_working_set_bytes{container!=""} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>}) / sum by (pod) (kube_pod_all_container_resource_limits{resource="memory",unit="byte"} * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Container Restarts
+              template: sum by (pod) (increase(kube_pod_all_container_status_restarts_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive
+              template: sum by (pod) (rate(container_network_receive_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit
+              template: sum by (pod) (rate(container_network_transmit_bytes_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Receive Dropped
+              template: sum by (pod) (rate(container_network_receive_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+            - name: Network Transmit Dropped
+              template: sum by (pod) (rate(container_network_transmit_packets_dropped_total[5m]) * on(namespace,pod) group_left() mixin_pod_workload{<<.LabelMatchers>>})
+        - labels:
+            app_kubernetes_io_component: ""
+            app_kubernetes_io_name: nvidia-device-plugin
+            namespace: kube-system

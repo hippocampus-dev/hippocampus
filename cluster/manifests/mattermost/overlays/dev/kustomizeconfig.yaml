@@ -1,0 +1,15 @@
+nameReference:
+  - kind: Secret
+    fieldSpecs:
+      - path: spec/cells/gateway/authentication/static/secret/name
+        group: planetscale.com
+        version: v2
+        kind: VitessCluster
+      - path: spec/keyspaces/partitionings/equal/shardTemplate/databaseInitScriptSecret/name
+        group: planetscale.com
+        version: v2
+        kind: VitessCluster
+      - path: spec/backup/locations/s3/authSecret/name
+        group: planetscale.com
+        version: v2
+        kind: VitessCluster
