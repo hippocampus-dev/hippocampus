@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ "$HUSKY_SKIP_HOOKS" == "true" ]; then
+  exit 0
+fi
+
+make fmt
+make lint

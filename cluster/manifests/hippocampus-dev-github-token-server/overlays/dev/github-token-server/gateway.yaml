@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: github-token-server
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - hippocampus-dev-github-token-server.minikube.127.0.0.1.nip.io
+        - hippocampus-dev-github-token-server.kaidotio.dev
+        - hippocampus-dev-github-token-server-public.kaidotio.dev
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

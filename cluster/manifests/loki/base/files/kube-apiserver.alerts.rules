@@ -1,0 +1,22 @@
+groups:
+  - name: kube-apiserver
+    rules:
+      - alert: KubeApiserverUnableToLoadRootCertificate
+        annotations:
+          message: |
+            kube-apiserver unable to load root certificate detected {{ $value }} times / 5m.
+        expr: |
+          count_over_time({grouping="kubernetes.kube-system.kube-apiserver"} |= "unable to load root certificate"[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+      # https://github.com/kubernetes/kubernetes/blob/e3c1777f7d1e1ad0259b43039e6ba6612232c065/pkg/util/conntrack/conntrack.go#L55
+      - alert: KubeApiserverErrorDeletingConnectionTrackingStateForUDP
+        annotations:
+          message: |
+            kube-apiserver error deleting connection tracking state for UDP detected {{ $value }} times / 5m.
+        expr: |
+          count_over_time({grouping="kubernetes.kube-system.kube-apiserver"} |= "error deleting connection tracking state for UDP"[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning

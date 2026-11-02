@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:569aa5e2ca9782b02f312694f673e842433c25169262aa17a6349b78a970efed
+  name: ghcr.io/hippocampus-dev/hippocampus/reporting-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/reporting-server

@@ -1,0 +1,18 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: l7-visibility
+spec:
+  endpointSelector:
+    matchLabels:
+      policy.cilium.io/l7-visibility: "true"
+  egress:
+    - toEntities:
+        - all
+    - toPorts:
+      - ports:
+        - port: "53"
+          protocol: ANY
+        rules:
+          dns:
+          - matchPattern: "*"

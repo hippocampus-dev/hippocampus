@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: tcp-gateway
+spec:
+  gatewayClassName: gateway-proxy
+  listeners:
+    - name: healthz
+      port: 18080
+      protocol: TCP
+      allowedRoutes:
+        namespaces:
+          from: Same
+  allowedListeners:
+    namespaces:
+      from: All

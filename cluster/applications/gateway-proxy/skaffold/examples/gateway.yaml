@@ -1,0 +1,9 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: e2e-gateway
+spec:
+  gatewayClassName: skaffold-gateway-proxy
+  allowedListeners:
+    namespaces:
+      from: Same

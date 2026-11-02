@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:bd8786f7ffda206ca2c6f471ef6e2bb755c2ff354d2064d5c7ce15b5250493c8
+  name: ghcr.io/hippocampus-dev/hippocampus/memory-bank
+  newName: ghcr.io/hippocampus-dev/hippocampus/memory-bank

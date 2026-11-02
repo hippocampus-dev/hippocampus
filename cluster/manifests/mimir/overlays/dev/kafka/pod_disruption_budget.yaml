@@ -1,0 +1,11 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mimir-ingest-entity-operator
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      strimzi.io/cluster: mimir-ingest
+      strimzi.io/kind: Kafka
+      strimzi.io/name: mimir-ingest-entity-operator

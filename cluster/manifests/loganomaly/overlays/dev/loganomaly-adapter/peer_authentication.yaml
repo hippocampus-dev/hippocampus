@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: loganomaly-adapter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loganomaly-adapter
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    # Knative activator probes this port over plain HTTP via PassthroughCluster.
+    "8012":
+      mode: PERMISSIVE

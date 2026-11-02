@@ -1,0 +1,7 @@
+---
+paths:
+  - ".idea/crd/**"
+---
+
+* `kustomization.yaml` to modify CRD sources; `crd.yaml` is the generated output
+* Regenerate `crd.yaml` with `kustomize build .idea/crd/ > .idea/crd/crd.yaml` after modifying `kustomization.yaml` and after adding a CRD to a directory its `resources` names - `.github/workflows/90_crd.yaml` only fires on `kustomization.yaml` itself, so a CRD dropped into an already-referenced directory leaves the generated bundle short of it with nothing reporting the gap; keep that workflow's `paths` listing every such directory so the regeneration still runs

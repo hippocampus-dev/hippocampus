@@ -1,0 +1,38 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: grafana
+spec:
+  gateways:
+    - grafana
+  hosts:
+    - grafana.minikube.127.0.0.1.nip.io
+    - grafana.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: grafana
+            port:
+              number: 3000
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: grafana-mcp
+spec:
+  gateways:
+    - grafana-mcp
+  hosts:
+    - grafana-mcp.minikube.127.0.0.1.nip.io
+  http:
+    - route:
+        - destination:
+            host: grafana
+            port:
+              number: 8000
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

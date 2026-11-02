@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-cron-job
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: my-container
+              image: busybox
+              command:
+                - echo
+                - $(JOB_SCHEDULED_TIMESTAMP)
+              env:
+                - name: JOB_SCHEDULED_TIMESTAMP
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['skaffold.job-hook.kaidotio.github.io/job-scheduled-timestamp']

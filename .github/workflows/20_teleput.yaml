@@ -1,0 +1,56 @@
+name: Release/teleput
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  release:
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-24.04
+            arch: amd64
+          - platform: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            .cargo/
+            bin/
+            packages/
+            Cargo.lock
+            Cargo.toml
+            rust-toolchain.toml
+          sparse-checkout-cone-mode: false
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-${{ runner.arch }}-teleput-packages-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-teleput-packages-
+      - uses: actions/cache@v6
+        with:
+          path: target
+          key: ${{ runner.os }}-${{ runner.arch }}-teleput-${{ hashFiles('packages/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-teleput-
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: |
+          set -eo pipefail
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          bash ./bin/bump.sh "${VERSION}"
+          cargo build --release -p teleput
+          cp target/release/teleput ${{ runner.temp }}/teleput_${VERSION}_linux_${{ matrix.arch }}
+          gh release upload ${{ github.event.release.tag_name }} ${{ runner.temp }}/teleput_${VERSION}_linux_${{ matrix.arch }}

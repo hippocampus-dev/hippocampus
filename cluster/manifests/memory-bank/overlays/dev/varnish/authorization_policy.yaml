@@ -1,0 +1,20 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: varnish
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: varnish
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - memory-bank
+            principals:
+              - cluster.local/ns/memory-bank/sa/memory-bank-ext-proc-proxy
+      to:
+        - operation:
+            notMethods:
+              - PURGE

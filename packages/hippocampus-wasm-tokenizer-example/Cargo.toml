@@ -1,0 +1,16 @@
+[package]
+name = "hippocampus-wasm-tokenizer-example"
+version = "0.1.0"
+authors = ["kai"]
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = { version = "0.38.0" }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

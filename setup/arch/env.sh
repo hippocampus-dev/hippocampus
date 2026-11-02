@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+_GROUPS=(
+  docker
+  libvirt
+  video
+  wireshark
+)
+
+_SERVICES=(
+  nftables.service
+  libvirtd.service
+  docker.service
+  docker-rootless.service
+  minikube.service
+  minikube-context.service
+  minikube-orphan.service
+  minikube-reset.service
+  minikube-socat.service
+  hippocampus-compose.service
+  bluetooth.service
+  lifecycle.service
+  nfs-server.service
+  xrdp.service
+  microsocks.service
+  run-claudex-pts.mount
+  cpu-frequency-limit.service
+  thin-pool-notify.service
+  #backup.timer
+  mirror-registry-garbage-collect.timer
+  minikube-worker.timer
+  minikube-gce-worker.timer
+  scrub.timer
+  sync.timer
+)
+
+_USER_SERVICES=(
+  pactl-subscribe.service
+  ttyd.service
+  square-webcam.service
+  rclone-gdrive.service
+  claude-daily-task.timer
+)

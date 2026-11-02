@@ -1,0 +1,17 @@
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: nvidia
+# The runtime nvidia-ctk registers in containerd: https://github.com/NVIDIA/nvidia-container-toolkit/blob/v1.18.2/cmd/nvidia-ctk/runtime/configure/configure.go#L39
+handler: nvidia
+scheduling:
+  nodeSelector:
+    cloud.google.com/gke-accelerator: nvidia-tesla-t4
+  tolerations:
+    - key: node.kaidotio.github.io/remote-worker
+      operator: Equal
+      value: gce
+      effect: NoSchedule
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule

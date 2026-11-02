@@ -1,0 +1,20 @@
+{
+  "id": "cache",
+  "version": "1.0.0",
+  "name": "Cache",
+  "description": "Creates a volume for persisting the cache across different containers",
+  "containerEnv": {
+    "XDG_CACHE_HOME": "/var/cache/devcontainer",
+    "CARGO_HOME": "/var/cache/devcontainer/cargo",
+    "GOPATH": "/var/cache/devcontainer/go",
+    "npm_config_cache": "/var/cache/devcontainer/npm"
+  },
+  "mounts": [
+    {
+      "source": "cache",
+      "target": "/var/cache/devcontainer",
+      "type": "volume"
+    }
+  ],
+  "postCreateCommand": "sudo chown -R 1000:1000 /var/cache/devcontainer"
+}

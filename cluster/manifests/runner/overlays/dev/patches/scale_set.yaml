@@ -1,0 +1,56 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: ScaleSet
+metadata:
+  name: scale-set
+spec:
+  builderContainerSpec:
+    volumeMounts:
+      - name: docker-config
+        mountPath: /kaniko/.docker
+        readOnly: true
+  runnerContainerSpec:
+    isolation: userns
+    resources:
+      requests:
+        # cluster/applications/github-actions-runner-controller/README.md's ### Rootless Runner sizes this for the emptyDir holding podman's store
+        ephemeral-storage: 10Gi
+  template:
+    metadata:
+      labels:
+        istio.io/dataplane-mode: ambient
+        # Istio Telemetry and AuthorizationPolicy cannot log https traffic
+        "policy.cilium.io/l7-visibility": "true"
+    spec:
+      serviceAccountName: runner
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  # files/usr/local/bin/minikube-worker.sh joins LAN workers with this label
+                  - key: node.kaidotio.github.io/remote-worker
+                    operator: In
+                    values:
+                      - lan
+      tolerations:
+        - key: node.kaidotio.github.io/remote-worker
+          operator: Equal
+          value: lan
+          effect: NoSchedule
+        # Overrides the 86400s files/usr/local/bin/minikube-start.sh sets, so the pod leaves a vanished LAN worker
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 60
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 60
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: runner
+            items:
+              - key: DOCKER_CONFIG_JSON
+                path: config.json

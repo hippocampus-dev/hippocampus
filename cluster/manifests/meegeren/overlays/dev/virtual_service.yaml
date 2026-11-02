@@ -1,0 +1,99 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: meegeren
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - meegeren.meegeren.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            exact: /v1/upscale
+      rewrite:
+        authority: meegeren-real-esrgan.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - queryParams:
+            pipeline:
+              exact: cpu
+      rewrite:
+        authority: meegeren-cpu.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - queryParams:
+            pipeline:
+              exact: quality
+      rewrite:
+        authority: meegeren-quality.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - queryParams:
+            pipeline:
+              exact: quality-sam3
+      rewrite:
+        authority: meegeren-quality-sam3.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - queryParams:
+            pipeline:
+              exact: gpt-image
+        - queryParams:
+            pipeline:
+              exact: gpt-image-edit
+      rewrite:
+        authority: meegeren-gpt-image.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - queryParams:
+            pipeline:
+              exact: qwen-image-edit
+      rewrite:
+        authority: meegeren-qwen-image-edit.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - uri:
+            exact: /v1/insert
+        - uri:
+            exact: /v1/replace
+        - uri:
+            exact: /v1/background
+      rewrite:
+        authority: meegeren-qwen-image-edit.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80
+    - rewrite:
+        authority: meegeren-quality.meegeren.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.istio-gateways.svc.cluster.local
+            port:
+              number: 80

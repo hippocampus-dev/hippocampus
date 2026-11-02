@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: tls-intercept-proxy
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: tls-intercept-proxy
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY # The origin listener re-establishes TLS to whatever host the browser asked for
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./cortex-api-ext-proc-proxy.cortex-api.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

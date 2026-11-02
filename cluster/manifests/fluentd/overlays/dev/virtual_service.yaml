@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: adhoc-elasticsearch-ingest.adhoc.svc.cluster.local
+spec:
+  exportTo:
+    - .
+  gateways:
+    - mesh
+  hosts:
+    - adhoc-elasticsearch-ingest.adhoc.svc.cluster.local
+  http:
+    - match:
+        - sourceNamespace: cortex-bot
+          sourceLabels:
+            app.kubernetes.io/name: cortex-bot
+      route:
+        - destination:
+            host: adhoc-elasticsearch-ingest.adhoc.svc.cluster.local
+            port:
+              number: 9200
+            subset: default
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+images:
+- digest: sha256:8233cbf87555600d8b3c87de46c3d2749034dea3cc5d018214de6767848c9264
+  name: apache/seata-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/apache/seata-server

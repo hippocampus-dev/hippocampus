@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+nameSuffix: -gpt-image
+
+resources:
+  - ../../../base
+
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/template/metadata/labels/app.kubernetes.io~1component
+        value: gpt-image
+      - op: add
+        path: /spec/template/spec/containers/0/envFrom
+        value:
+          - secretRef:
+              name: meegeren
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PIPELINE
+          value: gpt-image
+    target:
+      group: serving.knative.dev
+      version: v1
+      kind: Service
+      name: meegeren

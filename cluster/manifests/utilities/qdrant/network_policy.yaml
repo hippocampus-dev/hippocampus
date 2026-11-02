@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  # kustomize does not support NetworkPolicy ingress merge
+  name: qdrant-peer
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: qdrant
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: qdrant
+      ports:
+        - protocol: TCP
+          port: 6335

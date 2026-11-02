@@ -1,0 +1,98 @@
+sandbox_mode = "workspace-write"
+web_search = "live"
+# https://github.com/openai/codex/issues/32486
+#model_context_window = 1000000
+
+[sandbox_workspace_write]
+network_access = true
+
+[profiles."gpt-5.6-sol"]
+model = "gpt-5.6-sol"
+model_provider = "openai"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+
+[profiles."gpt-5.3-codex"]
+model = "gpt-5.3-codex"
+model_provider = "openai"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+
+# https://github.com/openai/codex/discussions/7782
+#[profiles."gpt-5.2"]
+#model = "gpt-5.2"
+#model_provider = "openai"
+#model_reasoning_effort = "medium"
+#
+#[profiles."chat-gpt-5.2"]
+#model = "gpt-5.2"
+#model_provider = "openai-chat-completions"
+#model_reasoning_effort = "medium"
+#
+#[profiles."local-gpt-5.2"]
+#model = "gpt-5.2"
+#model_provider = "local"
+#model_reasoning_effort = "medium"
+#
+#[profiles."local-chat-gpt-5.2"]
+#model = "gpt-5.2"
+#model_provider = "local-chat-completions"
+#model_reasoning_effort = "medium"
+#
+#[profiles.gpt-oss-120b]
+#model = "gpt-oss:120b"
+#model_provider = "ollama"
+#
+#[profiles.gpt-oss-20b]
+#model = "gpt-oss:20b"
+#model_provider = "ollama"
+#
+#[model_providers.openai-chat-completions]
+#name = "OpenAI using Chat Completions"
+#base_url = "https://api.openai.com/v1"
+#env_key = "OPENAI_API_KEY"
+#wire_api = "chat"
+#query_params = {}
+#
+#[model_providers.local]
+#name = "Local"
+#base_url = "http://127.0.0.1:8080/v1"
+#wire_api = "responses"
+#
+#[model_providers.local-chat-completions]
+#name = "Local"
+#base_url = "http://127.0.0.1:8080/v1"
+#wire_api = "chat"
+#
+#[model_providers.ollama]
+#name = "Ollama"
+#base_url = "https://ollama.127.0.0.1.nip.io/v1"
+#wire_api = "chat"
+
+[tui]
+screen_reader_detection_done = true
+
+[tui.model_availability_nux]
+"gpt-5.3-codex-spark" = 3
+"gpt-5.5" = 1
+"gpt-6.1-sol" = 1
+
+[projects."/opt/hippocampus"]
+trust_level = "trusted"
+
+[hooks.state]
+
+[hooks.state."/home/kai/.codex/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:142a77c4ef7f9b506878f90b13208552aa2032fc291611b0fa33926d658e39b7"
+
+[hooks.state."/home/kai/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:5622d2fa485ec70a1f4adc649746b5afe1840fd0036e661ccd32a9f5046f0f7f"
+
+[hooks.state."/home/kai/.codex/hooks.json:session_end:0:0"]
+trusted_hash = "sha256:9eff819adf6d0098b7543fc169fd286ed625e6015bab320cb9b36d240a09d467"
+
+[hooks.state."/home/kai/.codex/hooks.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:055305395af18a88df02e284a1932caf6e90071a608bdafcce6c2fea0da92b70"
+
+[hooks.state."/home/kai/.codex/hooks.json:stop:0:0"]
+trusted_hash = "sha256:7d85ae351a26e220f547156ae88ed101c40e3bc6ca4e185a3a33c106d7fc7c16"

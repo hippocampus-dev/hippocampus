@@ -1,0 +1,61 @@
+{
+  "description": "Generated from Claude Code hooks by sync-agent-files.sh.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/UserPromptSubmit.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/PreToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/PostToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/Stop.sh"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.config/claudex/config/hooks/SessionEnd.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
