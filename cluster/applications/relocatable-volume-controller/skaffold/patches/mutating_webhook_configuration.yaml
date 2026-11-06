@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: relocatable-volume-controller
+  annotations:
+    cert-manager.io/inject-ca-from: skaffold-relocatable-volume-controller/skaffold-relocatable-volume-controller

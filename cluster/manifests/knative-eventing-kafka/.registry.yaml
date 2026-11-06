@@ -1,0 +1,14 @@
+name: knative-eventing-kafka
+namespace: knative-eventing
+components:
+  - name: cloudevents-logger
+    labels:
+      app.kubernetes.io/name: cloudevents-logger
+    logs:
+      grouping: kubernetes.knative-eventing.cloudevents-logger
+      link: https://grafana.minikube.127.0.0.1.nip.io/explore?schemaVersion=1&panes=%7B%22default%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22expr%22%3A%22%7Bgrouping%3D%5C%22kubernetes.knative-eventing.cloudevents-logger%5C%22%7D%22%7D%5D%7D%7D
+    metrics:
+      labelSets:
+        - labels:
+            app_kubernetes_io_name: cloudevents-logger
+            namespace: knative-eventing

@@ -1,0 +1,24 @@
+{
+  "name": "email-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types",
+    "fmt": "biome format --write .",
+    "lint": "biome check --fix ."
+  },
+  "dependencies": {
+    "agents": "^0.2.0",
+    "mimetext": "^3.0.24",
+    "postal-mime": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "typescript": "^5.7.0",
+    "@biomejs/biome": "^2.4.6",
+    "wrangler": "^4.46.0"
+  }
+}

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tetragon
+spec:
+  selector:
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/component: ""
+  ports:
+    - name: http-metrics
+      port: 2112
+      targetPort: 2112
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tetragon-operator
+spec:
+  selector:
+    app.kubernetes.io/name: tetragon
+    app.kubernetes.io/component: operator
+  ports:
+    - name: http-metrics
+      port: 2113
+      targetPort: 2113
+      protocol: TCP

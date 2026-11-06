@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodeport-controller
+spec:
+  selector:
+    app.kubernetes.io/name: nodeport-controller
+    app.kubernetes.io/component: ""
+  ports:
+    - name: https
+      port: 9443
+      protocol: TCP
+      targetPort: https

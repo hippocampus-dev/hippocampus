@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- issuer.yaml
+- mutating_webhook_configuration.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service.yaml
+- service_account.yaml
+images:
+- digest: sha256:2d9eeaf6c23f605238f42e22a75fe45834ed5428e92256a7778f9639fbf66263
+  name: ghcr.io/hippocampus-dev/hippocampus/relocatable-volume-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/relocatable-volume-controller

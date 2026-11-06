@@ -1,0 +1,77 @@
+name: Release/teleput
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  release:
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-24.04
+            arch: amd64
+          - platform: ubuntu-24.04-arm
+            arch: arm64
+          - platform: windows-latest
+            arch: amd64
+    runs-on: ${{ matrix.platform }}
+    steps:
+      # Windows git rejects the ':' paths under files/, and sparse checkout does not help. checkout swaps HOME, so the setting goes through the environment.
+      - if: matrix.platform == 'windows-latest'
+        shell: bash
+        run: |
+          set -eo pipefail
+          {
+            echo "GIT_CONFIG_COUNT=1"
+            echo "GIT_CONFIG_KEY_0=core.protectNTFS"
+            echo "GIT_CONFIG_VALUE_0=false"
+          } >> "$GITHUB_ENV"
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            .cargo/
+            bin/
+            packages/
+            Cargo.lock
+            Cargo.toml
+            rust-toolchain.toml
+          sparse-checkout-cone-mode: false
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-${{ runner.arch }}-teleput-packages-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-teleput-packages-
+      - uses: actions/cache@v6.1.0
+        with:
+          path: target
+          key: ${{ runner.os }}-${{ runner.arch }}-teleput-${{ hashFiles('packages/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-teleput-
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+      - shell: bash
+        run: |
+          set -eo pipefail
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          bash ./bin/bump.sh "${VERSION}"
+          cargo build --release -p teleput
+          OS="linux"
+          EXTENSION=""
+          if [ "${{ matrix.platform }}" = "windows-latest" ]; then
+            OS="windows"
+            EXTENSION=".exe"
+          fi
+          cp "target/release/teleput${EXTENSION}" "${RUNNER_TEMP}/teleput_${VERSION}_${OS}_${{ matrix.arch }}${EXTENSION}"
+          gh release upload ${{ github.event.release.tag_name }} "${RUNNER_TEMP}/teleput_${VERSION}_${OS}_${{ matrix.arch }}${EXTENSION}"

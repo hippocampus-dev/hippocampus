@@ -1,0 +1,146 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-envoy-stats-scrape
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: prometheus
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/component: ""
+      ports:
+        - protocol: TCP
+          port: 15020
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traffic-agent
+spec:
+  podSelector:
+    matchLabels:
+      telepresence.io/workloadEnabled: "true"
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9900
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jupyterhub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: jupyterhub
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: jupyterhub
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jupyterhub-proxy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: proxy
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+      ports:
+        # Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+        #- protocol: TCP
+        #  port: 8080
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jupyterhub-hub
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: hub
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+      ports:
+        - protocol: TCP
+          port: 8081
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jupyterhub-singleuser-server
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: jupyterhub
+      app.kubernetes.io/component: singleuser-server
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-gateways
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+      ports:
+        - protocol: TCP
+          port: 8888
+# Use https://github.com/splunk/jupyterhub-istio-proxy instead of configurable-http-proxy
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: NetworkPolicy
+#metadata:
+#  name: jupyterhub-redis-haproxy
+#spec:
+#  podSelector:
+#    matchLabels:
+#      app.kubernetes.io/name: jupyterhub
+#      app.kubernetes.io/component: redis-haproxy
+#  ingress:
+#    - from:
+#        - namespaceSelector:
+#            matchLabels:
+#              name: jupyterhub
+#          podSelector:
+#            matchLabels:
+#              app.kubernetes.io/name: jupyterhub
+#              app.kubernetes.io/component: proxy
+#      ports:
+#        - protocol: TCP
+#          port: 6379

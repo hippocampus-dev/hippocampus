@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: gitlab-sso-bridge
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: gitlab-sso-bridge
+  mtls:
+    mode: STRICT

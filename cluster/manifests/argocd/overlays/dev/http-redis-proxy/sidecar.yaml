@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: http-redis-proxy
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: http-redis-proxy
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./argocd-redis-haproxy-writer.argocd.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

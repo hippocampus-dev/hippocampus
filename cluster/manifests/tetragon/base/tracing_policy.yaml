@@ -1,0 +1,112 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: monitor-kernel-modules
+spec:
+  kprobes:
+    - call: sys_finit_module
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Sigkill
+    - call: sys_init_module
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Sigkill
+    - call: sys_delete_module
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Sigkill
+    - call: sys_kexec_load
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_BOOT
+          matchActions:
+            - action: Sigkill
+    - call: sys_kexec_file_load
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_BOOT
+          matchActions:
+            - action: Sigkill
+    - call: security_kernel_read_file
+      syscall: false
+      return: true
+      args:
+        - index: 0
+          type: file
+        - index: 1
+          type: int
+      returnArg:
+        index: 0
+        type: int
+      selectors:
+        - matchBinaries:
+            - operator: NotIn
+              values:
+                - /usr/sbin/iptables
+                - /vt/bin/mysqlctld
+          matchArgs:
+            - index: 1
+              operator: Equal
+              values:
+                - "2"
+          matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill

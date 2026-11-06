@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: default
+spec:
+  exportTo:
+    - "*"
+  host: "*.svc.cluster.local"
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 0

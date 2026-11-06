@@ -1,0 +1,39 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: ScaleSet
+metadata:
+  name: privileged-scale-set
+spec:
+  builderContainerSpec:
+    volumeMounts:
+      - name: docker-config
+        mountPath: /kaniko/.docker
+        readOnly: true
+  runnerContainerSpec:
+    isolation: privileged
+    resources:
+      requests:
+        cpu: 4000m
+        # A qemu guest boots at the runtime class's own default_memory, so memory beyond it reserves node memory the guest never has
+        memory: 2Gi
+        # STORAGE_SIZE in cluster/applications/privileged-runner/start-dockerd.sh sizes the ext4 image this bounds
+        ephemeral-storage: 20Gi
+      limits:
+        cpu: 4000m
+        memory: 2Gi
+        ephemeral-storage: 20Gi
+  template:
+    metadata:
+      labels:
+        istio.io/dataplane-mode: ambient
+        # Istio Telemetry and AuthorizationPolicy cannot log https traffic
+        "policy.cilium.io/l7-visibility": "true"
+    spec:
+      runtimeClassName: kata-qemu
+      serviceAccountName: runner
+      volumes:
+        - name: docker-config
+          secret:
+            secretName: runner
+            items:
+              - key: DOCKER_CONFIG_JSON
+                path: config.json

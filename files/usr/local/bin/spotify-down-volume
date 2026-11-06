@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+readonly SPOTIFY_OAUTH_BRIDGE_URL="https://hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev"
+readonly SPOTIFY_SCOPE="user-read-playback-state user-modify-playback-state"
+readonly VOLUME_STEP=1
+
+readonly STATE_DIRECTORY="${XDG_RUNTIME_DIR:-/tmp}"
+readonly PENDING_FILE="${STATE_DIRECTORY}/spotify-volume.pending"
+readonly PENDING_LOCK="${STATE_DIRECTORY}/spotify-volume.pending.lock"
+readonly WORKER_LOCK="${STATE_DIRECTORY}/spotify-volume.worker.lock"
+
+exec 200>"$PENDING_LOCK"
+exec 201>"$WORKER_LOCK"
+
+flock 200
+pending=0
+[ -s "$PENDING_FILE" ] && pending=$(cat "$PENDING_FILE")
+echo $((pending - VOLUME_STEP)) > "$PENDING_FILE"
+flock -u 200
+
+flock -n 201 || exit 0
+
+while true; do
+  flock 200
+  delta=0
+  [ -s "$PENDING_FILE" ] && delta=$(cat "$PENDING_FILE")
+  if [ "$delta" -eq 0 ]; then
+    flock -u 201
+    flock -u 200
+    break
+  fi
+  echo 0 > "$PENDING_FILE"
+  flock -u 200
+
+  token=$(armyknife oauth device --url "$SPOTIFY_OAUTH_BRIDGE_URL" --client-id "spotify" --scope "$SPOTIFY_SCOPE")
+  state_json=$(curl -fsSL --retry 5 --retry-all-errors -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player")
+  if [ -z "$state_json" ]; then
+    exit 1
+  fi
+
+  current_volume=$(echo "$state_json" | jq -re '.device.volume_percent')
+  new_volume=$(( current_volume + delta ))
+  if [ "$new_volume" -gt 100 ]; then
+    new_volume=100
+  fi
+  if [ "$new_volume" -lt 0 ]; then
+    new_volume=0
+  fi
+
+  curl -fsSL --retry 5 -X PUT -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player/volume?volume_percent=${new_volume}" -o /dev/null
+  notify-send "Spotify Volume" "${new_volume}%"
+done

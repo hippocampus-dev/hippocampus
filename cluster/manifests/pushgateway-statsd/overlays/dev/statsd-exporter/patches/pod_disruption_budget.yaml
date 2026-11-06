@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: statsd-exporter
+spec:
+  maxUnavailable: 1

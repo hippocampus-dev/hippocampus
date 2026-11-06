@@ -1,0 +1,6 @@
+[Unit]
+
+[Service]
+Type=oneshot
+
+ExecStart=-/usr/bin/notify-send --app-name=sticky-note --hint=string:x-dunst-stack-tag:%i "%i failed" "journalctl -b --user -u %i"

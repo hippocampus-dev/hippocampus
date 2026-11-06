@@ -1,0 +1,12 @@
+[soe][Compressor#0]
+attack=5
+ratio=20
+threshold=-20
+
+[soe][Compressor#1]
+attack=5
+knee=0
+ratio=20
+sidechainLookahead=5
+sidechainMode=1
+threshold=-14

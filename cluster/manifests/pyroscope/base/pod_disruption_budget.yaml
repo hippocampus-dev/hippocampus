@@ -1,0 +1,59 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pyroscope-distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: distributor
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pyroscope-query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-frontend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pyroscope-query-scheduler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: query-scheduler
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pyroscope-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: querier
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pyroscope-ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: ingester
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pyroscope-store-gateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+      app.kubernetes.io/component: store-gateway

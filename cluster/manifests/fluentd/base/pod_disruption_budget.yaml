@@ -1,0 +1,29 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fluentd-processor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-processor
+      app.kubernetes.io/component: ""
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fluentd-aggregator-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-aggregator
+      app.kubernetes.io/component: proxy
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fluentd-aggregator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-aggregator
+      app.kubernetes.io/component: ""

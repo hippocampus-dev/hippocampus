@@ -1,0 +1,12 @@
+[Unit]
+
+[Service]
+Type=notify
+Restart=always
+RestartSec=5
+
+ExecStart=/usr/bin/rclone mount gdrive: /mnt/gdrive --vfs-cache-mode full
+ExecStopPost=-/usr/bin/fusermount3 -uz /mnt/gdrive
+
+[Install]
+WantedBy=default.target

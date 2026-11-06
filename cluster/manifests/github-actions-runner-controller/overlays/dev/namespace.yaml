@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: github-actions-runner-controller
+  labels:
+    name: github-actions-runner-controller
+    pod-security.kubernetes.io/enforce: restricted

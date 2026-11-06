@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:6d2a9056051327ef0ccd469b864d8455e75a82b0c1203f5c21c440247ab0f79f
+  name: ghcr.io/hippocampus-dev/hippocampus/embedding-retrieval
+  newName: ghcr.io/hippocampus-dev/hippocampus/embedding-retrieval

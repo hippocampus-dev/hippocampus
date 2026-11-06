@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: fluentd-aggregator
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: fluentd-aggregator
+      sectionName: tcp-24224
+  rules:
+    - backendRefs:
+        - name: fluentd-aggregator-proxy
+          port: 24224
