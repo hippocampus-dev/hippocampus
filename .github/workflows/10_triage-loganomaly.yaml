@@ -32,7 +32,7 @@ jobs:
           cp files/home/kai/.config/claudex/config/CLAUDE.summary.md ${{ runner.temp }}/claude-home/CLAUDE.summary.md
           cp files/home/kai/.config/claudex/config/CLAUDE.general.md ${{ runner.temp }}/claude-home/CLAUDE.general.md
           cp -r files/home/kai/.config/claudex/config/agents ${{ runner.temp }}/claude-home/agents
-      - uses: anthropics/claude-code-action@v1.0.266
+      - uses: anthropics/claude-code-action@v1.0.268
         env:
           CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
           CLAUDE_CODE_TMPDIR: ${{ runner.temp }}/claude-tmp
