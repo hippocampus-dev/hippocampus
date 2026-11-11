@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+if [ "$HUSKY_SKIP_HOOKS" == "true" ]; then
+  exit 0
+fi
+
+hook=".git/hooks/$(basename "$0")"
+if [ -x "$hook" ]; then
+  exec "$hook" "$@"
+fi

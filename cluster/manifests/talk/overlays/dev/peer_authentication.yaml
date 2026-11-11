@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: talk
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: talk
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

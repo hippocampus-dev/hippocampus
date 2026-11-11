@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cron_job.yaml
+images:
+- digest: sha256:47d3053b9bb9ab179ef90c121dfeb294a62bc068dd4593ff9423afb4f49552ff
+  name: ghcr.io/hippocampus-dev/hippocampus/promphet
+  newName: ghcr.io/hippocampus-dev/hippocampus/promphet

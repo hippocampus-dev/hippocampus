@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: relocatable-volume-controller
+spec:
+  secretName: relocatable-volume-controller-certs
+  issuerRef:
+    name: relocatable-volume-controller-selfsigned

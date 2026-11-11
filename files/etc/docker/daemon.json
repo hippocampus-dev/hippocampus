@@ -1,0 +1,12 @@
+{
+  "dns": ["172.17.0.1"],
+  "features": {
+    "buildkit": true
+  },
+  "runtimes": {
+    "nvidia": {
+      "args": [],
+      "path": "nvidia-container-runtime"
+    }
+  }
+}

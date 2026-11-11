@@ -1,0 +1,232 @@
+pipelines:
+  - name: cpu
+    object_locator:
+      type: grounding-dino-sam2
+      grounding_model: IDEA-Research/grounding-dino-tiny
+      threshold: 0.35
+      segmentation_model: facebook/sam2.1-hiera-tiny
+      deformable_attention_path: kernels-community/deformable-detr
+      dtype: float32
+      keep_on_device: true
+    text_locator:
+      type: craft
+      model_path: craft_mlt_25k.zip
+      region_threshold: 0.4
+      affinity_threshold: 0.4
+      dtype: float32
+      keep_on_device: true
+    inpainter:
+      type: big-lama
+      model_path: big-lama.pt
+      keep_on_device: true
+    remove:
+      redetect: false
+  - name: quality
+    object_locator:
+      type: grounding-dino-sam2
+      grounding_model: openmmlab-community/mm_grounding_dino_large_all
+      threshold: 0.35
+      segmentation_model: facebook/sam2.1-hiera-large
+      deformable_attention_path: kernels-community/deformable-detr
+      dtype: float16
+      keep_on_device: true
+    text_locator:
+      type: craft
+      model_path: craft_mlt_25k.zip
+      region_threshold: 0.4
+      affinity_threshold: 0.4
+      dtype: float16
+      keep_on_device: true
+    inpainter:
+      type: osor
+      base_model: diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+      weights_path: QinmingZhou/OSOR/osor-sdxlinpainting/weights/sdxlinpainting_phase2.pth
+      dtype: float16
+      keep_on_device: true
+    refiner:
+      type: sdxl-inpainting
+      base_model: diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+      prompt: a photo of an empty room, plain wall, clean floor, sharp, high detail
+      negative_prompt: furniture, object, plant, blurry, smudge
+      guidance_scale: 6.0
+      strength: 0.4
+      steps: 30
+      dtype: float16
+      keep_on_device: true
+    remove:
+      redetect: true
+      max_removals: 20
+      max_refinements: 2
+      remove_additions: true
+  - name: quality-sam3
+    object_locator:
+      type: sam3
+      model: facebook/sam3
+      threshold: 0.5
+      mask_threshold: 0.5
+      dtype: float16
+      keep_on_device: true
+    text_locator:
+      type: craft
+      model_path: craft_mlt_25k.zip
+      region_threshold: 0.4
+      affinity_threshold: 0.4
+      dtype: float16
+      keep_on_device: true
+    inpainter:
+      type: osor
+      base_model: diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+      weights_path: QinmingZhou/OSOR/osor-sdxlinpainting/weights/sdxlinpainting_phase2.pth
+      dtype: float16
+      keep_on_device: true
+    refiner:
+      type: sdxl-inpainting
+      base_model: diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+      prompt: a photo of an empty room, plain wall, clean floor, sharp, high detail
+      negative_prompt: furniture, object, plant, blurry, smudge
+      guidance_scale: 6.0
+      strength: 0.4
+      steps: 30
+      dtype: float16
+      keep_on_device: true
+    remove:
+      redetect: true
+      max_removals: 20
+      max_refinements: 2
+      remove_additions: true
+  - name: gpt-image
+    object_locator:
+      type: grounding-dino-sam2
+      grounding_model: IDEA-Research/grounding-dino-base
+      threshold: 0.25
+      segmentation_model: facebook/sam2.1-hiera-large
+      deformable_attention_path: kernels-community/deformable-detr
+      dtype: float16
+      keep_on_device: true
+    text_locator:
+      type: craft
+      model_path: craft_mlt_25k.zip
+      region_threshold: 0.4
+      affinity_threshold: 0.4
+      dtype: float16
+      keep_on_device: true
+    inpainter:
+      type: gpt-image
+      model: gpt-image-2.5-sunburst
+      quality: high
+    matting:
+      type: vitmatte
+      model: hustvl/vitmatte-base-distinctions-646
+      trimap_width: 20
+      dtype: float16
+      keep_on_device: true
+    harmonizers:
+      - type: pct-net
+        model_path: PCTNet_ViT.pth
+        dtype: float16
+        keep_on_device: true
+      - type: ic-light
+        base_model: stablediffusionapi/realistic-vision-v51
+        weights_path: lllyasviel/ic-light/iclight_sd15_fbc.safetensors
+        steps: 25
+        dtype: bfloat16
+        keep_on_device: true
+    upscaler: real-esrgan
+    remove:
+      redetect: false
+      whole_image: true
+  - name: qwen-image-edit
+    object_locator:
+      type: grounding-dino-sam2
+      grounding_model: IDEA-Research/grounding-dino-base
+      threshold: 0.25
+      segmentation_model: facebook/sam2.1-hiera-large
+      deformable_attention_path: kernels-community/deformable-detr
+      dtype: float16
+      keep_on_device: true
+    text_locator:
+      type: craft
+      model_path: craft_mlt_25k.zip
+      region_threshold: 0.4
+      affinity_threshold: 0.4
+      dtype: float16
+      keep_on_device: true
+    inpainter:
+      type: qwen-image-edit
+      model: Qwen/Qwen-Image-Edit-2511
+      transformer_path: unsloth/Qwen-Image-Edit-2511-GGUF/qwen-image-edit-2511-Q4_K_M.gguf
+      lightning_path: lightx2v/Qwen-Image-Edit-2511-Lightning/Qwen-Image-Edit-2511-Lightning-8steps-V1.0-bf16.safetensors
+      remover_path: prithivMLmods/QIE-2511-Object-Remover-v2/Qwen-Image-Edit-2511-Object-Remover-v2-9200.safetensors
+      steps: 8
+      dtype: bfloat16
+      # fits a 20GB GPU, where the text encoder and the transformer take 16.6GB and 13.2GB
+      text_encoder:
+        keep_on_device: false
+      transformer:
+        keep_on_device: true
+      vae:
+        keep_on_device: true
+    matting:
+      type: vitmatte
+      model: hustvl/vitmatte-base-distinctions-646
+      trimap_width: 20
+      dtype: float16
+      keep_on_device: true
+    harmonizers:
+      - type: pct-net
+        model_path: PCTNet_ViT.pth
+        dtype: float16
+        keep_on_device: true
+      - type: ic-light
+        base_model: stablediffusionapi/realistic-vision-v51
+        weights_path: lllyasviel/ic-light/iclight_sd15_fbc.safetensors
+        steps: 25
+        dtype: bfloat16
+        keep_on_device: false
+    upscaler: real-esrgan
+    remove:
+      redetect: false
+      whole_image: true
+upscalers:
+  - name: real-esrgan
+    type: real-esrgan
+    model_path: realesr-general-x4v3.pth
+    weak_denoise_model_path: realesr-general-wdn-x4v3.pth
+    denoise_strength: 0.2
+    dtype: float16
+    keep_on_device: true
+  - name: swinir
+    type: swinir
+    model_path: 003_realSR_BSRGAN_DFOWMFC_s64w8_SwinIR-L_x4_GAN.pth
+    keep_on_device: true
+enhancers:
+  - name: decisions
+    type: decisions
+    model: gpt-6-luna
+    context: Photos from a real-estate listing service.
+    reproduction_instructions: The photograph itself (not a picture hanging in the room) is a black-and-white, sepia-toned or hand-tinted reproduction, a scan of an old film print or slide, or a heavily degraded low-quality image, rather than an ordinary modern digital color photograph.
+    exposure_instructions: "This is a real photograph whose subject or room is accidentally underexposed: walls, ceilings, floors or the main subject are clearly darker than the photographer intended, so a real-estate photo editor would brighten the shadows. Photos intentionally dark for mood (low-key portraits, night scenes, dramatic lighting, product shots on black) do not count."
+    white_balance_instructions: This is a real photograph of a room whose white or neutral walls or ceiling look yellow, orange or otherwise tinted because of an uncorrected color cast from the light, which a real-estate photo editor would neutralize. Intentionally colored walls, wood, warm sunset or candle light kept for mood do not count.
+    prefer_instructions: The second image is the first image after an automatic {description}. Answer true if a real-estate listing would rather show the second image than the first.
+    harm_instructions: The second image is the first image after an automatic {description}. Answer true if the second image changes the real color of a material or surface (for example beige or colored wallpaper, paint, wood or fabric turned white, grey or orange), turns a scene meant to be dark or warm into something it was not, removes an intentional tone such as sepia or other monochrome toning, or blows out highlights that were not blown out in the first image.
+    reproduction_threshold: 0.5
+    need_threshold: 0.5
+    prefer_threshold: 0.5
+    harm_threshold: 0.5
+    strength: 0.5
+  - name: clef
+    type: clef
+    model: Cloudflare/clef-flash
+    context: Photos from a real-estate listing service.
+    reproduction_instructions: The photograph itself (not a picture hanging in the room) is a black-and-white, sepia-toned or hand-tinted reproduction, a scan of an old film print or slide, or a heavily degraded low-quality image, rather than an ordinary modern digital color photograph.
+    exposure_instructions: "This is a real photograph whose subject or room is accidentally underexposed: walls, ceilings, floors or the main subject are clearly darker than the photographer intended, so a real-estate photo editor would brighten the shadows. Photos intentionally dark for mood (low-key portraits, night scenes, dramatic lighting, product shots on black) do not count."
+    white_balance_instructions: This is a real photograph of a room whose white or neutral walls or ceiling look yellow, orange or otherwise tinted because of an uncorrected color cast from the light, which a real-estate photo editor would neutralize. Intentionally colored walls, wood, warm sunset or candle light kept for mood do not count.
+    prefer_instructions: The second image is the first image after an automatic {description}. Answer true if a real-estate listing would rather show the second image than the first.
+    harm_instructions: The second image is the first image after an automatic {description}. Answer true if the second image changes the real color of a material or surface (for example beige or colored wallpaper, paint, wood or fabric turned white, grey or orange), turns a scene meant to be dark or warm into something it was not, removes an intentional tone such as sepia or other monochrome toning, or blows out highlights that were not blown out in the first image.
+    reproduction_threshold: 0.5
+    need_threshold: 0.5
+    prefer_threshold: 0.1
+    harm_threshold: 0.5
+    strength: 0.5
+    dtype: bfloat16
+    keep_on_device: true

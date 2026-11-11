@@ -1,0 +1,91 @@
+{
+  "context": {
+    "fileName": "AGENTS.md"
+  },
+  "general": {
+    "previewFeatures": true
+  },
+  "ui": {
+    "theme": "Default"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
+  },
+  "hooks": {
+    "BeforeAgent": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/node/.config/claudex/config/hooks/UserPromptSubmit.sh"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/node/.config/claudex/config/hooks/PreToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace|write_file|replace|write_file|replace|write_file|replace|ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/node/.config/claudex/config/hooks/PostToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/node/.config/claudex/config/hooks/Notification.sh"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/node/.config/claudex/config/hooks/Stop.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/node/.config/claudex/config/hooks/SessionEnd.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "_generated": "sync-agent-files.sh",
+  "tools": {
+    "sandbox": true
+  }
+}

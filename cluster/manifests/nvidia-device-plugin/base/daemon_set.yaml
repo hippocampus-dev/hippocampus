@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-device-plugin
+spec:
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: nvidia-device-plugin
+      app.kubernetes.io/component: ""
+  template:
+    metadata:
+      labels:
+        <<: *labels
+    spec:
+      priorityClassName: system-node-critical
+      runtimeClassName: nvidia
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  # files/usr/local/bin/minikube-gce-worker.sh joins GPU instances with this label
+                  - key: cloud.google.com/gke-accelerator
+                    operator: Exists
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nvidia-device-plugin
+          # Runs as root to create its socket in the root-owned /var/lib/kubelet/device-plugins
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: nvcr.io/nvidia/k8s-device-plugin
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          volumeMounts:
+            - name: device-plugins
+              mountPath: /var/lib/kubelet/device-plugins
+      volumes:
+        - name: device-plugins
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+            type: Directory

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- config_map.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+- storage_class.yaml
+images:
+- digest: sha256:c3f2c60ee2490eb83ac00101d7e239fd8c20a5b8b4038e2dfc36a7e66fe99c08
+  name: docker.io/rancher/local-path-provisioner
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/docker.io/rancher/local-path-provisioner

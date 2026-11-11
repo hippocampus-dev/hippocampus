@@ -1,0 +1,9 @@
+---
+paths:
+  - "**/horizontal_pod_autoscaler.yaml"
+---
+
+* Write a CPU metric as `type: ContainerResource` with `containerResource.container`, never the pod-aggregate `type: Resource` - the aggregate counts the admission-injected `istio-proxy`/`istio-validation` (see `### Istio Sidecar Injection` in `.claude/rules/cluster/manifests.md`) in both the usage and the request it divides by, so a sidecar CPU spike below the `istio-proxy` metric's own target still holds the HPA over target and cycles replicas while `kustomize build`, `kubectl apply --dry-run=server` and ArgoCD's Sync Status all stay green
+* Name the container that measurement shows carries the workload's load, not the one sharing the workload's name - read per-container usage as `## PromQL (Mimir)` in `.claude/skills/kubernetes-operations/reference/queries.md` describes, since a pod's helper container can outrun the application container it sits beside
+* Give the container a `type: Utilization` metric names its own `resources.requests.cpu` - `type: Utilization` divides by that container's request alone and does not fall back to the pod total, so the HPA leaves the replica count where it is when the container has none
+* Add a `ContainerResource` metric naming `istio-proxy` with `type: AverageValue` and `averageValue: 500m` to every HPA with `minReplicas` of at least 1 whose pods carry the sidecar, beside the metric the workload already scales on - the sidecar can pin its CPU limit while the application container stays under its own target, `type: Utilization` cannot stand in because it divides by the `sidecar.istio.io/proxyCPU` request, a small fraction of a core, so a percentage target fires far below saturation, and a running sidecar always proposes at least one replica, so a `minReplicas: 0` HPA carrying the metric never returns to zero

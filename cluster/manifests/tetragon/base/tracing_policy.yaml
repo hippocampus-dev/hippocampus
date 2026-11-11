@@ -1,0 +1,409 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: monitor-kernel-modules
+spec:
+  options:
+    # Sigkill does not abort the syscall, so Override is what prevents the load; Override needs non-multi kprobes
+    - name: disable-kprobe-multi
+      value: "true"
+  kprobes:
+    - call: sys_finit_module
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill
+    - call: sys_init_module
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill
+    - call: sys_delete_module
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill
+    - call: sys_kexec_load
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_BOOT
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill
+    - call: sys_kexec_file_load
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_BOOT
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill
+    # 32-bit syscalls do not enter __x64_sys_*; Override is rejected here because these are neither syscall-flagged nor security_ hooks
+    - call: __ia32_sys_finit_module
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Sigkill
+    - call: __ia32_sys_init_module
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Sigkill
+    - call: __ia32_sys_delete_module
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_MODULE
+          matchActions:
+            - action: Sigkill
+    - call: __ia32_compat_sys_kexec_load
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchCapabilities:
+            - type: Effective
+              operator: In
+              values:
+                - CAP_SYS_BOOT
+          matchActions:
+            - action: Sigkill
+---
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: monitor-kernel-read-file
+spec:
+  options:
+    # https://github.com/cilium/tetragon/blob/v1.6.1/pkg/sensors/tracing/generickprobe.go#L750-L753
+    - name: disable-kprobe-multi
+      value: "true"
+  kprobes:
+    - call: security_kernel_read_file
+      syscall: false
+      return: true
+      args:
+        - index: 0
+          type: file
+        - index: 1
+          type: int
+      returnArg:
+        index: 0
+        type: int
+      selectors:
+        - matchArgs:
+            - index: 1
+              operator: Equal
+              values:
+                - "2"
+          matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill
+---
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: monitor-container-escape
+spec:
+  options:
+    - name: disable-kprobe-multi
+      value: "true"
+  kprobes:
+    - call: security_file_permission
+      syscall: false
+      args:
+        - index: 0
+          type: file
+        - index: 1
+          type: int
+      selectors:
+        - matchArgs:
+            - index: 0
+              operator: Postfix
+              values:
+                - /sys/kernel/core_pattern
+                - /sys/kernel/modprobe
+                - /binfmt_misc/register
+                - /sysrq-trigger
+                - /uevent_helper
+                - /release_agent
+            - index: 1
+              operator: Mask
+              values:
+                - "2"
+          matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: Sigkill
+    # The handlers catch the same files under any path, such as a bind mount
+    - call: proc_dostring_coredump
+      syscall: false
+      args:
+        - index: 1
+          type: int
+      selectors:
+        - matchArgs:
+            - index: 1
+              operator: Equal
+              values:
+                - "1"
+          matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    - call: write_sysrq_trigger
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    - call: cgroup_release_agent_write
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    # Each of these exists only on the kernels that build it in
+    - call: uevent_helper_store
+      syscall: false
+      ignore:
+        callNotFound: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    - call: bm_register_write
+      syscall: false
+      ignore:
+        callNotFound: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+---
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: monitor-unused-syscalls
+spec:
+  kprobes:
+    - call: sys_open_by_handle_at
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    - call: sys_userfaultfd
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    # libuv falls back to epoll when io_uring_setup fails, so Node.js keeps running: https://github.com/libuv/libuv/blob/v1.51.0/src/unix/linux.c
+    - call: sys_io_uring_setup
+      syscall: true
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Override
+              argError: -1
+            - action: NoPost
+    - call: __ia32_compat_sys_open_by_handle_at
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    - call: __ia32_sys_userfaultfd
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+    - call: __ia32_sys_io_uring_setup
+      syscall: false
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchActions:
+            - action: Sigkill
+---
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: monitor-privilege-raise
+spec:
+  # Runner jobs raise privileges with sudo and rootless podman
+  podSelector:
+    matchExpressions:
+      - key: github-actions-runner.kaidotio.github.io/scale-set-uid
+        operator: DoesNotExist
+  kprobes:
+    - call: commit_creds
+      syscall: false
+      args:
+        - index: 0
+          type: uint32
+          resolve: euid.val
+      data:
+        - index: 0
+          type: uint32
+          source: current_task
+          resolve: cred.euid.val
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - host_ns
+          matchData:
+            - index: 0
+              operator: NotEqual
+              values:
+                - "0"
+          matchArgs:
+            - index: 0
+              operator: Equal
+              values:
+                - "0"
+          matchActions:
+            - action: Sigkill

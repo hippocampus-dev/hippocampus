@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "read_file(*)",
+      "write_file(/tmp)",
+      "read_url(*)"
+    ]
+  },
+  "trustedWorkspaces": [
+    "/opt/hippocampus"
+  ]
+}

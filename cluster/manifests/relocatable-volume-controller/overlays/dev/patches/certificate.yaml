@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: relocatable-volume-controller
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # issuer + 1
+spec:
+  dnsNames:
+    - relocatable-volume-controller.relocatable-volume-controller.svc
+    - relocatable-volume-controller.relocatable-volume-controller.svc.cluster.local

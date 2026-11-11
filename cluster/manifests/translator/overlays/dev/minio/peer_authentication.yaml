@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: minio
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: minio
+  mtls:
+    mode: STRICT

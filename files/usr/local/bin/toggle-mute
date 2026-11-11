@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+pactl set-sink-mute @DEFAULT_SINK@ toggle
+notify-send "Current Volume" "$(pactl get-sink-mute @DEFAULT_SINK@)"

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- certificate.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- issuer.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- service_account.yaml
+- validating_webhook_configuration.yaml
+images:
+- digest: sha256:5f85f2bed8b4ad9e7530a76248627f08dabc06af9b998af5869bce6511c56b63
+  name: ghcr.io/hippocampus-dev/hippocampus/lifecycle-job-hook
+  newName: ghcr.io/hippocampus-dev/hippocampus/lifecycle-job-hook

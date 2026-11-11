@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kube-crud-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-crud-server
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

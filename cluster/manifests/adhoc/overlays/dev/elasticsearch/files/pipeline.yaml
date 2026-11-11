@@ -1,0 +1,11 @@
+{
+  "processors": [
+    {
+      "json" : {
+        "field": "structural_message.metadata.managedFields",
+        "target_field": "metadata.managedFields",
+        "ignore_failure": true
+      }
+    }
+  ]
+}

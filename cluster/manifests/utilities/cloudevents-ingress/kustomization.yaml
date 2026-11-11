@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+
+images:
+- digest: sha256:8be1443b3b1f5b390619ff4f20d65dc6d39446b9a547c81e667dcd2db43c5be4
+  name: ghcr.io/hippocampus-dev/hippocampus/cloudevents-ingress
+  newName: ghcr.io/hippocampus-dev/hippocampus/cloudevents-ingress

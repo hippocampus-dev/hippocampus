@@ -1,0 +1,31 @@
+# Layered over docker-compose.yaml by hippocampus-compose.service that setup/hyperv-host/wsl.sh installs on hyperv-host, which runs no X server and is reached by Envoy on the Arch Linux host over the LAN
+services:
+  stable-diffusion-webui-forge:
+    environment: !override
+      - SD_WEBUI_CACHE_FILE=/home/nonroot/stable-diffusion-webui-forge/models/.cache/cache.json
+      - HUGGINGFACE_HUB_CACHE=/home/nonroot/stable-diffusion-webui-forge/models/.cache/huggingface
+    ports:
+      - "7860:7860"
+    # Relative sources resolve against the project directory of docker-compose.yaml rather than this file's
+    volumes: !override
+      - type: bind
+        bind:
+          create_host_path: false
+        source: docker-compose/stable-diffusion-webui-forge/styles.csv
+        target: /home/nonroot/stable-diffusion-webui-forge/styles.csv
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: docker-compose/stable-diffusion-webui-forge/extensions/Config-Presets/config-img2img.json
+        target: /home/nonroot/stable-diffusion-webui-forge/extensions/Config-Presets/config-img2img.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: docker-compose/stable-diffusion-webui-forge/extensions/Config-Presets/config-txt2img.json
+        target: /home/nonroot/stable-diffusion-webui-forge/extensions/Config-Presets/config-txt2img.json
+        read_only: true
+      - type: volume
+        source: stable-diffusion-forge-models
+        target: /home/nonroot/stable-diffusion-webui-forge/models

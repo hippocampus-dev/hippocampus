@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: envoy-ratelimit-controller
+
+resources:
+- service_account.yaml
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- role.yaml
+- role_binding.yaml
+- deployment.yaml
+- service.yaml
+- pod_disruption_budget.yaml
+- crd
+
+images:
+- digest: sha256:d71392c7ae2340408d2be4d5503e880be6a918db46e92c7039fe77274f41a512
+  name: ghcr.io/hippocampus-dev/hippocampus/envoy-ratelimit-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/envoy-ratelimit-controller

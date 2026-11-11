@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: libsodium-encryptor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: libsodium-encryptor
+      app.kubernetes.io/component: ""

@@ -1,0 +1,11 @@
+[Unit]
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+
+ExecStart=/usr/bin/microsocks -p 65532
+
+[Install]
+WantedBy=multi-user.target

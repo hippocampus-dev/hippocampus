@@ -1,0 +1,29 @@
+apiVersion: messaging.knative.dev/v1
+kind: Subscription
+metadata:
+  name: cloudevents-logger
+spec:
+  channel:
+    apiVersion: messaging.knative.dev/v1
+    kind: Channel
+    name: dead-letter
+  subscriber:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: cloudevents-logger
+---
+apiVersion: messaging.knative.dev/v1
+kind: Subscription
+metadata:
+  name: dead-letter
+spec:
+  channel:
+    apiVersion: messaging.knative.dev/v1
+    kind: Channel
+    name: dead-letter
+  subscriber:
+    ref:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: KafkaSink
+      name: dead-letter

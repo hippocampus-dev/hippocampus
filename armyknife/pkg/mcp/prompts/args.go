@@ -1,0 +1,9 @@
+package prompts
+
+type Args struct {
+	Address string
+}
+
+func DefaultArgs() *Args {
+	return &Args{}
+}

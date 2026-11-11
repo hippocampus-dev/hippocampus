@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: url-shortener
+  labels:
+    name: url-shortener
+    pod-security.kubernetes.io/enforce: restricted

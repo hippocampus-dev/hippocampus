@@ -1,0 +1,12 @@
+[package]
+name = "wasm_tokenizer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.45.1", features = ["macros", "rt-multi-thread"] }
+tempfile = { version = "3.3.0" }
+
+hippocampus-core = { path = "../..", features = ["wasm"] }
+hippocampusql = { path = "../../../hippocampusql" }
+error = { path = "../../../error" }

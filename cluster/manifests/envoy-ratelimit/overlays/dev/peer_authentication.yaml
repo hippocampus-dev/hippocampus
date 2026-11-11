@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: envoy-ratelimit
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: envoy-ratelimit
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

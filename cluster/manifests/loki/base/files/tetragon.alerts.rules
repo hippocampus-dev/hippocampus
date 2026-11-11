@@ -1,0 +1,12 @@
+groups:
+  - name: tetragon
+    rules:
+      - alert: PrivilegesRaisedByExecution
+        annotations:
+          message: |
+            Execution raising privileges in a container detected {{ $value }} times / 5m.
+        expr: |
+          count_over_time({grouping="kubernetes.kube-system.tetragon"} |= "PRIVILEGES_RAISED"[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning

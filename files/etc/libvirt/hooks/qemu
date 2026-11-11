@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+guest_name="$1"
+operation="$2"
+sub_operation="$3"
+
+if [[ "$guest_name" =~ _passthrough$ ]] && [ "$operation" == "prepare" ] && [ "$sub_operation" == "begin" ]; then
+  killall openbox || true
+  sleep 3
+  modprobe vfio_pci
+fi
+
+if [[ "$guest_name" =~ _passthrough$ ]] && [ "$operation" == "release" ] && [ "$sub_operation" == "end" ]; then
+  modprobe -r vfio_pci
+fi

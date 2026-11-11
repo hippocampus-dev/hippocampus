@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cluster-autoscaler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cluster-autoscaler
+      app.kubernetes.io/component: ""

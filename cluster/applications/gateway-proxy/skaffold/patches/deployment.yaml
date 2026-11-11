@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-proxy
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+  template:
+    spec:
+      containers:
+        - name: gateway-proxy
+          image: ghcr.io/hippocampus-dev/hippocampus/skaffold
+          env:
+            - name: VARIANT
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['variant']
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 1000m
+              memory: 128Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /home/nonroot/.config
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

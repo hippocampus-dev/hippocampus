@@ -1,0 +1,12 @@
+[Unit]
+Requires=minikube.service
+After=minikube.service
+
+[Service]
+Restart=always
+
+User=kai
+ExecStart=/usr/local/bin/minikube-socat.sh
+
+[Install]
+WantedBy=multi-user.target

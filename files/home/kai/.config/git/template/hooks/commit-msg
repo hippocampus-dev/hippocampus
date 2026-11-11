@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+typos=$(typos - --write-changes < "$1") || [ $? -eq 2 ]
+if [ -n "$typos" ]; then
+  echo "$typos" > "$1"
+fi

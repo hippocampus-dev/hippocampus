@@ -1,0 +1,80 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tempo-distributor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: distributor
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tempo-querier
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: querier
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tempo-query-frontend
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: query-frontend
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9095":
+      mode: PERMISSIVE # querier
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tempo-compactor
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: compactor
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tempo-ingester
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: ingester
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9095":
+      mode: PERMISSIVE # distributor,querier
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tempo-metrics-generator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tempo
+      app.kubernetes.io/component: metrics-generator
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9095":
+      mode: PERMISSIVE # distributor

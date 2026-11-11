@@ -1,0 +1,98 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: github.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - github.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+    - name: ssh
+      number: 22
+      protocol: TCP
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: objects.githubusercontent.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - objects.githubusercontent.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: raw.githubusercontent.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - raw.githubusercontent.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: release-assets.githubusercontent.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - release-assets.githubusercontent.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: download.elastic.co
+spec:
+  exportTo:
+    - .
+  hosts:
+    - download.elastic.co
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: slack.com
+spec:
+  exportTo:
+    - .
+  hosts:
+    - slack.com
+  location: MESH_EXTERNAL
+  ports:
+    - name: https
+      number: 443
+      protocol: HTTPS
+  resolution: DNS

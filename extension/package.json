@@ -1,0 +1,7 @@
+{
+  "name": "extension",
+  "private": true,
+  "devDependencies": {
+    "chrome-types": "^0.1.312"
+  }
+}

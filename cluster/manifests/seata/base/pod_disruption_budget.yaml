@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: seata
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: seata
+      app.kubernetes.io/component: ""

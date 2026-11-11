@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: telepresence
+spec:
+  secretName: telepresence-certs
+  issuerRef:
+    name: telepresence-selfsigned

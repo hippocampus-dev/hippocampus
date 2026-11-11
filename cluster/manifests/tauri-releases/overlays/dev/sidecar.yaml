@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: tauri-releases
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/name: tauri-releases
+      app.kubernetes.io/component: ""
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./accounts.google.com
+        - ./oauth2.googleapis.com
+        - ./www.googleapis.com
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

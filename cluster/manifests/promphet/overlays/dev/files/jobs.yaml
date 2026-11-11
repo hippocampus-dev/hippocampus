@@ -1,0 +1,6 @@
+jobs:
+  - name: istio_requests_rate
+    query: sum(rate(istio_requests_total[5m])) by (destination_service_namespace)
+    lookback: 1d
+    frequency: 10minutes
+    periods: 6

@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-gossip-ring
+spec:
+  publishNotReadyAddresses: true
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/part-of: memberlist
+  ports:
+    - name: tcp
+      port: 7946
+      protocol: TCP
+      targetPort: gossip
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-distributor
+spec:
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: distributor
+  ports:
+    - name: http
+      port: 3100
+      protocol: TCP
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-query-frontend
+spec:
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: query-frontend
+  ports:
+    - name: http
+      port: 3100
+      protocol: TCP
+      targetPort: http
+    - name: grpc
+      port: 9095
+      protocol: TCP
+      targetPort: grpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-query-scheduler-discovery
+spec:
+  publishNotReadyAddresses: true
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: query-scheduler
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-compactor
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: compactor
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-ingester
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: ingester
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-store-gateway
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: store-gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-alertmanager
+spec:
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: alertmanager
+  ports:
+    - name: http
+      port: 3100
+      protocol: TCP
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-ruler
+spec:
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: ruler
+  ports:
+    - name: http
+      port: 3100
+      protocol: TCP
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-proxy
+spec:
+  selector:
+    app.kubernetes.io/name: mimir
+    app.kubernetes.io/component: proxy
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: http

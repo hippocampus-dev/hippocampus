@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: spotify-mcp-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: spotify-mcp-server
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
