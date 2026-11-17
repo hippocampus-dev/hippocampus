@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: memory-bank
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: memory-bank
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

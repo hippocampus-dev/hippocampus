@@ -1,0 +1,144 @@
+name: kubectl-validation
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - cluster/manifests/**
+      - cluster/applications/**
+      - files/home/kai/kustomize/**
+      - .idea/crd/crd.yaml
+      - files/usr/local/bin/minikube-start.sh
+      - .github/workflows/50_kubectl-validation.yaml
+      - "!**/*.md"
+      - "!cluster/applications/**/e2e/**"
+      - "!cluster/applications/**/skaffold/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 60
+    runs-on: ubuntu-24.04
+    env:
+      XDG_CONFIG_HOME: ${{ github.workspace }}/files/home/kai
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .idea/crd/
+            cluster/applications/
+            cluster/manifests/
+            files/home/kai/kustomize/
+            files/usr/local/bin/minikube-start.sh
+      - run: git config --global submodule.recurse false
+      - run: |
+          set -eo pipefail
+          mkdir -p "${{ runner.temp }}/bin"
+          cd "${{ runner.temp }}/bin"
+          curl -fsSL --retry 5 --retry-all-errors -o kustomize.tar.gz "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.0/kustomize_v5.8.0_linux_amd64.tar.gz"
+          curl -fsSL --retry 5 --retry-all-errors -o kind https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64
+          curl -fsSL --retry 5 --retry-all-errors -o kubectl https://dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl
+          tar zxf kustomize.tar.gz --no-same-owner
+          rm kustomize.tar.gz
+          chmod +x kind kubectl
+          echo "${{ runner.temp }}/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -eo pipefail
+          feature_gates=$(sed -n 's/.*--feature-gates=\([^ ]*\).*/\1/p' files/usr/local/bin/minikube-start.sh)
+          runtime_config=$(sed -n 's/.*apiserver\.runtime-config=\([^ )]*\).*/\1/p' files/usr/local/bin/minikube-start.sh)
+          {
+            echo "kind: Cluster"
+            echo "apiVersion: kind.x-k8s.io/v1alpha4"
+            echo "networking:"
+            echo "  disableDefaultCNI: true"
+            echo "  kubeProxyMode: none"
+            echo "featureGates:"
+            echo "$feature_gates" | tr ',' '\n' | awk -F= '{ print "  " $1 ": " $2 }'
+            echo "runtimeConfig:"
+            echo "$runtime_config" | tr ',' '\n' | awk -F= '{ print "  \"" $1 "\": \"" $2 "\"" }'
+          } > "${{ runner.temp }}/kind.yaml"
+          kind create cluster --config "${{ runner.temp }}/kind.yaml"
+          # kind preinstalls local-path-provisioner under a selector cluster/manifests/local-path-provisioner cannot change: https://github.com/kubernetes-sigs/kind/blob/v0.33.0/pkg/build/nodeimage/const_storage.go
+          kubectl delete deployment local-path-provisioner -n local-path-storage
+      - run: |
+          set -eo pipefail
+          for d in cluster/manifests/validating-admission/overlays/dev cluster/manifests/mutating-admission/overlays/dev; do
+            kustomize build --enable-alpha-plugins "$d" | kubectl apply --server-side -f -
+          done
+          # No conversion webhook runs in the kind cluster
+          yq '.spec.conversion = {"strategy": "None"}' .idea/crd/crd.yaml | kubectl apply --server-side -f - > /dev/null
+          kubectl wait --for=condition=Established crd --all --timeout=120s > /dev/null
+      - run: |
+          set -eo pipefail
+          : > "${{ runner.temp }}/changed"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            git diff HEAD^1 HEAD --name-only --no-renames > "${{ runner.temp }}/changed"
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ -n "$(awk '/^(\.github\/workflows\/50_kubectl-validation\.yaml|\.idea\/crd\/crd\.yaml|files\/usr\/local\/bin\/minikube-start\.sh|cluster\/manifests\/(validating|mutating)-admission\/)/' "${{ runner.temp }}/changed")" ]; then
+            find cluster/manifests -type d -path "*/overlays/dev" | sort -u > "${{ runner.temp }}/targets"
+          else
+            {
+              awk '/^cluster\/manifests\/.*\/overlays\/dev\// { sub(/\/overlays\/dev\/.*/, "/overlays/dev"); print }' "${{ runner.temp }}/changed"
+              awk -F/ 'NF > 4 && $1 == "cluster" && $2 == "manifests" && $3 != "utilities" && $4 != "overlays" { print $1 "/" $2 "/" $3 "/overlays/dev" }' "${{ runner.temp }}/changed"
+              awk '/^cluster\/applications\// { split($0, segments, "/"); print "applications/" segments[3]; next } /^cluster\/manifests\/utilities\// { split($0, segments, "/"); print "utilities/" segments[4] }' "${{ runner.temp }}/changed" | sort -u | while IFS= read -r reference; do
+                find cluster/manifests -name kustomization.yaml | xargs -r awk -v reference="$reference" '$0 ~ (reference "(/|$)") { print FILENAME }'
+              done | sed -E 's#^(cluster/manifests/[^/]+)/.*#\1/overlays/dev#'
+              if [ -n "$(awk '/^files\/home\/kai\/kustomize\//' "${{ runner.temp }}/changed")" ]; then
+                find cluster/manifests -name "*.yaml" | xargs -r awk '/kustomize\.kaidotio\.github\.io/ { print FILENAME }' | sed -E 's#(/overlays/dev)/.*#\1#'
+              fi
+            } | sort -u | while IFS= read -r candidate; do
+              if [ -d "$candidate" ]; then
+                echo "$candidate"
+              else
+                echo "dropped $candidate: not a directory" >&2
+              fi
+            done > "${{ runner.temp }}/targets"
+          fi
+          if [ -s "${{ runner.temp }}/targets" ]; then
+            cat "${{ runner.temp }}/targets"
+          else
+            echo "no overlays affected by this diff" >&2
+          fi
+          while IFS= read -r d; do
+            kustomize build --enable-alpha-plugins "$d" > "${{ runner.temp }}/manifest.yaml"
+            # A CRD the overlay brings itself has to exist before its own resources can be dry-run
+            yq 'select(.kind == "CustomResourceDefinition") | .spec.conversion = {"strategy": "None"}' "${{ runner.temp }}/manifest.yaml" > "${{ runner.temp }}/crd.yaml"
+            if [ -s "${{ runner.temp }}/crd.yaml" ]; then
+              kubectl apply --server-side --force-conflicts -f "${{ runner.temp }}/crd.yaml" > /dev/null
+              kubectl wait --for=condition=Established crd --all --timeout=120s > /dev/null
+            fi
+            # The admission policy bindings select namespaces by label
+            yq 'select(.kind == "Namespace")' "${{ runner.temp }}/manifest.yaml" > "${{ runner.temp }}/namespace.yaml"
+            if [ -s "${{ runner.temp }}/namespace.yaml" ]; then
+              kubectl apply --server-side -f "${{ runner.temp }}/namespace.yaml" > /dev/null
+            fi
+            # Every namespace in the cluster carries the name label: cluster/create.sh, cluster/bin/deploy-istio.sh
+            while IFS= read -r namespace; do
+              if ! kubectl get namespace "$namespace" > /dev/null 2>&1; then
+                kubectl create namespace "$namespace" --dry-run=client -o yaml | yq ".metadata.labels.name = \"$namespace\"" | kubectl apply -f - > /dev/null
+              fi
+            done < <(yq -N 'select(.metadata.namespace != null) | .metadata.namespace' "${{ runner.temp }}/manifest.yaml" | sort -u)
+            # Client-side apply overflows the last-applied annotation on a large object
+            # Server-side apply rejects some manifests client-side apply merges
+            apply_options=()
+            if [ -n "$(yq -N "select(.spec.source.path == \"$d\") | .spec.syncPolicy.syncOptions[] | select(. == \"ServerSideApply=true\")" cluster/manifests/argocd-applications/base/*.yaml)" ]; then
+              apply_options=(--server-side --force-conflicts)
+            fi
+            if ! kubectl apply "${apply_options[@]}" --dry-run=server -f "${{ runner.temp }}/manifest.yaml"; then
+              exit 1
+            fi
+          done < "${{ runner.temp }}/targets"

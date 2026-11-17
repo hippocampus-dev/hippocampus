@@ -1,0 +1,8 @@
+apiVersion: snapshot.kaidotio.github.io/v1
+kind: Snapshot
+metadata:
+  name: example
+spec:
+  baseline: https://example.com
+  target: https://example.com
+  diffFormat: pixel

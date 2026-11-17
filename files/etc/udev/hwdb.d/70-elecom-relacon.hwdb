@@ -1,0 +1,3 @@
+evdev:input:b0005v056Ep0156*
+ KEYBOARD_KEY_c00b5=right
+ KEYBOARD_KEY_c00b6=left

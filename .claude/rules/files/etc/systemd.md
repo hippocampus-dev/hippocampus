@@ -1,0 +1,37 @@
+---
+paths:
+  - "files/etc/systemd/**"
+---
+
+* `Requires=` and `After=` are used as a pair for dependencies, except for the `Wants=` case of the next bullet and that a timer-started unit takes `Requisite=` in place of `Requires=` for a dependency stopped on purpose, and its `.timer` takes `PartOf=` on that dependency - `Requires=` starts the stopped dependency again, and a start during its stop job cancels the stop (`files/etc/systemd/system/minikube-worker.service`)
+* A unit whose stop reaches beyond its own processes - host maintenance, or scaling remote workers down - takes `Wants=` in place of `Requires=` on a service that restarts while the host stays up, while one that only takes down the containers it started (`files/etc/systemd/system/hippocampus-compose.service`) keeps `Requires=` and restarts with it - `Requires=` stops or restarts it whenever that service is, so restarting `docker.service` ran `shutdown.sh`'s full system upgrade and `docker system prune` through `files/etc/systemd/system/lifecycle.service`, and restarting `libvirtd.service` or `polkit.service` would run `minikube-stop.sh`, which scales the GCE workers to zero, through `files/etc/systemd/system/minikube.service`
+* `After=network-online.target` handles both startup (waits for network) and shutdown (stops before network) ordering
+* Do NOT combine `After=network-online.target` with `Before=network.target` (causes ordering cycle)
+* A `[Timer]` carries `OnCalendar=` and `Persistent=true`, so a run the host was powered off through fires once at the next boot rather than being skipped
+* A user unit mounting a FUSE filesystem mounts it outside `/home/{user}` (`files/etc/systemd/user/rclone-gdrive.service`), as `## Choosing where a directory is created` in `.claude/rules/setup.md` sets out
+* A unit starting a network service listens on `127.0.0.1` when only this host connects to it, on a UNIX socket under `/run` placed as `## Choosing where a directory is created` in `.claude/rules/setup.md` sets out when Envoy alone does (`files/etc/systemd/user/ttyd.service`, whose `/run/ttyd` Envoy bind-mounts), and otherwise joins the Docker-only port set of the `input` chain in `files/etc/nftables.conf` in the same change (`files/etc/systemd/user/x11vnc.service`, `files/etc/systemd/system/microsocks.service`) - that chain accepts every LAN source (`ip saddr @lan4 accept`), so a service left on every interface is open to the LAN with nothing reporting it
+* Add a socket directory such a unit creates to both the `for path in` list of `files/home/kai/bin/claudex` and the `InaccessiblePaths=` of `files/etc/systemd/system/docker-rootless.service` (`/run/ttyd`) - the claudex sandbox and the rootless dockerd both run as `kai`, so an owner-only mode on the directory keeps neither of them from connecting to the socket
+
+## Unit Placement
+
+| Unit | File Path | `_SYSTEM_TARGETS` entry | Enablement entry | `[Install]` |
+|------|-----------|-------------------------|------------------|-------------|
+| System service started at boot | `files/etc/systemd/system/{name}.service` | the `.service` | `_SERVICES` in `setup/arch/env.sh` | `WantedBy=multi-user.target` |
+| User service started at login | `files/etc/systemd/user/{name}.service` | the `.service` | `_USER_SERVICES` in `setup/arch/env.sh` | `WantedBy=default.target` |
+| Scheduled unit | `{name}.timer` beside the `{name}.service` it starts, in that same directory | both, the `.timer` listed first | the `.timer`, in whichever array that directory takes | `WantedBy=timers.target` on the `.timer`; the `.service` carries no `[Install]` |
+| Template started only by another unit's `OnFailure=` | `files/etc/systemd/{system,user}/{name}@.service` | the `@.service` | none | none |
+| Drop-in | `files/etc/systemd/{directory}/{unit or type}.d/{name}.conf` | each `.conf`, never the `.d` directory | none | none |
+
+Every unit whose row names an enablement entry needs both entries: `_SYSTEM_TARGETS` only places the symlink, and `setup.sh` enables `_SERVICES` and `_USER_SERVICES` alone, so a unit missing from those is installed but never started - switch one off by commenting its enablement entry out in place (`#backup.timer` in `setup/arch/env.sh`) rather than deleting the line, since this sentence reads a missing entry as an omission to fix and restoring it starts the unit again.
+Only the `_SERVICES` loop passes `--now`, so a system unit has to start cleanly under the `[Service]` settings it is committed with - that loop runs ahead of `setup/user.sh` and the closing `reboot` under `set -Eeo pipefail`, so a unit failing to start ends provisioning there - while a `_USER_SERVICES` entry is enabled only and first starts at the next login.
+
+## Dependency Patterns
+
+| Dependency Type | Requires | After |
+|-----------------|----------|-------|
+| Network (with or without ExecStop) | network-online.target | network-online.target |
+| Other service | {service}.service | {service}.service |
+| Docker | docker.service | docker.service |
+| Docker from a unit whose stop reaches beyond its own processes | docker.service (as `Wants=`) | docker.service |
+| Libvirt from a unit whose stop reaches beyond its own processes (minikube) | libvirtd.service polkit.service (as `Wants=`) | libvirtd.service polkit.service |
+| Minikube from a timer-started unit | minikube.service libvirtd.service (as `Requisite=`) | minikube.service libvirtd.service |

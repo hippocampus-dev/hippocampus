@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1.4
+
+FROM python:3.14-slim-bookworm
+LABEL org.opencontainers.image.source="https://github.com/hippocampus-dev/hippocampus"
+
+RUN echo "nonroot:x:65532:65532::/home/nonroot:/usr/sbin/nologin" >> /etc/passwd
+RUN echo "nonroot:x:65532:" >> /etc/group
+RUN mkdir /home/nonroot && chown nonroot:nonroot /home/nonroot
+
+RUN --mount=type=cache,target=/var/cache/apt/archives --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends git build-essential python3-dev libglfw3-dev libgles2-mesa-dev pkg-config ffmpeg
+
+USER 65532
+
+WORKDIR /home/nonroot
+
+RUN git clone https://github.com/comfyanonymous/ComfyUI -b v0.12.3 --depth 1 /home/nonroot/ComfyUI
+
+WORKDIR /home/nonroot/ComfyUI
+
+# ROCm 7.14 and 10.0 keep two HSA runtime threads per process busy-polling at idle in WSL: https://github.com/ROCm/rocm-systems/issues/15153#issuecomment-6668838584
+# ROCm 10.1.0 is the first release carrying the fix: https://github.com/ROCm/rocm-systems/pull/7898
+# ROCm 10.1.0 ships librocdxg, which lets HSA runtime reach the Windows driver over /dev/dxg in WSL, where /dev/kfd does not exist: https://rocm.docs.amd.com/en/docs-10.1.0/about/release-notes.html
+# torchvision and torchaudio are the releases ROCm/pytorch release/2.14 pins: https://github.com/ROCm/pytorch/blob/release/2.14/related_commits
+# The Radeon RX 9070 XT of hyperv-host is gfx1201: https://github.com/ROCm/TheRock/blob/main/RELEASES.md
+RUN pip install --no-cache-dir --index-url https://stable.repo.amd.com/rocm/whl-next/ "torch[device-gfx1201]==2.14.0+rocm10.1.0" "torchvision[device-gfx1201]==0.29.0a0+rocm10.1.0" torchaudio==2.11.0.3+rocm10.1.0 && \
+    pip freeze | grep -E "^(torch|torchvision|torchaudio)==" > /home/nonroot/constraints.txt
+# Keeps a custom node that ComfyUI-Manager installs from pulling the CUDA build of torch from PyPI over the ROCm one
+ENV PIP_CONSTRAINT=/home/nonroot/constraints.txt
+
+# xformers ships CUDA kernels only, so attention falls back to PyTorch's SDPA
+RUN pip install --no-cache-dir -r requirements.txt && \
+    python -c "import torch; assert torch.version.hip, torch.__version__"
+
+RUN git clone https://github.com/ltdrdata/ComfyUI-Manager /home/nonroot/ComfyUI/custom_nodes/comfyui-manager
+
+ENTRYPOINT ["python", "main.py"]
+CMD ["--listen", "0.0.0.0", "--port", "8188"]

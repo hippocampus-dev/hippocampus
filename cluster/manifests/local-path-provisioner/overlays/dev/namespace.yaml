@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: local-path-storage
+  labels:
+    name: local-path-storage
+    # local-path-provisioner creates helper pods that mount hostPath
+    pod-security.kubernetes.io/enforce: privileged

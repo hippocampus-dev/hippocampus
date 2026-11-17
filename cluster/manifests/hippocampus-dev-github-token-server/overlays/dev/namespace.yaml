@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hippocampus-dev-github-token-server
+  labels:
+    name: github-token-server
+    pod-security.kubernetes.io/enforce: restricted

@@ -1,0 +1,6 @@
+---
+paths:
+  - "taurim/src/services/**"
+---
+
+* Subscribe to Android plugin events with `addPluginListener(plugin, event, callback)` from `@tauri-apps/api/core` inside `setup{Feature}Listeners()`, never by invoking `register_listener` with a hand-built `handler` - the Kotlin side deserializes `handler` only from the `__CHANNEL__:{id}` string that `Channel` serializes to and rejects any other shape at runtime

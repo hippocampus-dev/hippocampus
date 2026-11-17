@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:5dc3585e564be8a72187b13531cad857b8acb7430e5c696c2a721ce108a189b5
+  name: ghcr.io/hippocampus-dev/hippocampus/http-redis-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/http-redis-proxy

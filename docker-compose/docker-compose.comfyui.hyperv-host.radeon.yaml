@@ -1,0 +1,25 @@
+# Layered over docker-compose.comfyui.hyperv-host.yaml by setup/hyperv-host/wsl.sh --radeon, whose WSL distribution has no /dev/kfd and reaches the Windows driver through librocdxg over /dev/dxg
+services:
+  comfyui:
+    build:
+      dockerfile: Dockerfile.rocm
+    develop:
+      # Relative paths resolve against the project directory of docker-compose.yaml rather than this file's
+      watch: !override
+        - action: rebuild
+          path: docker-compose/comfyui/Dockerfile.rocm
+    deploy: !reset {}
+    devices:
+      - /dev/dxg
+    environment:
+      # HIP lists the integrated gfx1036 of hyperv-host as device 0 ahead of the Radeon RX 9070 XT, the gfx1201 Dockerfile.rocm installs kernels for
+      - HIP_VISIBLE_DEVICES=1
+    ipc: host
+    volumes:
+      # librocdxg dlopens libdxcore.so by name, which WSL provides outside the container's library path
+      - type: bind
+        bind:
+          create_host_path: false
+        source: /usr/lib/wsl/lib/libdxcore.so
+        target: /usr/lib/libdxcore.so
+        read_only: true

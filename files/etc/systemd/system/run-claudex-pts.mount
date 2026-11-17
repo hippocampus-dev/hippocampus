@@ -1,0 +1,9 @@
+[Mount]
+What=devpts
+Where=/run/claudex/pts
+Type=devpts
+# gid= is left out on purpose: devpts hands a new slave the allocating process's fsgid when it is unset, and gid 5 is unmappable in the uid-only userns the sandbox runs in
+Options=newinstance,ptmxmode=0666,mode=0600,nosuid,noexec
+
+[Install]
+WantedBy=multi-user.target

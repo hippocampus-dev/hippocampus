@@ -1,0 +1,10 @@
+[Unit]
+
+[Service]
+Restart=always
+RestartSec=5
+
+ExecStart=/usr/local/bin/square-webcam.sh
+
+[Install]
+WantedBy=default.target

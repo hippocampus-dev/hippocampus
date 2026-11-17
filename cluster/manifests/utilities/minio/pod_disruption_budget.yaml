@@ -1,0 +1,8 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: minio
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: minio

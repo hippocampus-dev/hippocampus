@@ -1,0 +1,37 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: vpa-webhook-config
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: vpa-webhook
+        port: 443
+    name: vpa.k8s.io
+    failurePolicy: Ignore
+    sideEffects: None
+    # --webhook-timeout-seconds default, kept explicit because --register-webhook=false no longer applies it
+    timeoutSeconds: 30
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        resources:
+          - pods
+        scope: "*"
+        operations:
+          - CREATE
+      - apiGroups:
+          - autoscaling.k8s.io
+        apiVersions:
+          - "*"
+        resources:
+          - verticalpodautoscalers
+        scope: "*"
+        operations:
+          - CREATE
+          - UPDATE

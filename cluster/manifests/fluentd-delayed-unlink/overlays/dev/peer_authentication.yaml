@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: fluentd-delayed-unlink
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluentd-delayed-unlink
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

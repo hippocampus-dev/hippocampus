@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: cloudevents-ingress
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - async-memory-bank.minikube.127.0.0.1.nip.io
+        - async-memory-bank.kaidotio.dev
+      port:
+        number: 80
+        name: http
+        protocol: HTTP

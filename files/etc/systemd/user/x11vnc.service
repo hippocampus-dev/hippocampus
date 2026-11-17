@@ -1,0 +1,12 @@
+[Unit]
+
+[Service]
+Restart=always
+RestartSec=5
+# x11vnc exits 2 on SIGTERM and 0 on SIGINT: https://github.com/LibVNC/x11vnc/blob/master/src/cleanup.c
+KillSignal=SIGINT
+
+ExecStart=/usr/bin/x11vnc -display WAIT:0 -passwdfile %h/.secrets/X11VNC_PASSWORD -forever
+
+[Install]
+WantedBy=default.target

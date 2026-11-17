@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-path-config
+data:
+  # / and /opt of the minikube node are tmpfs
+  config.json: |-
+    {
+            "nodePathMap":[
+            {
+                    "node":"minikube",
+                    "paths":["/data/local-path-provisioner"]
+            },
+            {
+                    "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
+                    "paths":["/opt/local-path-provisioner"]
+            }
+            ]
+    }

@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: tls-intercept-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: tls-intercept-proxy
+  mtls:
+    mode: STRICT

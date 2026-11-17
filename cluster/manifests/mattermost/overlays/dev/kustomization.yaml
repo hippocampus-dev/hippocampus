@@ -1,0 +1,58 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mattermost
+
+resources:
+  - ../../base
+  - namespace.yaml
+  - network_policy.yaml
+  - peer_authentication.yaml
+  - sidecar.yaml
+  - telemetry.yaml
+  - gateway.yaml
+  - virtual_service.yaml
+  - service.yaml
+  - vitess_cluster.yaml
+  - gitlab-sso-bridge
+
+patches:
+  - path: patches/pod_disruption_budget.yaml
+  - path: patches/service.yaml
+  - path: patches/stateful_set.yaml
+
+configMapGenerator:
+  - name: mattermost-config
+    files:
+      - files/config.json
+    options:
+      immutable: true
+  - name: mattermost-init
+    files:
+      - files/init.sh
+    options:
+      immutable: true
+  - name: mattermost-proxy-config
+    files:
+      - files/nginx.conf.tmpl
+    options:
+      immutable: true
+
+secretGenerator:
+  - name: mattermost
+    files:
+      - files/users.json
+      - files/init_db.sql
+    options:
+      immutable: true
+
+generators:
+  - secrets_from_vault.yaml
+
+configurations:
+  - kustomizeconfig.yaml
+
+images:
+  - digest: sha256:22e0ec13c0db6b3e1ba3280e831fc50ba7bffe58e81f31670a64b1afede247bc
+    name: alpine
+    newName: ghcr.io/hippocampus-dev/hippocampus/mirror/alpine

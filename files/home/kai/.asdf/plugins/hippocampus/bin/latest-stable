@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+ENTRYPOINT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+readonly ENTRYPOINT
+
+"${ENTRYPOINT}/list-all" | tail -n1

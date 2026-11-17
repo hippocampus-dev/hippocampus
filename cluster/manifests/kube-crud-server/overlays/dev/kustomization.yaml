@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: kube-crud-server
+
+resources:
+- ../../base
+- minio
+- authorization_policy.yaml
+- gateway.yaml
+- job.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/pod_disruption_budget.yaml
+- path: patches/service.yaml
+
+configMapGenerator:
+- files:
+  - files/fluent-bit.conf
+  name: kube-crud-server
+  options:
+    immutable: true
+images:
+- digest: sha256:9335a717a09c064c29e847cf4462344b88e69145795616adc81b8b2320b6196a
+  name: fluent/fluent-bit
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/fluent/fluent-bit
+- digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+  name: minio/mc
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/minio/mc

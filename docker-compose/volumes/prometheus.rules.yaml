@@ -1,0 +1,52 @@
+groups:
+  - name: windows-exporter
+    interval: 15s
+    rules:
+      - record: node_cpu_seconds_total
+        expr: sum without (core, state) (label_replace(label_replace(windows_hyperv_hypervisor_logical_processor_time_seconds_total, "cpu", "$1", "core", "(.*)"), "mode", "$1", "state", "(.*)"))
+      - record: node_memory_MemTotal_bytes
+        expr: windows_memory_physical_total_bytes
+      - record: node_memory_SwapTotal_bytes
+        expr: sum by (job, instance, node) (windows_pagefile_limit_bytes)
+      - record: node_memory_SwapFree_bytes
+        expr: sum by (job, instance, node) (windows_pagefile_free_bytes)
+      - record: node_boot_time_seconds
+        expr: windows_system_boot_time_timestamp
+      - record: node_time_seconds
+        expr: time() + 0 * windows_system_boot_time_timestamp
+      - record: node_filesystem_size_bytes
+        expr: label_replace(windows_logical_disk_size_bytes{volume="C:"}, "mountpoint", "/", "volume", ".*")
+      - record: node_network_receive_bytes_total
+        expr: sum without (nic) (label_replace(windows_net_bytes_received_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_transmit_bytes_total
+        expr: sum without (nic) (label_replace(windows_net_bytes_sent_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_receive_packets_total
+        expr: sum without (nic) (label_replace(windows_net_packets_received_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_transmit_packets_total
+        expr: sum without (nic) (label_replace(windows_net_packets_sent_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_receive_drop_total
+        expr: sum without (nic) (label_replace(windows_net_packets_received_discarded_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_transmit_drop_total
+        expr: sum without (nic) (label_replace(windows_net_packets_outbound_discarded_total, "device", "$1", "nic", "(.*)"))
+      - record: node_netstat_Tcp_RetransSegs
+        expr: sum by (job, instance, node) (windows_tcp_segments_retransmitted_total)
+      - record: node_disk_info
+        expr: sum by (job, instance, node, device) (label_replace(windows_logical_disk_info{volume=~"[A-Z]:"}, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_read_bytes_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_read_bytes_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_written_bytes_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_write_bytes_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_reads_completed_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_reads_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_writes_completed_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_writes_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_read_time_seconds_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_read_seconds_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_write_time_seconds_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_write_seconds_total, "device", "$1", "volume", "(.*)"))
+      - record: DCGM_FI_DEV_FB_USED
+        expr: max by (job, instance, node) (windows_gpu_adapter_memory_dedicated_bytes and on (instance, luid) (windows_gpu_dedicated_video_memory_size_bytes == on (instance) group_left () max by (instance) (windows_gpu_dedicated_video_memory_size_bytes))) / 1048576
+      - record: DCGM_FI_DEV_FB_FREE
+        expr: max by (job, instance, node) (windows_gpu_dedicated_video_memory_size_bytes) / 1048576 - DCGM_FI_DEV_FB_USED{job="windows-exporter"}
+      - record: DCGM_FI_DEV_GPU_TEMP
+        expr: label_replace(max by (job, instance, node) (windows_gpu_temperature_celsius and on (instance, luid) (windows_gpu_dedicated_video_memory_size_bytes == on (instance) group_left () max by (instance) (windows_gpu_dedicated_video_memory_size_bytes))), "modelName", "$1", "node", "(.*)")

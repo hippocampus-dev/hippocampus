@@ -1,0 +1,113 @@
+name: Scan Image
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+        description: "Full image reference (ghcr.io/owner/repo/image:tag)"
+      runner:
+        required: false
+        type: string
+        default: '"ubuntu-24.04"'
+permissions:
+  contents: write
+  packages: read
+  id-token: write
+jobs:
+  scan:
+    timeout-minutes: 60
+    runs-on: ${{ fromJSON(inputs.runner) }}
+    outputs:
+      vulnerabilities: ${{ steps.count.outputs.vulnerabilities }}
+      artifactName: ${{ steps.artifact.outputs.name }}
+    steps:
+      - if: contains(inputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - if: contains(inputs.runner, 'local')
+        run: echo "DOCKER_CONFIG=${{ runner.temp }}/.docker" >> $GITHUB_ENV
+      - run: docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ github.token }}
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ inputs.image }}
+          format: cyclonedx
+          output: ${{ runner.temp }}/sbom.cyclonedx.json
+          scanners: vuln,secret
+          severity: CRITICAL
+          exit-code: "0"
+          timeout: 30m
+          cache-dir: ${{ runner.temp }}/trivy-cache
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ inputs.image }}
+          format: json
+          output: ${{ runner.temp }}/trivy-results.json
+          scanners: vuln,secret
+          severity: CRITICAL
+          exit-code: "0"
+          timeout: 30m
+          cache-dir: ${{ runner.temp }}/trivy-cache
+          cache: false
+          skip-setup-trivy: true
+      - run: echo "SBOM_NAME=sbom-$(echo '${{ inputs.image }}' | sed 's|[/:@]|-|g')" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ${{ env.SBOM_NAME }}
+          path: ${{ runner.temp }}/sbom.cyclonedx.json
+          if-no-files-found: error
+          retention-days: 90
+      - id: count
+        run: |
+          set -eo pipefail
+          VULNERABILITIES=$(jq '[.Results // [] | .[] | .Vulnerabilities // [] | length] | add // 0' "${{ runner.temp }}/trivy-results.json")
+          echo "vulnerabilities=$VULNERABILITIES" >> $GITHUB_OUTPUT
+      - id: artifact
+        run: echo "name=trivy-results-$(echo '${{ inputs.image }}' | sed 's|[/:@]|-|g')" >> $GITHUB_OUTPUT
+      - if: steps.count.outputs.vulnerabilities != '0'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: ${{ runner.temp }}/trivy-results.json
+          if-no-files-found: error
+          retention-days: 1
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            .github/scripts/submit-dependency-snapshot.sh
+          sparse-checkout-cone-mode: false
+      - run: GH_TOKEN="${{ github.token }}" bash .github/scripts/submit-dependency-snapshot.sh "${{ runner.temp }}/sbom.cyclonedx.json"
+  issue-github-token:
+    if: needs.scan.outputs.vulnerabilities != '0'
+    needs: scan
+    uses: ./.github/workflows/reusable_issue-github-token.yaml
+    with:
+      profile: writer
+    secrets: inherit
+  create-cve-issues:
+    needs: [scan, issue-github-token]
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    environment: deployment
+    steps:
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            .github/scripts/create-cve-issues.sh
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: ${{ needs.scan.outputs.artifactName }}
+          path: ${{ runner.temp }}
+      - run: |
+          set -eo pipefail
+
+          TOKEN=$(echo "$ENCRYPTED_TOKEN" | base64 -d | gpg -dq --batch --passphrase-file <(printf '%s' "$GPG_PASSPHRASE"))
+          echo "::add-mask::$TOKEN"
+          export GH_TOKEN="$TOKEN"
+
+          bash .github/scripts/create-cve-issues.sh "${{ runner.temp }}/trivy-results.json"
+        env:
+          ENCRYPTED_TOKEN: ${{ needs.issue-github-token.outputs.encrypted_token }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

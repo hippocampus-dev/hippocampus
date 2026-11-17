@@ -1,0 +1,126 @@
+services:
+  comfyui:
+    profiles:
+      - comfyui
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: comfyui
+    develop:
+      watch:
+        - action: rebuild
+          path: comfyui/Dockerfile
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command:
+      - --listen
+      - 0.0.0.0
+      - --port
+      - "8188"
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: comfyui/workflows/flux.1.s.json
+        target: /home/nonroot/ComfyUI/user/default/workflows/flux.1.s.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: comfyui/workflows/flux.1.d.json
+        target: /home/nonroot/ComfyUI/user/default/workflows/flux.1.d.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: comfyui/workflows/flux.1.d.lora.json
+        target: /home/nonroot/ComfyUI/user/default/workflows/flux.1.d.lora.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: comfyui/workflows/wan2.1.t2v.json
+        target: /home/nonroot/ComfyUI/user/default/workflows/wan2.1.t2v.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: comfyui/workflows/wan2.1.i2v.480p.json
+        target: /home/nonroot/ComfyUI/user/default/workflows/wan2.1.i2v.480p.json
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: comfyui/workflows/wan2.1.i2v.720p.json
+        target: /home/nonroot/ComfyUI/user/default/workflows/wan2.1.i2v.720p.json
+        read_only: true
+      - type: volume
+        source: comfyui-models
+        target: /home/nonroot/ComfyUI/models
+      - type: volume
+        source: comfyui-user
+        target: /home/nonroot/ComfyUI/user
+      - type: volume
+        source: comfyui-custom-nodes
+        target: /home/nonroot/ComfyUI/custom_nodes
+    depends_on:
+      comfyui-chown:
+        condition: service_completed_successfully
+    networks:
+      - default
+  comfyui-chown:
+    profiles:
+      - comfyui
+      - full
+    image: debian:bookworm-slim
+    entrypoint:
+      - chown
+      - -R
+      - 65532:65532
+      - /home/nonroot/user
+    volumes:
+      - type: volume
+        source: comfyui-user
+        target: /home/nonroot/user
+      - type: volume
+        source: comfyui-custom-nodes
+        target: /home/nonroot/custom_nodes
+    networks:
+      - default
+  comfyui-downloader:
+    profiles:
+      - comfyui
+      - full
+    build:
+      dockerfile: Dockerfile
+      context: comfyui/downloader
+    develop:
+      watch:
+        - action: rebuild
+          path: comfyui/downloader/Dockerfile
+        - action: rebuild
+          path: comfyui/downloader/links.txt
+    command:
+      - -j
+      - "5"
+      - -x
+      - "8"
+      - -s
+      - "8"
+      - -k
+      - "100M"
+      - --header
+      - "Authorization: Bearer ${HF_HUB_TOKEN}"
+    environment:
+      - HF_HUB_TOKEN=${HF_HUB_TOKEN}
+    volumes:
+      - type: volume
+        source: comfyui-models
+        target: /home/nonroot/models
+    networks:
+      - default

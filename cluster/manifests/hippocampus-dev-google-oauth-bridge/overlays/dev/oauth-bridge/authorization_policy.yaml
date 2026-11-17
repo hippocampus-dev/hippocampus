@@ -1,0 +1,51 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: oauth-bridge
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: oauth-bridge
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - hippocampus-dev-google-oauth-bridge.minikube.127.0.0.1.nip.io
+            - hippocampus-dev-google-oauth-bridge.kaidotio.dev
+    # Only the redirect Google sends the browser to needs to reach the public host
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - hippocampus-dev-google-oauth-bridge-public.kaidotio.dev
+      to:
+        - operation:
+            methods:
+              - GET
+            paths:
+              - /callback
+    - from:
+        - source:
+            namespaces:
+              - cortex-bot
+            principals:
+              - cluster.local/ns/cortex-bot/sa/cortex-bot
+      to:
+        - operation:
+            methods:
+              - POST
+            paths:
+              - /device/code
+              - /token

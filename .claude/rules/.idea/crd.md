@@ -1,0 +1,19 @@
+---
+paths:
+  - ".idea/crd/**"
+  - "cluster/manifests/argocd/base/kustomization.yaml"
+  - "cluster/manifests/elastic-cloud-kubernetes/base/kustomization.yaml"
+  - "cluster/manifests/gateway-api/base/kustomization.yaml"
+  - "cluster/manifests/knative-eventing/base/kustomization.yaml"
+  - "cluster/manifests/knative-eventing-kafka/base/kustomization.yaml"
+  - "cluster/manifests/knative-serving/base/kustomization.yaml"
+  - "cluster/manifests/strimzi-cluster-operator/base/kustomization.yaml"
+  - "cluster/manifests/tetragon/base/kustomization.yaml"
+  - "cluster/manifests/vpa/base/kustomization.yaml"
+  - "cluster/create.sh"
+  - "cluster/bin/deploy-cilium.sh"
+---
+
+* `kustomization.yaml` to modify CRD sources; `crd.yaml` is the generated output
+* Name in `kustomization.yaml` the same URL, ref and path the cluster applies (the comment above each entry names that source), and change both in the same commit whenever a version moves on either side - the bundle is also what server-side validation installs, so an entry pinned apart from the cluster validates manifests against a schema the cluster does not run, and a kind the cluster serves but the bundle lacks fails validation for every manifest using it
+* Regenerate `crd.yaml` with the `kustomize build` pipeline in `.github/workflows/90_crd.yaml`, which keeps only the CustomResourceDefinitions out of the whole upstream manifests the entries name, after modifying `kustomization.yaml` and after adding a CRD to a directory or file its `resources` names - the workflow only fires on the `paths` it lists, so a CRD dropped into a source missing from them leaves the generated bundle short of it with nothing reporting the gap; keep that workflow's `paths` and `sparse-checkout` listing every in-repository source

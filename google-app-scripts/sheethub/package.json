@@ -1,0 +1,29 @@
+{
+  "name": "sheethub",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rollup --config",
+    "predeploy": "npm run build",
+    "deploy": "clasp push",
+    "open": "clasp open",
+    "open:addon": "clasp open --addon",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/google-apps-script": "^1.0.78",
+    "@types/node": "^20.10.5",
+    "@types/sjcl": "^1.0.34",
+    "rollup": "^4.9.1",
+    "tslib": "^2.6.2",
+    "vitest": "^1.1.0"
+  },
+  "dependencies": {
+    "@hyrious/marshal": "^0.3.3",
+    "sjcl": "^1.0.8",
+    "yaml": "^2.3.4"
+  }
+}

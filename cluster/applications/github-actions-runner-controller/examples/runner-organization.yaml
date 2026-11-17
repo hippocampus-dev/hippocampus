@@ -1,0 +1,11 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: Runner
+metadata:
+  name: org-runner-example
+spec:
+  image: ubuntu:24.04
+  owner: hippocampus-dev
+  # No repo field means organization-level runner
+  tokenSecretKeyRef:
+    name: org-credentials
+    key: GITHUB_TOKEN

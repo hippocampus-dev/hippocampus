@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- cluster_role.yaml
+- cluster_role_binding.yaml
+- deployment.yaml
+- pod_disruption_budget.yaml
+- role.yaml
+- role_binding.yaml
+- service_account.yaml
+
+configMapGenerator:
+- files:
+  - files/config.yaml
+  name: distribution-scheduler-config
+
+images:
+- digest: sha256:0381040858ccec6165bb5ceae4f400d340cdbad548a72c4011878679f4a64fb2
+  name: ghcr.io/hippocampus-dev/hippocampus/distribution-scheduler
+  newName: ghcr.io/hippocampus-dev/hippocampus/distribution-scheduler

@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: local-path-provisioner
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: local-path-provisioner
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

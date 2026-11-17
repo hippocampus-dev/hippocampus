@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:b8631eb8d481207fde1a8f4089e67c09dbd835272bb1872e17416d4a3f07fb8f
+  name: ghcr.io/hippocampus-dev/hippocampus/gitlab-sso-bridge
+  newName: ghcr.io/hippocampus-dev/hippocampus/gitlab-sso-bridge

@@ -1,0 +1,217 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+usage() {
+  cat <<EOS
+Usage:
+   claudex-discussion TOPIC [--members N] [--rounds N] [--output FILE] [--roles ROLES] [--type TYPE] [--auto-summarize]
+EOS
+}
+
+if [ -z "$TMUX_PANE" ]; then
+  exit 1
+fi
+
+facilitator_pane="$TMUX_PANE"
+
+members=3
+rounds=3
+output_file=""
+member_roles=""
+discussion_type="general"
+auto_summarize=false
+
+case "${1:-}" in
+  "" | -*)
+    usage
+    exit 1
+    ;;
+esac
+
+topic="$1"
+shift
+
+args=()
+while (( $# )); do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --members|-m)
+      members="$2"
+      shift 2
+      ;;
+    --rounds|-r)
+      rounds="$2"
+      shift 2
+      ;;
+    --output|-o)
+      output_file="$2"
+      shift 2
+      ;;
+    --roles)
+      member_roles="$2"
+      shift 2
+      ;;
+    --type)
+      discussion_type="$2"
+      shift 2
+      ;;
+    --auto-summarize)
+      auto_summarize=true
+      shift
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+IFS=, read -ra roles <<< "$member_roles"
+
+discussion_log=$(mktemp)
+structured_log=$(mktemp)
+
+jq -n \
+  --arg topic "$topic" \
+  --arg type "$discussion_type" \
+  --argjson participants "$members" \
+  --argjson rounds_planned "$rounds" \
+  --arg start_time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  '{topic: $topic, type: $type, participants: $participants, rounds_planned: $rounds_planned, start_time: $start_time, members: [], discussion: []}' \
+  > "$structured_log"
+
+declare -a member_panes
+declare -a prompt_files
+for i in $(seq 1 "$members"); do
+  if [ "$i" -eq 1 ]; then
+    member_panes[$i]=$(tmux split-window -t "$facilitator_pane" -h -P -F "#{pane_id}")
+  else
+    member_panes[$i]=$(tmux split-window -t "${member_panes[$((i - 1))]}" -v -P -F "#{pane_id}")
+  fi
+
+  if [ "${#roles[@]}" -ge "$i" ]; then
+    role="${roles[$((i-1))]}"
+  else
+    role="参加者"
+  fi
+
+  jq --arg id "MEMBER${i}" --arg role "$role" --arg pane "${member_panes[$i]}" \
+    '.members += [{"id": $id, "role": $role, "pane": $pane}]' \
+    "$structured_log" > "${structured_log}.tmp"
+  mv "${structured_log}.tmp" "$structured_log"
+
+  t=$(mktemp)
+  prompt_files+=("$t")
+  cat <<EOS > "$t"
+# MOST IMPORTANT RULES
+あなたは議論のメンバー${i}（役割: ${role}）です。
+ファシリテーターから指示されたトピックについて議論してください。
+
+発言が完了したら以下のコマンドでファシリテーターに報告してください。
+- tmux send-keys -t ${facilitator_pane} "${member_panes[$i]}[${role}]: <発言内容>" && sleep 0.1 && tmux send-keys -t ${facilitator_pane} C-m
+
+他のメンバーのpane id：
+EOS
+
+  for j in $(seq 1 "$members"); do
+    if [ "$j" -ne "$i" ]; then
+      if [ "${#roles[@]}" -ge "$j" ]; then
+        other_role="${roles[$((j-1))]}"
+      else
+        other_role="参加者"
+      fi
+      echo "- メンバー${j} (${other_role}): ${member_panes[$j]}" >> "$t"
+    fi
+  done
+
+  cat <<EOS >> "$t"
+
+他のメンバーに直接コメントや質問をする場合：
+- tmux send-keys -t <pane id> "@MEMBER${i}: <メッセージ>" && sleep 0.1 && tmux send-keys -t <pane id> C-m
+
+他のメンバーから以下のフォーマットでメッセージが来ます：
+@MEMBER${i}: <メッセージ>
+EOS
+
+  tmux send-keys -t "${member_panes[$i]}" "claudex ${args[*]} --local-memory-file $t" C-m
+  sleep 1
+done
+
+for i in $(seq 1 "$members"); do
+  tmux select-pane -t "${member_panes[$i]}"
+  tmux resize-pane -t "${member_panes[$i]}" -y $(( 100 / $members ))%
+done
+
+tmux select-pane -t "$facilitator_pane"
+
+cleanup() {
+  rm -f "${prompt_files[@]}"
+  jq --arg end_time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '.end_time = $end_time' \
+    "$structured_log" > "${structured_log}.tmp"
+  mv "${structured_log}.tmp" "$structured_log"
+
+  if [ -n "$output_file" ]; then
+    case "${output_file##*.}" in
+      json)
+        cp "$structured_log" "$output_file"
+        ;;
+      *)
+        cp "$discussion_log" "$output_file"
+        ;;
+    esac
+  fi
+
+  for i in $(seq 1 "$members"); do
+    tmux kill-pane -t "${member_panes[$i]}" 2>/dev/null || true
+  done
+
+  rm -f "$discussion_log" "$structured_log"
+}
+
+trap cleanup EXIT
+
+t=$(mktemp)
+prompt_files+=("$t")
+cat <<EOS > "$t"
+# MOST IMPORTANT RULES
+あなたは議論のファシリテーターです。
+${members}人のメンバーと共に「${topic}」について議論を進行させてください。
+議論タイプ: ${discussion_type}
+
+以下のtmuxのpane idでメンバーが動いています。
+EOS
+
+for i in $(seq 1 "$members"); do
+  if [ "${#roles[@]}" -ge "$i" ]; then
+    role="${roles[$((i-1))]}"
+  else
+    role="参加者"
+  fi
+  echo "- ${member_panes[$i]} (${role})" >> "$t"
+done
+
+cat <<EOS >> "$t"
+
+以下のコマンドでメンバーに指示できます。
+- tmux send-keys -t <pane id> "<指示内容>" && sleep 0.1 && tmux send-keys -t <pane id> C-m
+
+メンバーから以下のフォーマットで報告されます。
+<pane id>[役割]: <発言内容>
+
+メンバー間の直接会話も可能です。メンバーは相互に以下の形式でコミュニケーションできます：
+@MEMBER<番号>: <メッセージ>
+
+議論は${rounds}ラウンド行い、最終的に要約と結論をまとめてください。
+メンバー間の対話も促進し、活発な議論を実現してください。
+議論ログ: $discussion_log
+構造化ログ: $structured_log
+自動要約: $auto_summarize
+EOS
+
+claudex "${args[@]}" --local-memory-file "$t"

@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 1s
+
+rule_files:
+  - /etc/prometheus/prometheus.rules.yaml
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["127.0.0.1:9090"]
+  - job_name: "opentelemetry-collector"
+    static_configs:
+      - targets: ["opentelemetry-collector:8888"]
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+        labels:
+          node: arch
+  - job_name: "windows-exporter"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["hyperv-host.local:9182"]
+        labels:
+          node: hyperv-host
+  - job_name: "mirror-registry-dockerio"
+    static_configs:
+      - targets: ["mirror-registry-dockerio:5001"]
+  - job_name: "mirror-registry-ghcrio"
+    static_configs:
+      - targets: ["mirror-registry-ghcrio:5003"]
+  - job_name: "dcgm-exporter"
+    static_configs:
+      - targets: ["dcgm-exporter:9400"]
+        labels:
+          node: arch
+  - job_name: "opentelemetry"
+    static_configs:
+      - targets: ["opentelemetry-collector:8889"]

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- network_policy.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+- stateful_set.yaml
+
+configMapGenerator:
+- files:
+  - files/entrypoint.sh
+  name: qdrant-tools
+  options:
+    immutable: true
+
+images:
+- digest: sha256:d2ab6db75ba613b54ef3e4c797346f89525137fc9d6c907b6e9598dee6047ea3
+  name: qdrant/qdrant
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/qdrant/qdrant

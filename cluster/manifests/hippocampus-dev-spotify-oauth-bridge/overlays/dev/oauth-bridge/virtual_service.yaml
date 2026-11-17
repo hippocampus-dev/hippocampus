@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: oauth-bridge
+spec:
+  gateways:
+    - hippocampus-dev-spotify-oauth-bridge
+  hosts:
+    - hippocampus-dev-spotify-oauth-bridge.minikube.127.0.0.1.nip.io
+    - hippocampus-dev-spotify-oauth-bridge.kaidotio.dev
+    - hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: hippocampus-dev-spotify-oauth-bridge
+            port:
+              number: 8080
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

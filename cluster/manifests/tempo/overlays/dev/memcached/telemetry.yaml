@@ -1,0 +1,47 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: memcached
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: memcached
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: mcrouter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mcrouter
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

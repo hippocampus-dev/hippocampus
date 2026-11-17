@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- service.yaml
+
+configurations:
+- kustomizeconfig.yaml
+images:
+- digest: sha256:63414f6a0d36c8a54e53e55d84d3c476854bb9ba9f9414dce5203c4489b384e5
+  name: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy-wasm
+spec:
+  ports:
+    - name: http-base
+      port: 8081
+      protocol: TCP
+      targetPort: http-base
