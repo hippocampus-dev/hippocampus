@@ -38,7 +38,7 @@ jobs:
           cp -r files/home/kai/.config/claudex/config/agents ${{ runner.temp }}/claude-home/agents
           cp -r files/home/kai/.config/claudex/config/commands ${{ runner.temp }}/claude-home/commands
           cp -r files/home/kai/.config/claudex/config/skills ${{ runner.temp }}/claude-home/skills
-      - uses: anthropics/claude-code-action@v1.0.271
+      - uses: anthropics/claude-code-action@v1.0.281
         env:
           CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
         with:

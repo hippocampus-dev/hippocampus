@@ -143,7 +143,7 @@ jobs:
           cp -r files/home/kai/.config/claudex/config/commands ${{ runner.temp }}/claude-home/commands
           cp -r files/home/kai/.config/claudex/config/skills ${{ runner.temp }}/claude-home/skills
       - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
-        uses: anthropics/claude-code-action@v1.0.271
+        uses: anthropics/claude-code-action@v1.0.281
         env:
           CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
         with:

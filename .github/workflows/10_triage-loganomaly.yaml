@@ -26,7 +26,7 @@ jobs:
           set -eo pipefail
           mkdir -p ${{ runner.temp }}/claude-home
           mkdir -p ${{ runner.temp }}/claude-tmp
-      - uses: anthropics/claude-code-action@v1.0.271
+      - uses: anthropics/claude-code-action@v1.0.281
         env:
           CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
           CLAUDE_CODE_TMPDIR: ${{ runner.temp }}/claude-tmp
