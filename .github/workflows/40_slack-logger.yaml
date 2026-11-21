@@ -44,7 +44,7 @@ jobs:
         with:
           sparse-checkout: |
             cluster/applications/slack-logger/
-      - uses: actions/setup-go@v7.0.0
+      - uses: actions/setup-go@v7.1.0
         with:
           go-version: stable
       - run: |

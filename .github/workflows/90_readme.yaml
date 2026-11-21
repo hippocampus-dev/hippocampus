@@ -78,7 +78,7 @@ jobs:
           EOF
 
           echo '{"port":0}' > ${{ runner.temp }}/codex-home/${{ github.run_id }}.json
-      - uses: openai/codex-action@v1.13
+      - uses: openai/codex-action@v1.14
         with:
           codex-home: ${{ runner.temp }}/codex-home
           # https://github.com/openai/codex/issues/7051
