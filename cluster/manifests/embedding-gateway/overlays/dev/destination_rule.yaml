@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: embedding-gateway-varnish
+spec:
+  host: embedding-gateway-varnish
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: x-body-hash

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+readonly STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/easyeffects-bypass"
+
+if [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE")" = "1" ]; then
+  easyeffects -b 2
+  echo "2" > "$STATE_FILE"
+  notify-send "EasyEffects" "Effects enabled"
+else
+  easyeffects -b 1
+  echo "1" > "$STATE_FILE"
+  notify-send "EasyEffects" "Effects bypassed"
+fi

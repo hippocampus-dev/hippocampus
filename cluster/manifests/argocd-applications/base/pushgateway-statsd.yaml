@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pushgateway-statsd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/manifest-generate-paths: "/cluster/manifests/pushgateway-statsd;/cluster/manifests/utilities/statsd-exporter"
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: notifications
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: notifications
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:hippocampus-dev/hippocampus
+    targetRevision: main
+    path: cluster/manifests/pushgateway-statsd/overlays/dev
+    kustomize:
+      version: custom
+      commonAnnotationsEnvsubst: true
+      commonAnnotations:
+        repository: ${ARGOCD_APP_SOURCE_REPO_URL}
+        # revision annotation is injected by https://github.com/hippocampus-dev/hippocampus/blob/main/cluster/manifests/argocd/overlays/dev/patches/deployment.yaml to support monorepo
+        #revision: ${ARGOCD_APP_REVISION}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pushgateway-statsd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false

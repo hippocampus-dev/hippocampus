@@ -1,0 +1,36 @@
+name: tokei
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local,Linux
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  tokei:
+    needs: runner
+    if: ${{ !cancelled() && needs.runner.outputs.runner }}
+    timeout-minutes: 10
+    runs-on: ${{ fromJSON(needs.runner.outputs.runner) }}
+    steps:
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v7.0.1
+      - run: |
+          set -eo pipefail
+          curl -fsSL https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-gnu.tar.gz | tar zx --no-same-owner -C "${{ runner.temp }}" tokei
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          "${{ runner.temp }}/tokei" . >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,51 @@
+name: Test/rust_de_llama
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_rust_de_llama.yaml"
+      - "cluster/applications/rust_de_llama/**"
+      - ".cargo/**"
+      - ".gitmodules"
+      - "packages/error/**"
+      - "packages/opentelemetry-tracing/**"
+      - "rust-toolchain.toml"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            cluster/applications/rust_de_llama/
+            .cargo/
+            .gitmodules
+            packages/error/
+            packages/opentelemetry-tracing/
+            rust-toolchain.toml
+          sparse-checkout-cone-mode: false
+      - run: git submodule update --init cluster/applications/rust_de_llama/llama.cpp
+      - run: |
+          set -eo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends libclang-dev protobuf-compiler
+      - run: curl -fsSL --retry 5 --retry-all-errors --remote-name-all https://huggingface.co/bartowski/SmolLM2-135M-Instruct-GGUF/resolve/09816acd5d99df7be770d85ea30822623dab342c/SmolLM2-135M-Instruct-{Q4_K_M,Q8_0}.gguf
+        working-directory: cluster/applications/rust_de_llama/models
+      - run: cargo test --locked
+        working-directory: cluster/applications/rust_de_llama

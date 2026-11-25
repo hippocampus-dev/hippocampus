@@ -1,0 +1,6 @@
+---
+paths:
+  - "**/biome.json"
+---
+
+* End a `files.includes` that extends `biome.jsonc` with every negated pattern of the root `files.includes` matching a file under its own patterns (`"!**/*.gen.*"` in `taurin/biome.json`, `"!**/*.d.ts"` in `workers/biome.json`) - Biome combines the two lists with the extending file applied last and lets the last matching pattern win (https://biomejs.dev/reference/configuration/), so a child's `"src/**"` re-includes what the root excluded and `biome format` rewrites a generator's output back and forth with it

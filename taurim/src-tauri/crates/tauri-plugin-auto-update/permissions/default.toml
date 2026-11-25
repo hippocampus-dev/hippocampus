@@ -1,0 +1,6 @@
+[default]
+description = "Default permissions for the Auto Update plugin"
+permissions = [
+  "allow-wait-for-update",
+  "allow-install-update",
+]

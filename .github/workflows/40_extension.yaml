@@ -1,0 +1,46 @@
+name: Test/extension
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_extension.yaml"
+      - "extension/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          - npm run test
+          - npx --no-install playwright test
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            extension/
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - run: npm ci
+        working-directory: extension
+      - run: ${{ matrix.command }}
+        working-directory: extension

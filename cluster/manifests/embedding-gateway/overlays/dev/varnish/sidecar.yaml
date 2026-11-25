@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: varnish
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: varnish
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - ./embedding-gateway-backend.embedding-gateway.svc.cluster.local
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

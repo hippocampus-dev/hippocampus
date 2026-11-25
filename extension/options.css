@@ -1,0 +1,22 @@
+.binding-header {
+  display: grid;
+  grid-template-columns: 50px 200px;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.description {
+  color: #666;
+  font-size: 14px;
+}
+
+.url-pattern-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#new-url-pattern {
+  flex: 1;
+  padding: 5px;
+}

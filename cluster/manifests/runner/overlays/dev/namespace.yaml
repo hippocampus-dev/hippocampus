@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: runner
+  labels:
+    name: runner
+    # runner uses Kaniko for container image building, privileged-scale-set runs a container runtime, and scale-set carries SYS_ADMIN with an unmasked /proc
+    pod-security.kubernetes.io/enforce: privileged

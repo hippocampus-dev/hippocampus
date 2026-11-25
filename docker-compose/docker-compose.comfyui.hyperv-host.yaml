@@ -1,0 +1,5 @@
+# Layered over docker-compose.yaml by hippocampus-compose.service that setup/hyperv-host/wsl.sh installs on hyperv-host, which is reached by Envoy and autocomfy on the Arch Linux host over the LAN
+services:
+  comfyui:
+    ports:
+      - "8188:8188"

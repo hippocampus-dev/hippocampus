@@ -1,0 +1,381 @@
+{
+   "annotations": {
+      "list": [
+         {
+            "datasource": {
+               "type": "prometheus",
+               "uid": "Prometheus"
+            },
+            "expr": "sum(ALERTS{alertstate=\"firing\",severity=\"critical\"}) by (alertname)",
+            "iconColor": "rgba(255, 96, 96, 1)",
+            "name": "Critical Alerts",
+            "textFormat": "{{alertname}}"
+         }
+      ]
+   },
+   "graphTooltip": 1,
+   "panels": [
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 1,
+         "title": "Summary",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #A"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Disk"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kubelet%5Fvolume%5Fstats%5Fused%5Fbytes%7Bcluster%3D%5C%22%5C%22%7D%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #B"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Inode"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kubelet%5Fvolume%5Fstats%5Finodes%5Fused%7Bcluster%3D%5C%22%5C%22%7D%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 4,
+            "w": 24
+         },
+         "id": 2,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kubelet_volume_stats_used_bytes{cluster=\"\"})",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kubelet_volume_stats_inodes_used{cluster=\"\"})",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Quotas",
+         "transformations": [
+            {
+               "id": "joinByField"
+            }
+         ],
+         "type": "table"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "max": 1,
+               "min": 0,
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": null
+                     },
+                     {
+                        "color": "yellow",
+                        "value": 0.69999999999999996
+                     },
+                     {
+                        "color": "red",
+                        "value": 0.90000000000000002
+                     }
+                  ]
+               },
+               "unit": "percentunit"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 24
+         },
+         "id": 3,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kubelet_volume_stats_used_bytes{cluster=\"\"}) / sum(kubelet_volume_stats_capacity_bytes{cluster=\"\"})",
+               "instant": true,
+               "legendFormat": "Disk / Max"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kubelet_volume_stats_inodes_used{cluster=\"\"}) / sum(kubelet_volume_stats_inodes{cluster=\"\"})",
+               "instant": true,
+               "legendFormat": "Inode / Max"
+            }
+         ],
+         "title": "Gauges",
+         "type": "gauge"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0
+         },
+         "id": 4,
+         "title": "Summary per volume",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "align": "left",
+                  "filterable": false
+               },
+               "thresholds": {
+                  "mode": "absolute",
+                  "steps": [ ]
+               }
+            },
+            "overrides": [
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "w"
+                  },
+                  "properties": [
+                     {
+                        "id": "displayName",
+                        "value": "Workload"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "namespace"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "persistentvolumeclaim"
+                  },
+                  "properties": [
+                     {
+                        "id": "custom.hidden",
+                        "value": true
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #A"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 2
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Disk"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kubelet%5Fvolume%5Fstats%5Fused%5Fbytes%7Bcluster%3D%5C%22%5C%22%7D%29%20by%20%28namespace%2Cpersistentvolumeclaim%29%20%2A%20on%28namespace%2Cpersistentvolumeclaim%29%20group%5Fleft%20group%28kubelet%5Fvolume%5Fstats%5Finodes%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpersistentvolumeclaim%3D%5C%22${__data.fields[\"persistentvolumeclaim\"]}%5C%22%7D%29%20by%20%28namespace%2Cpersistentvolumeclaim%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "bytes"
+                     }
+                  ]
+               },
+               {
+                  "matcher": {
+                     "id": "byName",
+                     "options": "Value #B"
+                  },
+                  "properties": [
+                     {
+                        "id": "decimals",
+                        "value": 0
+                     },
+                     {
+                        "id": "displayName",
+                        "value": "Inode"
+                     },
+                     {
+                        "id": "links",
+                        "value": [
+                           {
+                              "targetBlank": true,
+                              "title": "Explore",
+                              "tooltip": "Explore",
+                              "type": "link",
+                              "url": "/explore?schemaVersion=1&panes=%7B%22left%22%3A%7B%22datasource%22%3A%22prometheus%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum%28kubelet%5Fvolume%5Fstats%5Finodes%5Fused%7Bcluster%3D%5C%22%5C%22%7D%29%20by%20%28namespace%2Cpersistentvolumeclaim%29%20%2A%20on%28namespace%2Cpersistentvolumeclaim%29%20group%5Fleft%20group%28kubelet%5Fvolume%5Fstats%5Finodes%7Bnamespace%3D%5C%22${__data.fields[\"namespace\"]}%5C%22%2Cpersistentvolumeclaim%3D%5C%22${__data.fields[\"persistentvolumeclaim\"]}%5C%22%7D%29%20by%20%28namespace%2Cpersistentvolumeclaim%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                           }
+                        ]
+                     },
+                     {
+                        "id": "unit",
+                        "value": "short"
+                     }
+                  ]
+               }
+            ]
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 24
+         },
+         "id": 5,
+         "pluginVersion": "v10.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kubelet_volume_stats_used_bytes{cluster=\"\"}) by (namespace,persistentvolumeclaim) * on(namespace,persistentvolumeclaim) group_left(w) group(label_join(kubelet_volume_stats_inodes, \"w\", \"/\", \"namespace\", \"persistentvolumeclaim\")) by (namespace,persistentvolumeclaim,w)",
+               "format": "table",
+               "instant": true
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "Prometheus"
+               },
+               "expr": "sum(kubelet_volume_stats_inodes_used{cluster=\"\"}) by (namespace,persistentvolumeclaim) * on(namespace,persistentvolumeclaim) group_left(w) group(label_join(kubelet_volume_stats_inodes, \"w\", \"/\", \"namespace\", \"persistentvolumeclaim\")) by (namespace,persistentvolumeclaim,w)",
+               "format": "table",
+               "instant": true
+            }
+         ],
+         "title": "Quotas",
+         "transformations": [
+            {
+               "id": "joinByField",
+               "options": {
+                  "byField": "w",
+                  "mode": "outer"
+               }
+            }
+         ],
+         "type": "table"
+      }
+   ],
+   "schemaVersion": 36,
+   "time": {
+      "from": "now-1h",
+      "to": "now"
+   },
+   "timezone": "browser",
+   "title": "Volume",
+   "uid": "volume"
+}

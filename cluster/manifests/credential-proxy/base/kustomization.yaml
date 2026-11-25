@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:904b3db4090a816603c89acb2c26a4ab43fd64e91969b8720588d8791e33750a
+  name: haproxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/haproxy

@@ -1,0 +1,38 @@
+name: Test/plugin
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_plugin.yaml"
+      - "plugin/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            plugin/
+      - uses: actions/setup-java@v6.3.0
+        with:
+          distribution: zulu
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6.4.1
+      - run: ./gradlew test
+        working-directory: plugin

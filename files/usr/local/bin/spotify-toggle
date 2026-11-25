@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+readonly SPOTIFY_OAUTH_BRIDGE_URL="https://hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev"
+readonly SPOTIFY_SCOPE="user-read-playback-state user-modify-playback-state"
+readonly PREFERRED_DEVICE="Beosound A9 5th gen"
+
+token=$(armyknife oauth device --url "$SPOTIFY_OAUTH_BRIDGE_URL" --client-id "spotify" --scope "$SPOTIFY_SCOPE")
+
+state_json=$(curl -fsSL --retry 5 --retry-all-errors -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player")
+
+if [ -z "$state_json" ]; then
+  devices_json=$(curl -fsSL --retry 5 --retry-all-errors -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player/devices")
+
+  device_count=$(echo "$devices_json" | jq -r '.devices | length')
+
+  if [ "$device_count" -eq 0 ]; then
+    notify-send "Spotify" "No active Spotify devices found. Open Spotify on a device first."
+    exit 1
+  elif [ "$device_count" -eq 1 ]; then
+    device_id=$(echo "$devices_json" | jq -re '.devices[0].id')
+  else
+    device_id=$(echo "$devices_json" | jq -r --arg name "$PREFERRED_DEVICE" 'first(.devices[] | select(.name == $name) | .id) // empty')
+    if [ -z "$device_id" ]; then
+      notify-send "Spotify" "${PREFERRED_DEVICE} not available"
+      exit 1
+    fi
+  fi
+
+  curl -fsSL --retry 5 --retry-all-errors -X PUT -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player/play?device_id=${device_id}" -o /dev/null
+  notify-send "Spotify" "Resumed"
+  exit 0
+fi
+
+is_playing=$(echo "$state_json" | jq -r '.is_playing')
+
+if [ "$is_playing" = "true" ]; then
+  curl -fsSL --retry 5 --retry-all-errors -X PUT -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player/pause" -o /dev/null
+  notify-send "Spotify" "Paused"
+else
+  curl -fsSL --retry 5 --retry-all-errors -X PUT -H @<(printf 'Authorization: Bearer %s\n' "$token") "https://api.spotify.com/v1/me/player/play" -o /dev/null
+  notify-send "Spotify" "Resumed"
+fi

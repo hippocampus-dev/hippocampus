@@ -1,0 +1,15 @@
+{
+  "name": "libsodium-encryptor",
+  "private": true,
+  "scripts": {
+    "fmt": "biome format --write .",
+    "lint": "biome check --fix ."
+  },
+  "dependencies": {
+    "express": "5.0.1",
+    "tweetsodium": "^0.0.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6"
+  }
+}

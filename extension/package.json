@@ -1,0 +1,12 @@
+{
+  "name": "extension",
+  "private": true,
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "chrome-types": "^0.1.312",
+    "vitest": "^3.0.5"
+  }
+}

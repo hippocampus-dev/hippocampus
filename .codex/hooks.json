@@ -1,0 +1,60 @@
+{
+  "description": "Generated from Claude Code hooks by sync-agent-files.sh.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/UserPromptSubmit.sh' '.. | .command? // empty | select(. == $command)' \"${CODEX_HOME:-$HOME/.codex}/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/UserPromptSubmit.sh\"; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/PreToolUse.sh' '.. | .command? // empty | select(. == $command)' \"${CODEX_HOME:-$HOME/.codex}/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/PreToolUse.sh\"; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|ExitPlanMode|MultiEdit|NotebookEdit|Write|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/PostToolUse.sh' '.. | .command? // empty | select(. == $command)' \"${CODEX_HOME:-$HOME/.codex}/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/PostToolUse.sh\"; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/Stop.sh' '.. | .command? // empty | select(. == $command)' \"${CODEX_HOME:-$HOME/.codex}/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/Stop.sh\"; fi"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel)\"/.claude/hooks/SessionStart.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

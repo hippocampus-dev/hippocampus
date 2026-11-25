@@ -1,0 +1,4 @@
+# cudarc 0.19.10's build.rs panics on an nvcc newer than 13.4 unless this pins the bindings it selects
+# Remove this once candle-core's cudarc in Cargo.lock supports the nvcc that .github/workflows/20_taurin.yaml installs
+[env]
+CUDARC_CUDA_VERSION = "13040"

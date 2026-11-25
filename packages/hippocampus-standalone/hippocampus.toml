@@ -1,0 +1,22 @@
+[TokenStorage]
+kind = "File"
+path = "/var/hippocampus/tokens"
+
+[DocumentStorage]
+kind = "File"
+path = "/var/hippocampus/documents"
+
+[Tokenizer]
+kind = "Lindera"
+
+[Schema]
+
+[[Schema.fields]]
+name = "file"
+type = "string"
+indexed = false
+
+[[Schema.fields]]
+name = "content"
+type = "string"
+indexed = true

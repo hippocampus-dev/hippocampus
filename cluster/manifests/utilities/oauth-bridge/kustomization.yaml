@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:58824e51f42e6ed973474e8732969722b50c8de5a7e8fc86e0df3c43df944f26
+- digest: sha256:10487294a3f3cb013815316faa53d03c1dfd5e82f77fabbcc726a11730b90fff
+  name: ghcr.io/hippocampus-dev/hippocampus/oauth-bridge
+  newName: ghcr.io/hippocampus-dev/hippocampus/oauth-bridge

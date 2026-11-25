@@ -1,0 +1,9 @@
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Restart=on-failure
+
+ExecStart=/usr/local/bin/cpu-frequency-limit.sh
+
+[Install]
+WantedBy=multi-user.target

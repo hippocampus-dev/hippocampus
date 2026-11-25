@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:ab1712776e4263fc417d11b0202fa2d23c3baf9cd2b1011a6af596fa4c74b72b
+  name: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/anonymous-proxy

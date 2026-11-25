@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cortex-bot
+
+resources:
+- ../../base
+- destination_rule.yaml
+- horizontal_pod_autoscaler.yaml
+- job.yaml
+- namespace.yaml
+- network_policy.yaml
+- peer_authentication.yaml
+- service.yaml
+- service_entry.yaml
+- sidecar.yaml
+- telemetry.yaml
+- virtual_service.yaml
+- minio
+- redis
+
+patches:
+- path: patches/deployment.yaml
+- path: patches/pod_disruption_budget.yaml
+
+generators:
+- secrets_from_vault.yaml
+images:
+- digest: sha256:af8f9160e88a860c0386a16fe97e9d6e28866c0fe88346ed729a342d78dc8d80
+  name: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
+  newName: ghcr.io/hippocampus-dev/hippocampus/chrome-devtools-protocol-server
+- digest: sha256:facc96de6b85acf64d7574b892bb65ba8046032d124b097f042f81feabd5fd1e
+  name: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+  newName: ghcr.io/hippocampus-dev/hippocampus/exporter-merger
+- digest: sha256:4607aa693058fa6f37820b00184cac629921769c999f391441b8084a66ef6df7
+  name: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
+  newName: ghcr.io/hippocampus-dev/hippocampus/playwright-mcp
+- digest: sha256:ac82b680320cc698c85f0f88773a77c8443c7e0f785c1521dec06496969860b5
+  name: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+  newName: ghcr.io/hippocampus-dev/hippocampus/redis-proxy
+- digest: sha256:ace3d71e6aba6a8462ebded479c9690fee3047a483cf76dd39c7c2e1b3c54a2b
+  name: minio/mc
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/minio/mc

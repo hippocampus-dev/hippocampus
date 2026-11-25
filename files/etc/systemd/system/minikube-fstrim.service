@@ -1,0 +1,10 @@
+[Unit]
+Requisite=minikube.service libvirtd.service
+After=minikube.service libvirtd.service
+
+[Service]
+Type=oneshot
+
+User=kai
+# The guest's own fstrim.timer trims only what its /etc/fstab lists, which leaves out /mnt/vda1
+ExecStart=/usr/bin/minikube ssh -- "sudo fstrim /mnt/vda1"

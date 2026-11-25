@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: events-logger
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: events-logger
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

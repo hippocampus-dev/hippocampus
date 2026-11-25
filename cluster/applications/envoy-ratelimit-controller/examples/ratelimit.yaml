@@ -1,0 +1,72 @@
+apiVersion: envoy-ratelimit.kaidotio.github.io/v1
+kind: RateLimit
+metadata:
+  name: reporting-server
+  namespace: reporting-server
+spec:
+  workloadSelector:
+    app.kubernetes.io/name: reporting-server
+  filter:
+    enable_x_ratelimit_headers: DRAFT_VERSION_03
+    disable_x_envoy_ratelimited_header: true
+  descriptors:
+    - key: X-CLIENT-IP
+      rate_limit:
+        unit: second
+        requests_per_unit: 4
+      descriptors:
+        - key: PATH
+          value: /csp-reports
+          rate_limit:
+            unit: second
+            requests_per_unit: 1
+        - key: PATH
+          value: /reports
+          rate_limit:
+            unit: second
+            requests_per_unit: 1
+    - key: PATH
+      value: /csp-reports
+      rate_limit:
+        unit: second
+        requests_per_unit: 16
+    - key: PATH
+      value: /reports
+      rate_limit:
+        unit: second
+        requests_per_unit: 32
+  rateLimits:
+    - actions:
+        - request_headers:
+            header_name: x-client-ip
+            descriptor_key: X-CLIENT-IP
+        - header_value_match:
+            descriptor_key: PATH
+            descriptor_value: /csp-reports
+            headers:
+              - name: ":path"
+                exact_match: /csp-reports
+    - actions:
+        - request_headers:
+            header_name: x-client-ip
+            descriptor_key: X-CLIENT-IP
+        - header_value_match:
+            descriptor_key: PATH
+            descriptor_value: /reports
+            headers:
+              - name: ":path"
+                exact_match: /reports
+    - actions:
+        - header_value_match:
+            descriptor_key: PATH
+            descriptor_value: /csp-reports
+            headers:
+              - name: ":path"
+                exact_match: /csp-reports
+    - actions:
+        - header_value_match:
+            descriptor_key: PATH
+            descriptor_value: /reports
+            headers:
+              - name: ":path"
+                exact_match: /reports

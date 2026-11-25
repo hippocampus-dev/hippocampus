@@ -1,0 +1,16 @@
+[Match]
+Name=eno1
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+DHCP=yes
+DNS=2606:4700:4700::1111 2001:4860:4860::8888 1.1.1.1 8.8.8.8
+MulticastDNS=yes
+
+[DHCPv4]
+RouteMetric=5
+
+[IPv6AcceptRA]
+RouteMetric=5

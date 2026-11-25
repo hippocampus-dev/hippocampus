@@ -1,0 +1,21 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: memcached
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: memcached
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: mcrouter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mcrouter
+  mtls:
+    mode: STRICT

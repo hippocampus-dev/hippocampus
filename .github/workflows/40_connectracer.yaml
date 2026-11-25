@@ -1,0 +1,39 @@
+name: Test/connectracer
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/workflows/40_connectracer.yaml"
+      - "cluster/applications/connectracer/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            cluster/applications/connectracer/
+      - run: |
+          set -eo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends clang libelf-dev linux-tools-generic
+          bpftool=$(find -L /usr/lib/linux-tools -path '*-generic/bpftool' -type f -print -quit)
+          "$bpftool" btf dump file /sys/kernel/btf/vmlinux format c | sudo tee /usr/include/vmlinux.h > /dev/null
+      - run: cargo test --locked
+        working-directory: cluster/applications/connectracer

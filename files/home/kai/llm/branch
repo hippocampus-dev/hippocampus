@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+readonly OPENAI_HOST="${OPENAI_HOST:-https://api.openai.com}"
+# https://platform.openai.com/docs/api-reference/chat/create
+readonly MODEL="${MODEL:-gpt-5}"
+readonly TEMPERATURE="${TEMPERATURE:-1}"
+readonly TOP_P="${TOP_P:-1}"
+readonly N="${N:-1}"
+readonly MAX_TOKENS="${MAX_TOKENS:-null}"
+readonly PRESENCE_PENALTY="${PRESENCE_PENALTY:-0}"
+readonly FREQUENCY_PENALTY="${FREQUENCY_PENALTY:-0}"
+
+system=$(cat <<EOS
+Please create an appropriate branch name for the given diff according to the following specifications.
+
+---
+
+## Specifications
+
+1. The branch name must be kept within 30 characters (MUST).
+2. The branch name must be written in English (MUST).
+EOS
+)
+
+user_message=$(cat -)
+
+if [ -z "$user_message" ]; then
+  exit 0
+fi
+
+system=$(jq -n --arg role "system" --arg content "$system" '{"role": $role, "content": $content}')
+user_message=$(jq -n --arg role "user" --arg content "$user_message" '{"role": $role, "content": $content}')
+
+response=$(curl -fsSL --retry 5 --retry-all-errors "${OPENAI_HOST}/v1/chat/completions" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H @<(printf 'Authorization: Bearer %s\n' "$OPENAI_API_KEY") \
+  -d "$(echo "$system" "$user_message" | jq -sc \
+    --arg model "$MODEL" \
+    --argjson temperature "$TEMPERATURE" \
+    --argjson top_p "$TOP_P" \
+    --argjson n "$N" \
+    --argjson max_tokens "$MAX_TOKENS" \
+    --argjson presence_penalty "$PRESENCE_PENALTY" \
+    --argjson frequency_penalty "$FREQUENCY_PENALTY" \
+    '. as $messages | {"model": $model, "messages": $messages, "temperature": $temperature, "top_p": $top_p, "n": $n, "max_tokens": $max_tokens, "presence_penalty": $presence_penalty, "frequency_penalty": $frequency_penalty}' \
+  )"
+)
+
+if [ "$(echo "$response" | jq -r '.error')" != "null" ]; then
+  echo "$response" | jq -r '.error' 1>&2
+  exit 1
+fi
+if [ "$N" -gt 1 ]; then
+  echo "$response" | jq -c '.choices[]' | fzf --preview="echo {} | jq -r '.message.content'" --preview-window wrap | jq -r '.message.content'
+else
+  echo "$response" | jq -r '.choices[0].message.content'
+fi

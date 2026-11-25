@@ -1,0 +1,30 @@
+{
+  "name": "taurin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "cross-env NO_STRIP=1 tauri",
+    "fmt": "biome format --write .",
+    "lint": "biome check --fix ."
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@tauri-apps/api": "^2.3.0",
+    "@tauri-apps/plugin-dialog": "^2",
+    "@tauri-apps/plugin-os": "^2",
+    "preact": "^10.22.1",
+    "preact-router": "^4.1.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6",
+    "@preact/preset-vite": "^2.9.3",
+    "@tailwindcss/vite": "^4.1.18",
+    "@tauri-apps/cli": "^2.10.1",
+    "cross-env": "^7.0.3",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.7.2"
+  }
+}

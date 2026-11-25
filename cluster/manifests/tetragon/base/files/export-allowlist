@@ -1,0 +1,2 @@
+{"event_set":["PROCESS_KPROBE"]}
+{"event_set":["PROCESS_EXEC"],"cel_expression":["has(process_exec.process.pod) && process_exec.process.pod.namespace != 'runner' && size(process_exec.process.binary_properties.privileges_changed) > 0"]}

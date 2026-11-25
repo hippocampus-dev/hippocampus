@@ -1,0 +1,14 @@
+{
+  "name": "csviewer",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6",
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.9"
+  },
+  "scripts": {
+    "fmt": "biome format --write .",
+    "lint": "biome check --fix ."
+  }
+}

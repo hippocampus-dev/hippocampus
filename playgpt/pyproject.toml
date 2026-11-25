@@ -1,0 +1,24 @@
+[project]
+name = "playgpt"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.14"
+
+dependencies = [
+    "playwright==1.58.0",
+
+    "fastapi==0.135.1",
+    "uvicorn==0.42.0",
+    "tiktoken==0.12.0",
+
+    "pydantic==2.12.5",
+    "pydantic-settings==2.7.1",
+
+    "opentelemetry-api==1.40.0",
+    "opentelemetry-sdk==1.40.0",
+    "opentelemetry-exporter-otlp==1.40.0",
+    "opentelemetry-instrumentation-fastapi==0.61b0",
+    "python-dotenv==1.0.0",
+    "python-json-logger==2.0.7",
+]

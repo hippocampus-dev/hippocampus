@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: statefulset-hook
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: statefulset-hook
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "9443":
+      mode: PERMISSIVE # AdmissionWebhook

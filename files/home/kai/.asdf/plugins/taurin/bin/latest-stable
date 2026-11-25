@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+# asdf resolves latest through latest-stable only on install: https://github.com/asdf-vm/asdf/blob/v0.14.1/lib/functions/installs.bash
+# Its shims look for installs/<plugin>/<version as written in .tool-versions>: https://github.com/asdf-vm/asdf/blob/v0.14.1/lib/utils.bash
+echo latest

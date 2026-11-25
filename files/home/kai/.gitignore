@@ -1,0 +1,6 @@
+*.swp
+*.swo
+*~
+.diff-*
+.run-*
+.stage-*

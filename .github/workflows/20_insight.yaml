@@ -1,0 +1,69 @@
+name: Release/insight
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  id-token: write
+  packages: read
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local,Linux
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  release:
+    needs: runner
+    if: ${{ !cancelled() }}
+    timeout-minutes: 10
+    runs-on: ${{ needs.runner.outputs.runner && fromJSON(needs.runner.outputs.runner) || 'ubuntu-24.04' }}
+    steps:
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "DOCKER_CONFIG=${{ runner.temp }}/.docker" >> $GITHUB_ENV
+      - run: printf '%s' "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_REPOSITORY_OWNER}" --password-stdin
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            insight/
+            packages/
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "RUSTUP_HOME=${{ runner.temp }}/rustup" >> $GITHUB_ENV
+      - if: ${{ !contains(needs.runner.outputs.runner, 'local') }}
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-insight-packages-${{ hashFiles('insight/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-insight-packages-
+      - uses: actions/cache@v6.1.0
+        with:
+          path: insight/target
+          key: ${{ runner.os }}-insight-${{ hashFiles('insight/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-insight-
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+      - run: |
+          set -eo pipefail
+          mkdir -p ${{ runner.temp }}/bin
+          curl -fsSL https://github.com/goreleaser/goreleaser/releases/download/v2.8.2/goreleaser_Linux_x86_64.tar.gz | tar zx --no-same-owner -C ${{ runner.temp }}/bin goreleaser
+          curl -fsSL https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz | tar zx --no-same-owner -C ${{ runner.temp }}/bin cross
+          echo "${{ runner.temp }}/bin" >> "$GITHUB_PATH"
+      - run: |
+          set -eo pipefail
+          rustup component add rustfmt
+          rustup component add rust-src
+          goreleaser release
+        working-directory: insight

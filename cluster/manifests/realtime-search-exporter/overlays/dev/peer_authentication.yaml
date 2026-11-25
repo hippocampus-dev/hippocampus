@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: realtime-search-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: realtime-search-exporter
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

@@ -1,0 +1,13 @@
+apiVersion: github-actions-runner.kaidotio.github.io/v1
+kind: ScaleSet
+metadata:
+  name: scale-set-example
+spec:
+  image: ubuntu:24.04
+  owner: hippocampus-dev
+  repo: hippocampus
+  minRunners: 1
+  maxRunners: 5
+  tokenSecretKeyRef:
+    name: credentials
+    key: GITHUB_TOKEN

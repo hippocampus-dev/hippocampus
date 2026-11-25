@@ -1,0 +1,31 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: credential-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: credential-proxy
+      app.kubernetes.io/component: ""
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            namespaces:
+              - istio-gateways
+            principals:
+              - cluster.local/ns/istio-gateways/sa/istio-ingressgateway-service-account
+      when:
+        - key: request.headers[host]
+          values:
+            - github-credential-proxy.kaidotio.dev
+        # Forces a CORS preflight on browser requests: https://fetch.spec.whatwg.org/#cors-safelisted-request-header
+        - key: request.headers[x-github-api-version]
+          values:
+            - "*"
+      to:
+        - operation:
+            methods:
+              - POST
+            paths:
+              - /user/repos

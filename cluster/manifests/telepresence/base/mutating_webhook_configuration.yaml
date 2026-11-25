@@ -1,0 +1,36 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: agent-injector-webhook-telepresence
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: agent-injector
+        path: /traffic-agent
+        port: 8443
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - DELETE
+        resources:
+          - pods
+        scope: "*"
+    failurePolicy: Ignore
+    reinvocationPolicy: IfNeeded
+    name: agent-injector-telepresence.telepresence.io
+    sideEffects: None
+    timeoutSeconds: 5
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+            - kube-system
+            - kube-node-lease

@@ -1,0 +1,8 @@
+target/
+manifests/
+skaffold/
+skaffold.yaml
+k6/
+e2e.sh
+Makefile
+README.md

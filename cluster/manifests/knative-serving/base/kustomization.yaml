@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://github.com/knative/serving/releases/download/knative-v1.20.1/serving-core.yaml
+images:
+- digest: sha256:371b15c8832347cefd918ff4ec6ae88c7e5486b51f35767a64c77c331de6a162
+  name: gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/serving/cmd/autoscaler
+- digest: sha256:650a6cb7728f88830636168554e71b4520d23da7c3cb1d731cb3958a442f6b87
+  name: gcr.io/knative-releases/knative.dev/serving/cmd/queue
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/serving/cmd/queue
+- digest: sha256:b3b84c16ee9c343fb08307f9700495dd71b50e5577f75809073ba30376c6c21d
+  name: gcr.io/knative-releases/knative.dev/serving/cmd/controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/serving/cmd/controller
+- digest: sha256:a599b3788f933b29680f7cfd178664b8e77498437ac6beddceccce2e8c4129ed
+  name: gcr.io/knative-releases/knative.dev/serving/cmd/activator
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/serving/cmd/activator
+- digest: sha256:e4d1ad862820d045bc9dd8542ad14336e1e501e763c3d0d6d93cefbeb27674a0
+  name: gcr.io/knative-releases/knative.dev/serving/cmd/webhook
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/serving/cmd/webhook

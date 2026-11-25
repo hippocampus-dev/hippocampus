@@ -1,0 +1,113 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  background: #fafafa;
+  color: #1a1a1a;
+}
+
+#header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background: white;
+}
+
+#header span {
+  font-weight: 600;
+}
+
+#content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+[hidden] {
+  display: none;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+input,
+select {
+  padding: 4px 8px;
+  font: inherit;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+}
+
+button {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  color: #1a1a1a;
+}
+
+button:hover {
+  background: #f0f0f0;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+table {
+  border-collapse: collapse;
+  background: white;
+}
+
+th,
+td {
+  padding: 4px 8px;
+  border: 1px solid #e0e0e0;
+  text-align: left;
+  vertical-align: top;
+}
+
+#rows td {
+  max-width: 320px;
+  overflow-wrap: break-word;
+}
+
+td.running {
+  color: #1a73e8;
+}
+
+td.done {
+  color: #188038;
+}
+
+td.failed,
+#columns.failed {
+  color: #d93025;
+}

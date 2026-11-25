@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- horizontal_pod_autoscaler.yaml
+- pod_disruption_budget.yaml
+- service.yaml
+images:
+- digest: sha256:aa5a9c0be212c338f2009193111b2613dd7cad970525629d6dad64cb091bf0a3
+  name: ghcr.io/hippocampus-dev/hippocampus/bakery
+  newName: ghcr.io/hippocampus-dev/hippocampus/bakery

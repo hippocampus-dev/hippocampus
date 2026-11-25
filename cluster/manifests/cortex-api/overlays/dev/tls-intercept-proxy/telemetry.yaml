@@ -1,0 +1,23 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: tls-intercept-proxy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: tls-intercept-proxy
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

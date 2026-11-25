@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Istio (ISTIO_VERSION in cluster/create.sh)
+  - https://raw.githubusercontent.com/istio/api/1.23.2/kubernetes/customresourcedefinitions.gen.yaml
+  # ArgoCD (cluster/manifests/argocd/base/kustomization.yaml)
+  - https://github.com/argoproj/argo-cd//manifests/crds?ref=v2.14.15&timeout=300s
+  # Knative (cluster/manifests/knative-serving, knative-eventing and knative-eventing-kafka)
+  - https://github.com/knative/serving/releases/download/knative-v1.20.1/serving-core.yaml
+  - https://github.com/knative/eventing/releases/download/knative-v1.20.0/eventing-core.yaml
+  - https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-controller.yaml
+  # Gateway API (cluster/manifests/gateway-api/base/kustomization.yaml)
+  - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/experimental-install.yaml
+  # VPA (cluster/manifests/vpa/base/kustomization.yaml)
+  - https://raw.githubusercontent.com/kubernetes/autoscaler/vpa-release-1.7/vertical-pod-autoscaler/deploy/vpa-v1-crd-gen.yaml
+  # strimzi (cluster/manifests/strimzi-cluster-operator/base/kustomization.yaml)
+  - https://github.com/strimzi/strimzi-kafka-operator/releases/download/1.3.0/strimzi-cluster-operator-1.3.0.yaml
+  # ECK (cluster/manifests/elastic-cloud-kubernetes/base/kustomization.yaml)
+  - https://download.elastic.co/downloads/eck/2.15.0/crds.yaml
+  # Tetragon (cluster/manifests/tetragon/base/kustomization.yaml)
+  - https://raw.githubusercontent.com/cilium/tetragon/v1.6.1/install/kubernetes/tetragon/crds-yaml/cilium.io_podinfo.yaml
+  - https://raw.githubusercontent.com/cilium/tetragon/v1.6.1/install/kubernetes/tetragon/crds-yaml/cilium.io_tracingpolicies.yaml
+  - https://raw.githubusercontent.com/cilium/tetragon/v1.6.1/install/kubernetes/tetragon/crds-yaml/cilium.io_tracingpoliciesnamespaced.yaml
+  # cilium (--version in cluster/bin/deploy-cilium.sh)
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwideenvoyconfigs.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumegressgatewaypolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumendpoints.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumenvoyconfigs.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumexternalworkloads.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumidentities.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumlocalredirectpolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnodeconfigs.yaml
+  - https://raw.githubusercontent.com/cilium/cilium/v1.16.19/pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnodes.yaml
+  # Operators whose CRDs this repository vendors
+  - ../../cluster/manifests/atlas-operator/base/custom_resource_definition.yaml
+  - ../../cluster/manifests/cert-manager/base/custom_resource_definition.yaml
+  - ../../cluster/manifests/k6-operator/base/custom_resource_definition.yaml
+  - ../../cluster/manifests/tidb-operator/base/custom_resource_definition.yaml
+  - ../../cluster/manifests/vitess-operator/base/custom_resource_definition.yaml
+  # Own CRDs
+  - ../../cluster/applications/dedicated-container-ingress-controller/manifests/crd
+  - ../../cluster/applications/envoy-ratelimit-controller/manifests/crd
+  - ../../cluster/applications/github-actions-exporter-controller/manifests/crd
+  - ../../cluster/applications/github-actions-runner-controller/manifests/crd
+  - ../../cluster/applications/grafana-manifest-controller/manifests/crd
+  - ../../cluster/applications/owasp-zap-controller/manifests/crd
+  - ../../cluster/applications/snapshot-controller/manifests/crd

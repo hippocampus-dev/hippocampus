@@ -1,0 +1,7 @@
+[default]
+description = "Default permissions for the Wake-on-LAN plugin"
+permissions = [
+  "allow-get-schedule",
+  "allow-set-schedule",
+  "allow-wake",
+]

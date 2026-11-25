@@ -1,0 +1,12 @@
+#include <tunables/global>
+
+profile claude {
+  #include <abstractions/base>
+
+  network inet tcp,
+  network inet udp,
+  network inet icmp,
+
+  deny network raw,
+  deny network packet,
+}

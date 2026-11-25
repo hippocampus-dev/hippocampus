@@ -1,0 +1,44 @@
+{
+  "claudex-project": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/UserPromptSubmit.sh' '.. | .command? // empty | select(. == $command)' \"$HOME/.gemini/config/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/UserPromptSubmit.sh\"; fi"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/PreToolUse.sh' '.. | .command? // empty | select(. == $command)' \"$HOME/.gemini/config/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/PreToolUse.sh\"; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "edit_file|multi_replace_file_content|replace_file_content|write_file|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/PostToolUse.sh' '.. | .command? // empty | select(. == $command)' \"$HOME/.gemini/config/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/PostToolUse.sh\"; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "if ! jq -e --arg command '~/.config/claudex/config/hooks/Stop.sh' '.. | .command? // empty | select(. == $command)' \"$HOME/.gemini/config/hooks.json\" >/dev/null 2>&1; then exec \"$(git rev-parse --show-toplevel)/files/home/kai/.config/claudex/config/hooks/Stop.sh\"; fi"
+      }
+    ],
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "\"$(git rev-parse --show-toplevel)\"/.claude/hooks/SessionStart.sh"
+      }
+    ]
+  }
+}

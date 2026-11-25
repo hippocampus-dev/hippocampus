@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-actions-runner-controller
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: fetch-nodeport
+          image: bitnami/kubectl

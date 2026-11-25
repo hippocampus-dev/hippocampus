@@ -1,0 +1,13 @@
+[Unit]
+Requires=hippocampus-compose.service
+# Requires= would let the timer start minikube.service again after it was stopped on purpose: https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Requisite=
+Requisite=minikube.service
+After=minikube.service hippocampus-compose.service
+
+[Service]
+Type=oneshot
+Restart=on-failure
+RestartSec=60s
+
+User=kai
+ExecStart=/usr/local/bin/mirror-registry-garbage-collect.sh

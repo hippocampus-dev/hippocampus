@@ -1,0 +1,20 @@
+[package]
+name = "tauri-plugin-wake-on-lan"
+version = "0.1.0"
+edition = "2021"
+links = "tauri-plugin-wake-on-lan"
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }
+
+[dependencies]
+tauri = { version = "2" }
+tauri-plugin = { version = "2" }
+serde = { version = "1", features = ["derive"] }
+
+[lib]
+name = "tauri_plugin_wake_on_lan"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []

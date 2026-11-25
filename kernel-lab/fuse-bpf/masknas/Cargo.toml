@@ -1,0 +1,31 @@
+[package]
+name = "masknas"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+resolver = "2"
+
+[[bin]]
+name = "masknas"
+required-features = ["bpf"]
+
+[features]
+default = ["bpf"]
+bpf = ["dep:clap", "dep:libbpf-cargo", "dep:libbpf-rs", "dep:libbpf-sys", "dep:libc", "dep:plain"]
+
+[dependencies]
+libbpf-rs = { version = "0.24.3", optional = true }
+libbpf-sys = { version = "=1.7.0", features = ["vendored-libbpf", "static-libbpf"], optional = true }
+plain = { version = "0.2", optional = true }
+clap = { version = "4.5.38", features = ["derive"], optional = true }
+libc = { version = "0.2.186", optional = true }
+regex = { version = "1.13.0" }
+
+[build-dependencies]
+libbpf-cargo = { version = "0.24.3", optional = true }
+
+[profile.release]
+strip = "symbols"
+lto = true
+panic = "abort"

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+readonly FRAMERATE=30
+readonly WIDTH_DIVISOR=4
+
+readonly STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/screenpip"
+
+if [ -f "$STATE_FILE" ]; then
+  read -r pid < "$STATE_FILE" || true
+  rm -f "$STATE_FILE"
+  if [ "$(cat "/proc/${pid}/comm" 2>/dev/null)" = "ffplay" ]; then
+    kill "$pid"
+    exit 0
+  fi
+fi
+
+geometry=$(xrandr --listmonitors | awk -v divisor="$WIDTH_DIVISOR" '
+  NR > 1 {
+    split($3, g, /[\/x+]/)
+    if ($2 ~ /\*/) { pw = g[1]; ph = g[3]; px = g[5]; py = g[6] }
+    else if (!sw) { sw = g[1]; sh = g[3]; sx = g[5]; sy = g[6] }
+  }
+  END {
+    if (!pw || !sw) exit
+    w = int(pw / divisor); h = int(w * sh / sw)
+    printf "%dx%d %d,%d %d %d %d %d\n", sw, sh, sx, sy, w, h, px + pw - w, py + ph - h
+  }
+')
+if [ -z "$geometry" ]; then
+  notify-send "Screenpip" "No secondary monitor"
+  exit 1
+fi
+read -r size offset width height left top <<< "$geometry"
+
+ffplay -loglevel error -f x11grab -framerate "$FRAMERATE" -video_size "$size" -alwaysontop -x "$width" -y "$height" -left "$left" -top "$top" -window_title screenpip "${DISPLAY}+${offset}" &
+echo "$!" > "$STATE_FILE"

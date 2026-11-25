@@ -1,0 +1,99 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: elasticsearch-master
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: master
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: elasticsearch-data
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: data
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: elasticsearch-ingest
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: ingest
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: elasticsearch-coordinating
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: elasticsearch
+      role: coordinating
+  tracing:
+    - providers:
+        - name: otel-agent
+      randomSamplingPercentage: 100
+  metrics:
+    - providers:
+        - name: prometheus
+      reportingInterval: 15s
+  accessLogging:
+    - providers:
+        - name: envoy
+      filter:
+        expression: request.protocol != null
+      match:
+        mode: SERVER

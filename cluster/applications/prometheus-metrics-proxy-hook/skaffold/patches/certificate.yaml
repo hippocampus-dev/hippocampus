@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus-metrics-proxy-hook
+spec:
+  issuerRef:
+    name: skaffold-prometheus-metrics-proxy-hook-selfsigned
+  dnsNames:
+    - skaffold-prometheus-metrics-proxy-hook.skaffold-prometheus-metrics-proxy-hook.svc
+    - skaffold-prometheus-metrics-proxy-hook.skaffold-prometheus-metrics-proxy-hook.svc.cluster.local

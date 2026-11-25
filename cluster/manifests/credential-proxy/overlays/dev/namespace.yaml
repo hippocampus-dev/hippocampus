@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: credential-proxy
+  labels:
+    name: credential-proxy
+    pod-security.kubernetes.io/enforce: restricted

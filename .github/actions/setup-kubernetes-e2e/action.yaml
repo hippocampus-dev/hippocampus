@@ -1,0 +1,35 @@
+name: setup-kubernetes-e2e
+description: Install tools for an isolated Kubernetes end-to-end test.
+inputs:
+  k6:
+    description: Start the k6 service used by the end-to-end test scripts.
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -eo pipefail
+        mkdir -p "${RUNNER_TEMP}/bin"
+        cd "${RUNNER_TEMP}/bin"
+        curl -fsSL --retry 5 --retry-all-errors -o kind https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64
+        curl -fsSL --retry 5 --retry-all-errors -o kubectl https://dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl
+        curl -fsSL --retry 5 --retry-all-errors -o kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.8.0/kustomize_v5.8.0_linux_amd64.tar.gz
+        curl -fsSL --retry 5 --retry-all-errors -o skaffold https://storage.googleapis.com/skaffold/releases/v2.25.0/skaffold-linux-amd64
+        tar zxf kustomize.tar.gz --no-same-owner
+        chmod +x kind kubectl skaffold
+        echo "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
+    - if: inputs.k6 == 'true'
+      shell: bash
+      run: |
+        set -eo pipefail
+        export COMPOSE_FILE="${RUNNER_TEMP}/k6-compose.yaml"
+        cat > "${COMPOSE_FILE}" <<'EOF'
+        services:
+          k6:
+            image: grafana/k6:1.1.0
+            network_mode: host
+            entrypoint: [sleep, infinity]
+        EOF
+        docker compose up -d k6
+        echo "COMPOSE_FILE=${COMPOSE_FILE}" >> "${GITHUB_ENV}"

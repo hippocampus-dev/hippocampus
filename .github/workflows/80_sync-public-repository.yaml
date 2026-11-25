@@ -1,0 +1,71 @@
+name: Sync to Public Repository
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local,Linux
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  sync:
+    needs: runner
+    if: ${{ !cancelled() && needs.runner.outputs.runner }}
+    timeout-minutes: 10
+    runs-on: ${{ fromJSON(needs.runner.outputs.runner) }}
+    environment: deployment
+    steps:
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - run: |
+          set -eo pipefail
+          git config --global user.email "kaidotio@gmail.com"
+          git config --global user.name "kaidotio"
+
+          grep -l hippocampus-dev/hippocampus -r . --exclude-dir=.git | xargs -r sed -i 's|hippocampus-dev/hippocampus|hippocampus-dev/hippocampus|g'
+          sed -i 's|https://tauri-releases-public.kaidotio.dev/taurin/latest.json|https://github.com/hippocampus-dev/hippocampus/releases/latest/download/latest.json|' taurin/src-tauri/tauri.conf.json
+          sed -i 's|https://tauri-releases-public.kaidotio.dev/taurim/latest.json|https://github.com/hippocampus-dev/hippocampus/releases/latest/download/taurim_latest.json|' taurim/src-tauri/crates/tauri-plugin-auto-update/src/lib.rs
+          # sed exits 0 without a match
+          grep -qF https://github.com/hippocampus-dev/hippocampus/releases/latest/download/latest.json taurin/src-tauri/tauri.conf.json
+          grep -qF https://github.com/hippocampus-dev/hippocampus/releases/latest/download/taurim_latest.json taurim/src-tauri/crates/tauri-plugin-auto-update/src/lib.rs
+
+          git checkout --orphan tmp
+          git add -A
+          git commit -m "Sync to the latest hippocampus [$(date +%Y%m%d)]"
+
+          git remote add public "https://x-access-token:${PUBLIC_REPOSITORY_PAT}@github.com/hippocampus-dev/hippocampus.git"
+          git push -f public HEAD:main
+
+          # MSI caps major and minor at 255: https://learn.microsoft.com/en-us/windows/win32/msi/productversion
+          # Android's versionCode gives minor and patch three digits each: https://v2.tauri.app/reference/config/#versioncode
+          TAG="v$(date +%y.%-m.%-d)"
+
+          tags=$(gh release list --repo hippocampus-dev/hippocampus --json tagName --jq '.[].tagName')
+          for tag in ${tags}; do
+            gh release delete "${tag}" --repo hippocampus-dev/hippocampus --cleanup-tag --yes || true
+
+            # https://github.com/cli/cli/issues/8458
+            while gh api "repos/hippocampus-dev/hippocampus/git/refs/tags/${tag}" --silent 2>/dev/null; do
+              sleep 1
+            done
+          done
+          sleep 3
+
+          gh release create "${TAG}" --repo hippocampus-dev/hippocampus --title "${TAG}" --generate-notes
+        env:
+          PUBLIC_REPOSITORY_PAT: ${{ secrets.PUBLIC_REPOSITORY_PAT }}
+          GH_TOKEN: ${{ secrets.PUBLIC_REPOSITORY_PAT }}

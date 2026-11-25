@@ -1,0 +1,13 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: qdrant
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: qdrant
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "6335":
+      mode: PERMISSIVE # p2p

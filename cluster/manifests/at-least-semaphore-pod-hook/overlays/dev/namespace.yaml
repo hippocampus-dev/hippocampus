@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: at-least-semaphore-pod-hook
+  labels:
+    name: at-least-semaphore-pod-hook
+    pod-security.kubernetes.io/enforce: restricted

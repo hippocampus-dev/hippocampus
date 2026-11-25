@@ -1,0 +1,121 @@
+name: Release/taurim
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  id-token: write
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local,Linux
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  release:
+    needs: runner
+    if: ${{ !cancelled() }}
+    timeout-minutes: 60
+    runs-on: ${{ needs.runner.outputs.runner && fromJSON(needs.runner.outputs.runner) || 'ubuntu-24.04' }}
+    environment: deployment
+    steps:
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            .cargo/
+            bin/
+            taurim/
+            rust-toolchain.toml
+            taurin/src-tauri/tauri.conf.json
+          sparse-checkout-cone-mode: false
+      # setup-android installs no NDK, which the hosted image preinstalls, so a local runner takes the host's Android Studio one
+      - if: contains(needs.runner.outputs.runner, 'local')
+        run: |
+          set -eo pipefail
+          echo "RUSTUP_HOME=${{ runner.temp }}/rustup" >> $GITHUB_ENV
+          echo "GRADLE_USER_HOME=${{ runner.temp }}/gradle" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=${{ runner.temp }}/android-sdk" >> $GITHUB_ENV
+          ndk=$(ls -d ~/Android/Sdk/ndk/* | sort -V | tail -n 1)
+          echo "NDK_HOME=${ndk}" >> $GITHUB_ENV
+      - uses: actions/setup-java@v6.3.0
+        with:
+          distribution: temurin
+          java-version: "24"
+      - uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: "platforms;android-36 build-tools;36.0.0"
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: taurim/package-lock.json
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: aarch64-linux-android
+      - if: ${{ !contains(needs.runner.outputs.runner, 'local') }}
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-taurim-cargo-${{ hashFiles('taurim/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-taurim-cargo-
+      - uses: actions/cache@v6.1.0
+        with:
+          path: taurim/src-tauri/target
+          key: ${{ runner.os }}-taurim-target-${{ hashFiles('taurim/src-tauri/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-taurim-target-
+      - run: |
+          set -eo pipefail
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          bash ./bin/bump.sh "${VERSION}"
+      - run: npm ci
+        working-directory: taurim
+      - run: npm run tauri android init
+        working-directory: taurim
+      - run: sed -i 's/kotlin-gradle-plugin:[0-9]\+\.[0-9]\+\.[0-9]\+/kotlin-gradle-plugin:2.1.0/' taurim/src-tauri/gen/android/build.gradle.kts
+      - run: |
+          set -eo pipefail
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > ${{ runner.temp }}/release.keystore
+          echo '' >> taurim/src-tauri/gen/android/app/build.gradle.kts
+          echo 'apply(from = file("../../../../signing.gradle.kts"))' >> taurim/src-tauri/gen/android/app/build.gradle.kts
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      - run: npm run tauri android build
+        working-directory: taurim
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: taurim
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_TAURIM_KEY_PASSWORD }}
+      - run: |
+          set -eo pipefail
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" -type f | head -1)
+          APK_NAME="taurim_${VERSION}_android.apk"
+          mv "${APK_PATH}" "${APK_NAME}"
+          npm run tauri -- signer sign "${APK_NAME}"
+          gh release upload ${{ github.event.release.tag_name }} "${APK_NAME}" "${APK_NAME}.sig"
+          fingerprint=$(keytool -list -v -keystore ${{ runner.temp }}/release.keystore -alias taurim -storepass "${ANDROID_KEYSTORE_PASSWORD}" | sed -n 's/^\s*SHA256: //p')
+          jq -n --arg fingerprint "${fingerprint}" '[{relation: ["delegate_permission/common.handle_all_urls"], target: {namespace: "android_app", package_name: "kaidotio.github.io", sha256_cert_fingerprints: [$fingerprint]}}]' > "${{ runner.temp }}/taurim_assetlinks.json"
+          gh release upload ${{ github.event.release.tag_name }} "${{ runner.temp }}/taurim_assetlinks.json"
+          url=$(gh release view ${{ github.event.release.tag_name }} --json assets | jq -re --arg name "${APK_NAME}" '.assets[] | select(.name == $name) | .apiUrl')
+          jq -n --arg version "${VERSION}" --rawfile signature "${APK_NAME}.sig" --arg url "${url}" '{version: $version, platforms: {android: {signature: $signature, url: $url}}}' > "${{ runner.temp }}/taurim_latest.json"
+          gh release upload ${{ github.event.release.tag_name }} "${{ runner.temp }}/taurim_latest.json"
+        working-directory: taurim
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}

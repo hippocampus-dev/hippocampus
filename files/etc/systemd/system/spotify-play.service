@@ -1,0 +1,14 @@
+[Unit]
+# Requires= would let the timer start minikube.service again after it was stopped on purpose: https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Requisite=
+Requisite=minikube.service libvirtd.service
+After=minikube.service libvirtd.service
+
+[Service]
+Type=oneshot
+
+User=kai
+Environment=PATH=/usr/local/bin:/usr/bin:/home/kai/.asdf/shims
+# The OAuth bridge spotify-play refreshes its token through runs in minikube, which serves it some time after minikube.service has started
+ExecStartPre=/usr/bin/bash -c 'until curl -fsS -o /dev/null https://hippocampus-dev-spotify-oauth-bridge-public.kaidotio.dev/.well-known/oauth-authorization-server; do sleep 5; done'
+ExecStart=/usr/local/bin/spotify-play spotify:playlist:37i9dQZF1DZ06evO4wh9uT
+TimeoutStartSec=1800

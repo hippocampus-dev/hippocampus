@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "notify": {
+      "command": "armyknife",
+      "args": ["mcp", "notify"]
+    },
+    "tmux": {
+      "command": "armyknife",
+      "args": ["mcp", "tmux"]
+    },
+    "codex": {
+      "command": "armyknife",
+      "args": ["mcp", "codex"]
+    },
+    "claude": {
+      "command": "armyknife",
+      "args": ["mcp", "claude"]
+    },
+    "agy": {
+      "command": "armyknife",
+      "args": ["mcp", "agy", "--model", "gemini-4-neon-medium"]
+    },
+    "chrome-devtools": {
+      "command": "chrome-devtools-mcp",
+      "args": ["--browserUrl", "http://127.0.0.1:59222"]
+    },
+    "graphiti": {
+      "url": "http://graphiti-mcp-server.127.0.0.1.nip.io/mcp"
+    }
+  }
+}

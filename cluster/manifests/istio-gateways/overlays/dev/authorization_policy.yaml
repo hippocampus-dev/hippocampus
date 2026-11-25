@@ -1,0 +1,21 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: istio-ingressgateway
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: DENY
+  rules:
+    # The nip.io hosts skip ext-authz for access from the host through files/usr/local/bin/minikube-socat.sh
+    # A pod can send any Host header
+    - from:
+        - source:
+            # Cilium's cluster-pool default, which cluster/bin/deploy-cilium.sh keeps: https://github.com/cilium/cilium/blob/v1.16.19/install/kubernetes/cilium/values.yaml#L1790
+            ipBlocks:
+              - 10.0.0.0/8
+      when:
+        - key: request.headers[host]
+          values:
+            - "*.minikube.127.0.0.1.nip.io"

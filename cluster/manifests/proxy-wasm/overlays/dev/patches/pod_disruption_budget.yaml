@@ -1,0 +1,6 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: proxy-wasm
+spec:
+  maxUnavailable: 1

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>hippocampus</title>
+    <link rel="stylesheet" href="automation.css">
+</head>
+<body>
+    <div id="header">
+        <img src="images/icon32.png" alt="Extension" width="16" height="16">
+        <span>Automation</span>
+    </div>
+    <div id="content">
+        <section>
+            <div class="field">
+                <label for="template">Template</label>
+                <select id="template"></select>
+            </div>
+            <div class="field">
+                <label for="csv">CSV</label>
+                <input type="file" id="csv" accept=".csv,text/csv">
+            </div>
+            <p id="columns"></p>
+        </section>
+        <section id="settings" hidden>
+            <div class="field">
+                <span>Rows</span>
+                <span id="count"></span>
+            </div>
+            <div class="field">
+                <label for="concurrency">Concurrency</label>
+                <input type="number" id="concurrency" min="1" value="4">
+            </div>
+            <div class="field">
+                <label for="timeout">Timeout (ms)</label>
+                <input type="number" id="timeout" min="1" placeholder="Unlimited">
+            </div>
+            <div class="buttons">
+                <button type="button" id="run">Run</button>
+                <button type="button" id="download" disabled>Download</button>
+                <button type="button" id="copy" disabled>Copy</button>
+                <button type="button" id="cancel" disabled>Cancel</button>
+            </div>
+        </section>
+        <table id="rows"></table>
+    </div>
+    <script type="module" src="automation.js"></script>
+</body>
+</html>

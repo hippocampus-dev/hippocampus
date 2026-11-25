@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lighthouse-exporter
+  labels:
+    name: lighthouse-exporter
+    pod-security.kubernetes.io/enforce: restricted

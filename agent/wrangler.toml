@@ -1,0 +1,36 @@
+name = "email-agent"
+account_id = "e646938998c521013d47874db7e1d2d7"
+main = "src/index.ts"
+compatibility_date = "2025-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[observability.logs]
+invocation_logs = true
+head_sampling_rate = 1.0
+
+[observability.traces]
+enabled = true
+
+[ai]
+binding = "AI"
+
+[alias]
+ai = "./src/ai-stub.ts"
+
+[[send_email]]
+name = "EMAIL"
+
+[[durable_objects.bindings]]
+name = "EmailAgent"
+class_name = "EmailAgent"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["EmailAgent"]
+
+[[routes]]
+pattern = "agent.kaidotio.dev"
+custom_domain = true

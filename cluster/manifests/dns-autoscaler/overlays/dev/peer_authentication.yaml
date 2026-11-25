@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: dns-autoscaler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dns-autoscaler
+      app.kubernetes.io/component: ""
+  mtls:
+    mode: STRICT

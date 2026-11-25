@@ -1,0 +1,19 @@
+{
+  "root": false,
+  "$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
+  "extends": ["../../../biome.jsonc"],
+  "files": {
+    "includes": [
+      "components/**",
+      "tests/**",
+      "*.ts",
+      "!playwright-report/**",
+      "!test-results/**"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "recommended": true
+    }
+  }
+}

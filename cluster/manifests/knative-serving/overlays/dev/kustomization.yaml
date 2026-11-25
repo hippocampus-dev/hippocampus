@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: knative-serving
+
+resources:
+- ../../base
+- network_policy.yaml
+- peer_authentication.yaml
+- sidecar.yaml
+- telemetry.yaml
+- https://github.com/knative/net-istio/releases/download/knative-v1.20.1/net-istio.yaml
+
+  # Avoid to duplicate Certificate resource
+  # Use cluster-local-gateway instead
+patches:
+- path: patches/config_map.yaml
+- path: patches/deployment.yaml
+- path: patches/horizontal_pod_autoscaler.yaml
+- path: patches/namespace.yaml
+- patch: |-
+    $patch: delete
+    apiVersion: networking.internal.knative.dev/v1alpha1
+    kind: Certificate
+    metadata:
+      name: routing-serving-certs
+      namespace: knative-serving
+- patch: |-
+    $patch: delete
+    apiVersion: networking.istio.io/v1beta1
+    kind: Gateway
+    metadata:
+      name: knative-local-gateway
+      namespace: knative-serving
+- patch: |-
+    $patch: delete
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: knative-local-gateway
+      namespace: istio-system
+images:
+- digest: sha256:4b6030b621a2d417adab629225cff09e0290c9c7c39faae33e3cac20de3e1ebb
+  name: gcr.io/knative-releases/knative.dev/net-istio/cmd/webhook
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/net-istio/cmd/webhook
+- digest: sha256:3afd2eb32ba981c4d249d3419e54e160d3d1151fe25ebcf15435ba067c719d43
+  name: gcr.io/knative-releases/knative.dev/net-istio/cmd/controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/net-istio/cmd/controller

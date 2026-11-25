@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -Eeo pipefail
+trap 'echo "exit $?: $BASH_COMMAND(line $LINENO)" >&2' ERR
+
+skaffold run
+kubectl port-forward svc/skaffold-proxy-wasm 8080:8080 8081:8081 8082:8082 -n skaffold-proxy-wasm > /dev/null 2>&1 &
+trap "kill $! 2>/dev/null" EXIT
+curl -fsSL --retry 5 --retry-all-errors -o /dev/null http://127.0.0.1:8080/
+cat k6/fallback-filter/index.js | docker compose exec -T k6 k6 run -
+cat k6/cookie-manipulator/request.js | docker compose exec -T k6 k6 run -
+cat k6/cookie-manipulator/response.js | docker compose exec -T k6 k6 run -

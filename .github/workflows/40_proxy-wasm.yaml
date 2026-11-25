@@ -1,0 +1,71 @@
+name: Test/proxy-wasm
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - ".github/actions/setup-kubernetes-e2e/**"
+      - ".github/workflows/40_proxy-wasm.yaml"
+      - "cluster/applications/proxy-wasm/**"
+  workflow_dispatch:
+    inputs: {}
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            cluster/applications/proxy-wasm/
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-proxy-wasm-cargo-${{ hashFiles('cluster/applications/proxy-wasm/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-proxy-wasm-cargo-
+      - uses: actions/cache@v6.1.0
+        with:
+          path: cluster/applications/proxy-wasm/target
+          key: ${{ runner.os }}-proxy-wasm-target-${{ hashFiles('cluster/applications/proxy-wasm/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-proxy-wasm-target-
+      - run: cargo test
+        working-directory: cluster/applications/proxy-wasm
+  e2e:
+    if: github.repository_owner == 'kaidotio' && (github.event_name == 'workflow_dispatch' || (github.event.pull_request.draft == false && github.event.pull_request.state == 'open'))
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            .github/actions/setup-kubernetes-e2e/
+            cluster/applications/proxy-wasm/
+      - uses: $/.github/actions/setup-kubernetes-e2e
+        with:
+          k6: "true"
+      - run: printf '%s' "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_REPOSITORY_OWNER}" --password-stdin
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: make e2e SHELL=bash
+        working-directory: cluster/applications/proxy-wasm

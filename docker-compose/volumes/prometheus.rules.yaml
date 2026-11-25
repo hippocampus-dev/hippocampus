@@ -1,0 +1,81 @@
+groups:
+  - name: windows-exporter
+    interval: 15s
+    rules:
+      - record: node_cpu_seconds_total
+        expr: sum without (core, state) (label_replace(label_replace(windows_hyperv_hypervisor_logical_processor_time_seconds_total, "cpu", "$1", "core", "(.*)"), "mode", "$1", "state", "(.*)"))
+      - record: node_memory_MemTotal_bytes
+        expr: windows_memory_physical_total_bytes
+      - record: node_memory_SwapTotal_bytes
+        expr: sum by (job, instance, node) (windows_pagefile_limit_bytes)
+      - record: node_memory_SwapFree_bytes
+        expr: sum by (job, instance, node) (windows_pagefile_free_bytes)
+      - record: node_boot_time_seconds
+        expr: windows_system_boot_time_timestamp
+      - record: node_time_seconds
+        expr: time() + 0 * windows_system_boot_time_timestamp
+      - record: node_filesystem_size_bytes
+        expr: label_replace(windows_logical_disk_size_bytes{volume="C:"}, "mountpoint", "/", "volume", ".*")
+      - record: node_network_receive_bytes_total
+        expr: sum without (nic) (label_replace(windows_net_bytes_received_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_transmit_bytes_total
+        expr: sum without (nic) (label_replace(windows_net_bytes_sent_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_receive_packets_total
+        expr: sum without (nic) (label_replace(windows_net_packets_received_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_transmit_packets_total
+        expr: sum without (nic) (label_replace(windows_net_packets_sent_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_receive_drop_total
+        expr: sum without (nic) (label_replace(windows_net_packets_received_discarded_total, "device", "$1", "nic", "(.*)"))
+      - record: node_network_transmit_drop_total
+        expr: sum without (nic) (label_replace(windows_net_packets_outbound_discarded_total, "device", "$1", "nic", "(.*)"))
+      - record: node_netstat_Tcp_RetransSegs
+        expr: sum by (job, instance, node) (windows_tcp_segments_retransmitted_total)
+      - record: node_disk_info
+        expr: sum by (job, instance, node, device) (label_replace(windows_logical_disk_info{volume=~"[A-Z]:"}, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_read_bytes_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_read_bytes_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_written_bytes_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_write_bytes_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_reads_completed_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_reads_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_writes_completed_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_writes_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_read_time_seconds_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_read_seconds_total, "device", "$1", "volume", "(.*)"))
+      - record: node_disk_write_time_seconds_total
+        expr: sum without (volume) (label_replace(windows_logical_disk_write_seconds_total, "device", "$1", "volume", "(.*)"))
+      - record: DCGM_FI_DEV_FB_USED
+        expr: max by (job, instance, node) (windows_gpu_adapter_memory_dedicated_bytes and on (instance, luid) (windows_gpu_dedicated_video_memory_size_bytes == on (instance) group_left () max by (instance) (windows_gpu_dedicated_video_memory_size_bytes))) / 1048576
+      - record: DCGM_FI_DEV_FB_FREE
+        expr: max by (job, instance, node) (windows_gpu_dedicated_video_memory_size_bytes) / 1048576 - DCGM_FI_DEV_FB_USED{job="windows-exporter"}
+      - record: DCGM_FI_DEV_GPU_TEMP
+        expr: label_replace(max by (job, instance, node) (windows_gpu_temperature_celsius and on (instance, luid) (windows_gpu_dedicated_video_memory_size_bytes == on (instance) group_left () max by (instance) (windows_gpu_dedicated_video_memory_size_bytes))), "modelName", "$1", "node", "(.*)")
+      - record: node_hwmon_temp_celsius
+        expr: sum without (hardwareName, sensorName, sensorIndex) (label_replace(label_replace(lhm_cpu_temperature_celsius, "chip", "$1", "hardwareName", "(.*)"), "sensor", "$1", "sensorName", "(.*)")) and on (instance) (time() - windows_textfile_mtime_seconds{file="libre_hardware_monitor.prom"} < 60)
+      - record: node_hwmon_fan_rpm
+        expr: sum without (hardwareName, sensorName, sensorIndex) (label_replace(label_replace(lhm_motherboard_fan_rpm, "chip", "$1", "hardwareName", "(.*)"), "sensor", "$1", "sensorName", "(.*)")) and on (instance) (time() - windows_textfile_mtime_seconds{file="libre_hardware_monitor.prom"} < 60)
+      # LibreHardwareMonitor indexes Super I/O voltages by channel from 0: https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/v0.9.6/LibreHardwareMonitorLib/Hardware/Motherboard/SuperIOHardware.cs
+      # hwmon numbers voltage inputs from in0: https://www.kernel.org/doc/html/latest/hwmon/sysfs-interface.html
+      - record: node_hwmon_in_volts
+        expr: sum without (hardwareName, sensorName, sensorIndex) (label_replace(label_replace(lhm_motherboard_voltage_volts, "chip", "$1", "hardwareName", "(.*)"), "sensor", "in$1", "sensorIndex", "(.*)")) and on (instance) (time() - windows_textfile_mtime_seconds{file="libre_hardware_monitor.prom"} < 60)
+      - record: node_hwmon_chip_names
+        expr: label_replace(group by (job, instance, node, chip) (node_hwmon_temp_celsius{job="windows-exporter"}), "chip_name", "k10temp", "", "") or label_replace(group by (job, instance, node, chip) (node_hwmon_fan_rpm{job="windows-exporter"} or node_hwmon_in_volts{job="windows-exporter"}), "chip_name", "$1", "chip", "(.*)")
+      - record: node_cpu_scaling_frequency_hertz
+        # A plain YAML scalar ends at " #"
+        expr: 'sum without (hardwareName, sensorName, sensorIndex) (label_replace(lhm_cpu_clock_hertz{sensorName=~"Core #[0-9]+"}, "cpu", "$1", "sensorName", "Core #([0-9]+)")) and on (instance) (time() - windows_textfile_mtime_seconds{file="libre_hardware_monitor.prom"} < 60)'
+      - record: node_memory_MemFree_bytes
+        expr: windows_memory_free_and_zero_page_list_bytes
+      - record: node_memory_Inactive_file_bytes
+        expr: windows_memory_standby_cache_core_bytes + windows_memory_standby_cache_normal_priority_bytes + windows_memory_standby_cache_reserve_bytes + windows_memory_modified_page_list_bytes
+      - record: node_memory_Active_file_bytes
+        expr: windows_memory_system_cache_resident_bytes
+      - record: node_memory_Cached_bytes
+        expr: node_memory_Inactive_file_bytes{job="windows-exporter"} + node_memory_Active_file_bytes{job="windows-exporter"}
+      - record: node_memory_Buffers_bytes
+        expr: 0 * windows_memory_physical_total_bytes
+      - record: node_memory_Dirty_bytes
+        expr: windows_memory_modified_page_list_bytes
+      - record: node_vmstat_pswpin
+        expr: windows_memory_swap_pages_read_total
+      - record: node_vmstat_pswpout
+        expr: windows_memory_swap_pages_written_total

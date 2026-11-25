@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  name: gitlab-sso-bridge
+spec:
+  workloadSelector:
+    labels:
+      app.kubernetes.io/component: gitlab-sso-bridge
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+  egress:
+    - captureMode: DEFAULT
+      hosts:
+        - istio-system/istiod.istio-system.svc.cluster.local
+        - otel/otel-agent.otel.svc.cluster.local

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: snapshot-controller
+  labels:
+    name: snapshot-controller
+    pod-security.kubernetes.io/enforce: restricted

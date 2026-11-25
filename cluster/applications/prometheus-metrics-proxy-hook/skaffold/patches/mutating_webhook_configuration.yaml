@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: prometheus-metrics-proxy-hook
+  annotations:
+    cert-manager.io/inject-ca-from: skaffold-prometheus-metrics-proxy-hook/skaffold-prometheus-metrics-proxy-hook

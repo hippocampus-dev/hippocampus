@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-controller.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-broker.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-channel.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-sink.yaml
+- https://github.com/knative-extensions/eventing-kafka-broker/releases/download/knative-v1.20.1/eventing-kafka-source.yaml
+images:
+- digest: sha256:08ea6f74b144bd286cc02c0cca248f210370f10f41ff07a1de2e4a2cdd213ac2
+  name: gcr.io/knative-releases/knative-kafka-broker-dispatcher-loom
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative-kafka-broker-dispatcher-loom
+- digest: sha256:a3003e80e092e5f367ad645fcdf25a5256ffd1c83ae8ee83ffcb58902f246f89
+  name: gcr.io/knative-releases/knative.dev/eventing-kafka-broker/control-plane/cmd/webhook-kafka
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/eventing-kafka-broker/control-plane/cmd/webhook-kafka
+- digest: sha256:b464e5b01e86a3c913df7bd9fd7b74f2e75c5af0a1bddd0d28e8e047c8f5d0ba
+  name: gcr.io/knative-releases/knative.dev/eventing-kafka-broker/control-plane/cmd/kafka-controller
+  newName: ghcr.io/hippocampus-dev/hippocampus/mirror/gcr.io/knative-releases/knative.dev/eventing-kafka-broker/control-plane/cmd/kafka-controller

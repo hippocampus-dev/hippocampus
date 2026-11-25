@@ -1,0 +1,118 @@
+name: Release/confidant
+on:
+  release:
+    types:
+      - created
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+  id-token: write
+  packages: read
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+jobs:
+  runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local,Linux
+      fallback-runner: ubuntu-24.04
+    secrets: inherit
+  windows-runner:
+    if: github.repository_owner == 'kaidotio'
+    uses: ./.github/workflows/reusable_dynamic-runner.yaml
+    with:
+      labels: self-hosted,local,Windows
+      fallback-runner: windows-latest
+    secrets: inherit
+  release:
+    needs: [runner, windows-runner]
+    if: ${{ !cancelled() }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-24.04
+            arch: amd64
+          - platform: ubuntu-24.04-arm
+            arch: arm64
+          - platform: windows-latest
+            arch: amd64
+    runs-on: ${{ matrix.platform == 'ubuntu-24.04' && (needs.runner.outputs.runner && fromJSON(needs.runner.outputs.runner) || 'ubuntu-24.04') || matrix.platform == 'windows-latest' && (needs.windows-runner.outputs.runner && fromJSON(needs.windows-runner.outputs.runner) || 'windows-latest') || matrix.platform }}
+    steps:
+      # Windows git rejects the ':' paths under files/, and sparse checkout does not help. checkout swaps HOME, so the setting goes through the environment.
+      - if: matrix.platform == 'windows-latest'
+        shell: bash
+        run: |
+          set -eo pipefail
+          {
+            echo "GIT_CONFIG_COUNT=1"
+            echo "GIT_CONFIG_KEY_0=core.protectNTFS"
+            echo "GIT_CONFIG_VALUE_0=false"
+          } >> "$GITHUB_ENV"
+      - if: matrix.platform != 'ubuntu-24.04-arm' && contains(matrix.platform == 'windows-latest' && needs.windows-runner.outputs.runner || matrix.platform != 'windows-latest' && needs.runner.outputs.runner, 'local')
+        shell: bash
+        run: echo "GIT_CONFIG_GLOBAL=${{ runner.temp }}/gitconfig" >> $GITHUB_ENV
+      - run: git config --global submodule.recurse false
+      - uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: |
+            .cargo/
+            bin/
+            confidant/
+            packages/
+            rust-toolchain.toml
+          sparse-checkout-cone-mode: false
+      - if: matrix.platform != 'ubuntu-24.04-arm' && contains(matrix.platform == 'windows-latest' && needs.windows-runner.outputs.runner || matrix.platform != 'windows-latest' && needs.runner.outputs.runner, 'local')
+        shell: bash
+        run: echo "RUSTUP_HOME=${{ runner.temp }}/rustup" >> $GITHUB_ENV
+      - if: matrix.platform == 'ubuntu-24.04-arm' || !contains(matrix.platform == 'windows-latest' && needs.windows-runner.outputs.runner || matrix.platform != 'windows-latest' && needs.runner.outputs.runner, 'local')
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-${{ runner.arch }}-confidant-packages-${{ hashFiles('confidant/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-confidant-packages-
+      - uses: actions/cache@v6.1.0
+        with:
+          path: confidant/target
+          key: ${{ runner.os }}-${{ runner.arch }}-confidant-${{ hashFiles('confidant/**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-confidant-
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+      - if: matrix.platform == 'ubuntu-24.04' && contains(needs.runner.outputs.runner, 'local')
+        run: echo "DOCKER_CONFIG=${{ runner.temp }}/.docker" >> $GITHUB_ENV
+      - if: matrix.platform == 'ubuntu-24.04'
+        run: |
+          set -eo pipefail
+          printf '%s' "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_REPOSITORY_OWNER}" --password-stdin
+          mkdir -p ${{ runner.temp }}/bin
+          curl -fsSL https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz | tar zx --no-same-owner -C ${{ runner.temp }}/bin cross
+          echo "${{ runner.temp }}/bin" >> "$GITHUB_PATH"
+      - shell: bash
+        run: |
+          set -eo pipefail
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          bash ./bin/bump.sh "${VERSION}"
+          OS="linux"
+          EXTENSION=""
+          if [ "${{ matrix.platform }}" = "ubuntu-24.04" ]; then
+            # https://github.com/cross-rs/cross/blob/v0.2.5/src/docker/shared.rs#L329-L341
+            mkdir -p confidant/target
+            cross build --release --manifest-path confidant/Cargo.toml --target x86_64-unknown-linux-gnu
+            BINARY="confidant/target/x86_64-unknown-linux-gnu/release/confidant"
+          else
+            cargo build --release --manifest-path confidant/Cargo.toml
+            if [ "${{ matrix.platform }}" = "windows-latest" ]; then
+              OS="windows"
+              EXTENSION=".exe"
+            fi
+            BINARY="confidant/target/release/confidant${EXTENSION}"
+          fi
+          cp "${BINARY}" "${RUNNER_TEMP}/confidant_${VERSION}_${OS}_${{ matrix.arch }}${EXTENSION}"
+          gh release upload ${{ github.event.release.tag_name }} "${RUNNER_TEMP}/confidant_${VERSION}_${OS}_${{ matrix.arch }}${EXTENSION}"

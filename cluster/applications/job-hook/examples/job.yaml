@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: my-container
+          image: busybox
+          command:
+            - echo
+            - $(JOB_CREATION_TIMESTAMP)
+          env:
+            - name: JOB_CREATION_TIMESTAMP
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['job-hook.kaidotio.github.io/job-creation-timestamp']

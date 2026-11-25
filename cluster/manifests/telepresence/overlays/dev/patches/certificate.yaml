@@ -1,0 +1,10 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: telepresence
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # issuer + 1
+spec:
+  dnsNames:
+    - agent-injector.telepresence.svc
+    - agent-injector.telepresence.svc.cluster.local

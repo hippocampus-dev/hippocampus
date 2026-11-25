@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: oauth2-proxy
+spec:
+  gateways:
+    - oauth2-proxy
+  hosts:
+    - oauth2-proxy.kaidotio.dev
+  http:
+    - route:
+        - destination:
+            host: oauth2-proxy
+            port:
+              number: 4180
+      retries:
+        attempts: 3
+        retryOn: gateway-error,retriable-4xx,connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes

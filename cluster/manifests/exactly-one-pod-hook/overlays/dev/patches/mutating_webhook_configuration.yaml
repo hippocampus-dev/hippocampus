@@ -1,0 +1,6 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: exactly-one-pod-hook
+  annotations:
+    cert-manager.io/inject-ca-from: exactly-one-pod-hook/exactly-one-pod-hook

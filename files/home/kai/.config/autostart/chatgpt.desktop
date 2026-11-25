@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=ChatGPT
+Exec=/usr/bin/chatgpt
+Icon=chatgpt
+Terminal=false

@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus-metrics-proxy-hook
+spec:
+  secretName: prometheus-metrics-proxy-hook-certs
+  issuerRef:
+    name: prometheus-metrics-proxy-hook-selfsigned
