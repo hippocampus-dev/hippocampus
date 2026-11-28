@@ -461,7 +461,7 @@ workflows:
     '.github/workflows/10_triage-dependabot.yaml': []
     '.github/workflows/10_triage-loganomaly.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'anthropics/claude-code-action@v1.0.280'
+        - 'anthropics/claude-code-action@v1.0.290'
     '.github/workflows/20_agent.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
@@ -873,13 +873,13 @@ workflows:
     '.github/workflows/claude-auto-fix-ci.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/github-script@v9.0.0'
-        - 'anthropics/claude-code-action@v1.0.280'
+        - 'anthropics/claude-code-action@v1.0.290'
     '.github/workflows/claude-code-review.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'anthropics/claude-code-action@v1.0.280'
+        - 'anthropics/claude-code-action@v1.0.290'
     '.github/workflows/claude.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'anthropics/claude-code-action@v1.0.280'
+        - 'anthropics/claude-code-action@v1.0.290'
     '.github/workflows/reusable_dynamic-runner.yaml':
         - 'actions/github-script@v9.0.0'
     '.github/workflows/reusable_issue-github-token.yaml': []
@@ -987,9 +987,9 @@ dependencies:
         commit: 'sha1-be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd'
         owner_id: 69522701
         repo_id: 286780795
-    'anthropics/claude-code-action@v1.0.280':
-        ref: 'v1.0.280'
-        commit: 'sha1-469588f42e6b1e94cd14ad09dccfeaec772ce0fd'
+    'anthropics/claude-code-action@v1.0.290':
+        ref: 'v1.0.290'
+        commit: 'sha1-4411a9e9b0283becf4b924f7bce360fd7756c78c'
         owner_id: 76263028
         repo_id: 986421638
         uses:
