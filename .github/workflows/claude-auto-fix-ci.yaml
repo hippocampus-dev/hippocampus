@@ -139,7 +139,7 @@ jobs:
           mkdir -p ${{ runner.temp }}/claude-home
           mkdir -p ${{ runner.temp }}/claude-tmp
       - if: steps.check-previous.outputs.should_run == 'true' && steps.rerun.outputs.rerun_accepted != 'true'
-        uses: anthropics/claude-code-action@v1.0.280
+        uses: anthropics/claude-code-action@v1.0.290
         env:
           CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-home
           CLAUDE_CODE_TMPDIR: ${{ runner.temp }}/claude-tmp
